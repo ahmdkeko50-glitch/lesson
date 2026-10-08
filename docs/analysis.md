@@ -286,3 +286,27 @@ Value = educational gain over the existing book scenes (1–10).
   - Icons plus text, so meaning never depends on colour alone.
 - **Input:** pointer events (mouse and touch), tap-to-select-then-tap-target as a drag alternative, keyboard focus and Enter/Space.
 - **Motion:** short transitions; `prefers-reduced-motion` turns animation off; any celebration is small.
+
+---
+
+## 5. Revision 2: simpler, easy to trace, more 3D (teacher feedback)
+
+All eight activities were rebuilt on a new base (`activities/_base/base.html`, Kit v2):
+
+- **Simpler:**
+  - Each activity has exactly 3 scenes (أستكشفُ · أجرّبُ/أبني · أتحدّى), with 3–5 steps per scene.
+  - Each step is one short instruction with one action, and feedback appears in one place.
+  - Book quotes fold away behind «📘 من الكتابِ».
+  - Secondary mini-games, tables and side panels were removed.
+- **Easy to trace:**
+  - A step bar and «الخطوةُ ٢ من ٤» show where the student is.
+  - A yellow ring and a pointing hand mark the exact thing to touch.
+  - Steps advance automatically when done.
+  - Labels appear on the model as parts are discovered.
+  - On phones the model sits on top and the guide card fills the rest of the screen, with no overlap.
+- **More 3D:**
+  - A small offline canvas engine (shaded spheres, rods, meshes, picking) gives every scene a model the student can rotate.
+  - New 3D models: the bean and corn seeds, the potato with eyes and cut pieces, the onion section, the head with brain and spinal cord, the lab glassware, the skin block, the joints, the book's muscle model and the arm.
+
+Content was cut, not added: every activity reuses only the book facts already checked in revision 1.
+The chemistry lab no longer simulates water electrolysis or the steel-wool test; electrolysis remains as a sorting card.

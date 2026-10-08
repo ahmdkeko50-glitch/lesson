@@ -5,1139 +5,655 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>مزرعةُ الدرناتِ</title>
 <style>
-/* ================= DESIGN TOKENS (from the book's brand) ================= */
 :root{
-  --navy:#200058; --navy-2:#3a1f7a; --ink:#200058; --muted:#5f5a85;
+  --navy:#200058; --muted:#5f5a85; --ink:#200058;
   --cyan:#00c3fe; --cyan-d:#0a8fc0; --cyan-l:#e3f8ff; --cyan-b:#b8ebff;
   --green:#12a06a; --green-d:#0b7a50; --green-l:#e4f6ee; --green-b:#9cd9bd;
   --red:#e8425a; --red-d:#c22b43; --red-l:#fde8ec; --red-b:#f5b3bf;
   --yellow:#ffd15c; --orange:#f6a723; --yellow-l:#fff6dc;
   --purple:#7b5cff; --purple-l:#efeaff;
-  --bg:#f1f0fb; --bg-2:#e3f8ff; --card:#ffffff; --line:#e0ddf0; --soft:#faf9fe;
-  --r-s:12px; --r:18px; --r-l:26px;
-  --sh:0 6px 18px rgba(32,0,88,.08); --sh-l:0 18px 50px rgba(32,0,88,.14);
-  --font: "Segoe UI","Noto Sans Arabic","Noto Naskh Arabic","Geeza Pro","Arial",Tahoma,system-ui,sans-serif;
-  --tap:48px;
+  --bg:#f1f0fb; --bg-2:#e3f8ff; --card:#fff; --line:#e0ddf0; --soft:#faf9fe;
+  --sh:0 6px 18px rgba(32,0,88,.08); --sh-l:0 18px 50px rgba(32,0,88,.16);
+  --font:"Segoe UI","Noto Sans Arabic","Noto Naskh Arabic","Geeza Pro","Arial",Tahoma,system-ui,sans-serif;
+  --nav-h:68px;
 }
 *{box-sizing:border-box;}
 html{-webkit-text-size-adjust:100%;}
-body{margin:0;min-height:100vh;font-family:var(--font);color:var(--ink);
-  background:linear-gradient(180deg,var(--bg) 0%,var(--bg-2) 100%) fixed;line-height:1.7;}
-button,input,select,textarea{font-family:inherit;color:inherit;}
-img,svg,canvas{max-width:100%;}
+body{margin:0;min-height:100vh;font-family:var(--font);color:var(--ink);line-height:1.65;
+  background:linear-gradient(180deg,var(--bg) 0%,var(--bg-2) 100%) fixed;}
+button,input{font-family:inherit;color:inherit;}
 :focus-visible{outline:3px solid var(--cyan);outline-offset:3px;border-radius:8px;}
-.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
 
-/* ================= SHELL ================= */
-.app{max-width:1120px;margin:0 auto;padding:14px 16px 110px;}
-.topbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--card);border:1.5px solid var(--line);
-  border-radius:var(--r);box-shadow:var(--sh);padding:10px 14px;}
-.ref{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13.5px;font-weight:700;color:var(--cyan-d);
-  background:var(--cyan-l);border:1.5px solid var(--cyan-b);border-radius:999px;padding:6px 14px;}
-.ref b{color:var(--navy);}
-.topbar h1{flex:1;min-width:200px;margin:0;font-size:clamp(19px,2.6vw,26px);font-weight:900;line-height:1.3;}
-.topbar h1 small{display:block;font-size:13px;font-weight:600;color:var(--muted);}
-.dots{display:flex;gap:6px;align-items:center;list-style:none;margin:0;padding:0;}
-.dots li{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:14px;
-  background:var(--soft);border:2px solid var(--line);color:var(--muted);transition:all .25s;}
-.dots li.on{background:var(--navy);border-color:var(--navy);color:#fff;transform:scale(1.08);}
-.dots li.done{background:var(--green);border-color:var(--green);color:#fff;}
+/* ---------- header: title + 3 scene pills ---------- */
+.hdr{max-width:1180px;margin:0 auto;padding:12px 16px 0;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.hdr h1{margin:0;font-size:clamp(19px,2.6vw,25px);font-weight:900;line-height:1.3;flex:1;min-width:180px;}
+.ref{font-size:12.5px;font-weight:700;color:var(--cyan-d);background:var(--cyan-l);border:1.5px solid var(--cyan-b);border-radius:999px;padding:4px 12px;white-space:nowrap;}
+.pills{display:flex;gap:6px;list-style:none;margin:0;padding:0;}
+.pills li{display:flex;align-items:center;gap:6px;height:38px;padding:0 12px;border-radius:999px;font-weight:800;font-size:14px;
+  background:#fff;border:2px solid var(--line);color:var(--muted);transition:all .25s;white-space:nowrap;}
+.pills li b{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--soft);font-size:13px;}
+.pills li.on{border-color:var(--navy);color:var(--navy);box-shadow:0 0 0 3px rgba(32,0,88,.08);}
+.pills li.on b{background:var(--navy);color:#fff;}
+.pills li.done{border-color:var(--green-b);color:var(--green-d);}
+.pills li.done b{background:var(--green);color:#fff;}
 
-.stage{display:none;margin-top:16px;background:var(--card);border-radius:var(--r-l);box-shadow:var(--sh-l);overflow:hidden;
-  animation:rise .4s ease both;}
-.stage.on{display:block;}
-.stage-h{background:var(--navy);color:#fff;padding:14px 22px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
-.stage-h .kind{font-size:13px;font-weight:800;background:rgba(255,255,255,.14);border-radius:999px;padding:4px 12px;}
-.stage-h h2{margin:0;font-size:clamp(18px,2.4vw,23px);font-weight:900;}
-.stage-b{padding:20px 22px 24px;}
-.lead{font-size:17px;margin:0 0 14px;}
-.task{display:flex;gap:10px;align-items:flex-start;background:var(--yellow-l);border:1.5px solid #f3dc97;border-radius:var(--r-s);
-  padding:10px 14px;font-weight:700;margin:0 0 14px;}
-.task::before{content:"👆";font-size:20px;line-height:1.4;}
-.book{font-size:15px;background:var(--purple-l);border-inline-start:5px solid var(--purple);border-radius:var(--r-s);padding:10px 14px;margin:10px 0;}
-.book::before{content:"📘 من الكتاب: ";font-weight:800;color:var(--purple);}
-.extra{font-size:13.5px;color:var(--muted);background:var(--soft);border:1.5px dashed var(--line);border-radius:var(--r-s);padding:8px 12px;margin:10px 0;}
-.extra::before{content:"ℹ️ توضيح للنشاط وليس من الكتاب: ";font-weight:800;}
-.grid2{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:20px;align-items:start;}
-@media (max-width:820px){.grid2{grid-template-columns:minmax(0,1fr);}}
-.panel{background:var(--soft);border:1.5px solid var(--line);border-radius:var(--r);padding:14px;}
-.panel h3{margin:0 0 8px;font-size:17px;font-weight:900;}
+/* ---------- scene layout ---------- */
+.wrap{max-width:1180px;margin:0 auto;padding:12px 16px calc(var(--nav-h) + 18px);}
+.scene{display:none;}
+.scene.on{display:block;animation:rise .35s ease both;}
+.layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,1fr);gap:16px;align-items:start;}
+.viewport{position:relative;border-radius:24px;overflow:hidden;background:#fff;box-shadow:var(--sh-l);min-height:420px;}
+.viewport.dark{background:radial-gradient(ellipse at 50% 38%,#33197a 0%,#170040 72%);}
+.v3d{position:relative;width:100%;aspect-ratio:4/3;touch-action:none;cursor:grab;}
+.v3d canvas{display:block;width:100%;height:100%;}
+.v3d .rot{position:absolute;bottom:10px;inset-inline-start:10px;font-size:12.5px;font-weight:800;color:#e8e3ff;background:rgba(255,255,255,.12);
+  border-radius:999px;padding:4px 12px;pointer-events:none;}
+.viewport:not(.dark) .v3d .rot{color:var(--muted);background:rgba(32,0,88,.06);}
+.vtools{position:absolute;top:10px;inset-inline-end:10px;display:flex;gap:6px;z-index:3;flex-wrap:wrap;justify-content:flex-end;}
 
-/* ================= CONTROLS ================= */
-.btn{min-height:var(--tap);min-width:var(--tap);display:inline-flex;align-items:center;justify-content:center;gap:8px;
-  padding:0 20px;border-radius:999px;border:2px solid transparent;font-size:16px;font-weight:800;cursor:pointer;
-  background:var(--navy);color:#fff;transition:transform .12s,background .2s,box-shadow .2s;touch-action:manipulation;
-  -webkit-tap-highlight-color:transparent;user-select:none;}
-.btn:active{transform:scale(.96);}
-.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;}
-.btn.cyan{background:var(--cyan);color:var(--navy);}
-.btn.green{background:var(--green);}
-.btn.red{background:var(--red);}
+/* ---------- the guide card (one place to look) ---------- */
+.guide{background:#fff;border-radius:24px;box-shadow:var(--sh-l);padding:16px 16px 14px;position:sticky;top:12px;}
+.g-trail{display:flex;gap:6px;align-items:center;margin-bottom:10px;}
+.g-trail i{flex:1;height:8px;border-radius:99px;background:#ece9f8;transition:background .3s;}
+.g-trail i.done{background:var(--green);} .g-trail i.cur{background:var(--cyan);}
+.g-count{font-size:13px;font-weight:800;color:var(--muted);margin-bottom:4px;}
+.g-step{display:flex;gap:12px;align-items:flex-start;}
+.g-num{flex:none;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--navy);color:#fff;font-weight:900;font-size:20px;}
+.g-text{margin:0;font-size:clamp(18px,2.1vw,21px);font-weight:900;line-height:1.45;padding-top:6px;}
+.g-body{margin-top:12px;}
+.g-body:empty{display:none;}
+.g-book{margin-top:12px;border-top:1.5px dashed var(--line);padding-top:8px;}
+.g-book summary{cursor:pointer;font-weight:800;font-size:14px;color:var(--purple);list-style:none;min-height:36px;display:flex;align-items:center;gap:6px;}
+.g-book summary::-webkit-details-marker{display:none;}
+.g-book p{margin:6px 0 0;font-size:15px;background:var(--purple-l);border-radius:12px;padding:8px 12px;}
+.g-book .extra{background:var(--soft);color:var(--muted);font-size:13.5px;border:1.5px dashed var(--line);}
+.g-book .extra::before{content:"ℹ️ توضيحٌ للنشاطِ وليس من الكتابِ: ";font-weight:800;}
+.g-done{text-align:center;padding:8px 0 2px;}
+.g-done .big{font-size:44px;line-height:1;animation:pop .5s ease both;}
+.g-done h3{margin:6px 0 4px;font-size:21px;font-weight:900;}
+.g-done ul{list-style:none;padding:0;margin:10px 0 0;display:grid;gap:6px;text-align:start;}
+.g-done li{background:var(--green-l);border:1.5px solid var(--green-b);border-radius:12px;padding:7px 12px;font-weight:700;font-size:15px;}
+
+/* ---------- controls ---------- */
+.btn{min-height:48px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0 20px;border-radius:999px;border:2px solid transparent;
+  font-size:16px;font-weight:800;cursor:pointer;background:var(--navy);color:#fff;transition:transform .12s,background .2s,box-shadow .2s;touch-action:manipulation;user-select:none;}
+.btn:active{transform:scale(.96);} .btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn.cyan{background:var(--cyan);color:var(--navy);} .btn.green{background:var(--green);} .btn.red{background:var(--red);}
 .btn.ghost{background:#fff;color:var(--navy);border-color:var(--line);}
 .btn.ghost[aria-pressed="true"]{background:var(--navy);color:#fff;border-color:var(--navy);}
 .btn.sm{min-height:40px;font-size:14.5px;padding:0 14px;}
-.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
-.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;}
-.choice{min-height:56px;text-align:start;padding:10px 14px;border-radius:var(--r-s);border:2px solid var(--line);background:#fff;
-  font-size:16px;font-weight:700;cursor:pointer;transition:all .15s;}
+.btn.glow{animation:glow 1.4s ease-in-out infinite;}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.choices{display:grid;gap:8px;}
+.choice{min-height:52px;text-align:start;padding:8px 14px;border-radius:14px;border:2px solid var(--line);background:#fff;font-size:16.5px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:10px;}
 .choice:hover{border-color:var(--cyan);}
-.choice[aria-pressed="true"]{border-color:var(--navy);background:var(--purple-l);}
-.choice.ok{border-color:var(--green);background:var(--green-l);}
-.choice.bad{border-color:var(--red);background:var(--red-l);}
+.choice.ok{border-color:var(--green);background:var(--green-l);} .choice.bad{border-color:var(--red);background:var(--red-l);animation:shake .4s;}
+.counter{display:flex;align-items:center;gap:10px;justify-content:space-between;background:var(--soft);border:1.5px solid var(--line);border-radius:16px;padding:6px 8px 6px 12px;}
+.counter .n{font-size:24px;font-weight:900;min-width:34px;text-align:center;}
 input[type=range]{width:100%;height:44px;accent-color:var(--cyan-d);cursor:pointer;}
-.slider-lbl{display:flex;justify-content:space-between;font-size:13.5px;font-weight:700;color:var(--muted);}
-
-/* chips + drop zones (Kit.dnd) */
-.chips{display:flex;flex-wrap:wrap;gap:8px;min-height:56px;padding:8px;border-radius:var(--r-s);background:var(--soft);
-  border:1.5px dashed var(--line);}
-.chip{min-height:46px;display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;background:#fff;
-  border:2px solid var(--cyan-b);font-weight:800;font-size:15.5px;cursor:grab;touch-action:none;user-select:none;
-  -webkit-user-select:none;box-shadow:0 2px 0 var(--cyan-b);transition:transform .12s,box-shadow .12s,border-color .2s;}
-.chip.sel{border-color:var(--navy);box-shadow:0 0 0 4px rgba(0,195,254,.35);transform:translateY(-2px);}
-.chip.dragging{opacity:.35;}
-.chip.ghost{position:fixed;z-index:999;pointer-events:none;opacity:.95;transform:rotate(-3deg) scale(1.05);box-shadow:var(--sh-l);}
-.chip.ok{border-color:var(--green);background:var(--green-l);box-shadow:0 2px 0 var(--green-b);cursor:default;}
-.chip.bad{border-color:var(--red);background:var(--red-l);animation:shake .4s;}
-.zone{min-height:64px;border:2.5px dashed var(--cyan-b);border-radius:var(--r-s);padding:8px;background:#fff;
-  transition:background .15s,border-color .15s;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;}
+.chips{display:flex;flex-wrap:wrap;gap:8px;}
+.chip{min-height:46px;display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;background:#fff;border:2px solid var(--cyan-b);
+  font-weight:800;font-size:15.5px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;box-shadow:0 3px 0 var(--cyan-b);}
+.chip.sel{border-color:var(--navy);box-shadow:0 0 0 4px rgba(0,195,254,.35);}
+.chip.dragging{opacity:.35;} .chip.ghost{position:fixed;z-index:999;pointer-events:none;transform:rotate(-3deg) scale(1.05);box-shadow:var(--sh-l);}
+.chip.ok{border-color:var(--green);background:var(--green-l);box-shadow:0 3px 0 var(--green-b);cursor:default;} .chip.bad{border-color:var(--red);background:var(--red-l);animation:shake .4s;}
+.zone{min-height:62px;border:2.5px dashed var(--cyan-b);border-radius:16px;padding:8px;background:#fff;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;transition:background .15s,border-color .15s;}
 .zone.hot{background:var(--cyan-l);border-color:var(--cyan);border-style:solid;}
-.zone .zt{width:100%;font-weight:900;font-size:15px;color:var(--navy);}
+.zone .zt{width:100%;font-weight:900;font-size:15px;}
+.tag{display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:14px;border-radius:999px;padding:3px 12px;background:var(--soft);border:1.5px solid var(--line);}
+.tag.ok{background:var(--green-l);border-color:var(--green-b);color:var(--green-d);} .tag.bad{background:var(--red-l);border-color:var(--red-b);color:var(--red-d);}
 
-/* feedback */
-.fb{display:none;margin-top:12px;border-radius:var(--r-s);padding:12px 14px 12px 14px;font-size:16px;font-weight:600;
-  border:2px solid;animation:rise .25s ease both;}
-.fb.show{display:flex;gap:10px;align-items:flex-start;}
-.fb .ic{font-size:22px;line-height:1.3;flex:none;}
+/* feedback (inside the guide card) */
+.fb{display:none;margin-top:10px;border-radius:14px;padding:10px 12px;font-size:15.5px;font-weight:700;border:2px solid;animation:rise .25s ease both;}
+.fb.show{display:flex;gap:8px;align-items:flex-start;}
+.fb .ic{font-size:20px;line-height:1.3;flex:none;}
 .fb.ok{background:var(--green-l);border-color:var(--green-b);color:#064b31;}
 .fb.bad{background:var(--red-l);border-color:var(--red-b);color:#7a1426;}
 .fb.info{background:var(--cyan-l);border-color:var(--cyan-b);color:#06456a;}
 .fb.warn{background:var(--yellow-l);border-color:#f3dc97;color:#5a4200;}
 
-/* meters & badges */
-.meter{height:16px;border-radius:999px;background:#ece9f8;overflow:hidden;}
-.meter>i{display:block;height:100%;border-radius:999px;background:var(--cyan);transition:width .4s;}
-.badge{display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:14px;border-radius:999px;padding:4px 12px;
-  background:var(--soft);border:1.5px solid var(--line);}
-.badge.ok{background:var(--green-l);border-color:var(--green-b);color:var(--green-d);}
-.badge.bad{background:var(--red-l);border-color:var(--red-b);color:var(--red-d);}
-.missions{list-style:none;margin:0;padding:0;display:grid;gap:8px;}
-.missions li{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-s);background:#fff;
-  border:2px solid var(--line);font-weight:700;}
-.missions li .st{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--soft);
-  border:2px solid var(--line);flex:none;font-size:15px;}
-.missions li.cur{border-color:var(--cyan);}
-.missions li.done{border-color:var(--green-b);background:var(--green-l);}
-.missions li.done .st{background:var(--green);border-color:var(--green);color:#fff;}
+/* spotlight ring + pointing hand */
+#spot{position:fixed;z-index:60;pointer-events:none;border-radius:50%;border:4px solid var(--yellow);box-shadow:0 0 0 6px rgba(255,209,92,.35),0 0 24px rgba(255,209,92,.8);
+  display:none;animation:ring 1.3s ease-in-out infinite;transition:left .25s,top .25s,width .25s,height .25s;}
+#spot.box{border-radius:18px;}
+#hand{position:fixed;z-index:61;pointer-events:none;font-size:34px;display:none;filter:drop-shadow(0 3px 4px rgba(0,0,0,.3));animation:tapme 1.3s ease-in-out infinite;transition:left .25s,top .25s;}
 
-/* 3D canvas wrapper (Kit.orbit) */
-.view3d{position:relative;border-radius:var(--r);background:radial-gradient(ellipse at 50% 40%,#2d1670 0%,#160038 75%);
-  overflow:hidden;touch-action:none;cursor:grab;aspect-ratio:4/3;width:100%;}
-.view3d canvas{display:block;width:100%;height:100%;}
-.view3d .hint3d{position:absolute;bottom:10px;inset-inline-start:10px;font-size:13px;font-weight:700;color:#d9d2ff;
-  background:rgba(255,255,255,.1);border-radius:999px;padding:4px 12px;pointer-events:none;}
-
-/* nav footer */
-.navbar{position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);
-  border-top:1.5px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));}
-.navbar .in{max-width:1120px;margin:0 auto;display:flex;gap:10px;align-items:center;justify-content:space-between;}
-.navbar .where{font-weight:800;color:var(--muted);font-size:14.5px;text-align:center;flex:1;}
-
-/* summary card */
-.sum{display:grid;gap:10px;}
-.sum li{background:var(--green-l);border:1.5px solid var(--green-b);border-radius:var(--r-s);padding:10px 14px;font-weight:700;list-style:none;}
-.sum{padding:0;margin:0;}
+/* nav */
+.navbar{position:fixed;bottom:0;left:0;right:0;z-index:50;height:var(--nav-h);background:rgba(255,255,255,.95);backdrop-filter:blur(8px);border-top:1.5px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));}
+.navbar .in{max-width:1180px;margin:0 auto;display:flex;gap:10px;align-items:center;justify-content:space-between;height:100%;}
+.navbar .where{font-weight:800;color:var(--muted);font-size:14px;text-align:center;flex:1;}
 
 .confetti{position:fixed;inset:0;pointer-events:none;z-index:998;}
-@keyframes rise{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+@keyframes rise{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
 @keyframes shake{0%,100%{transform:none;}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
-@keyframes pop{0%{transform:scale(.6);opacity:0;}70%{transform:scale(1.08);}100%{transform:scale(1);opacity:1;}}
-@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;scroll-behavior:auto !important;}}
-@media (max-width:560px){.stage-b{padding:16px 14px 20px;}.stage-h{padding:12px 14px;}.dots li{width:28px;height:28px;font-size:12.5px;}.btn{padding:0 16px;}}
+@keyframes pop{0%{transform:scale(.5);opacity:0;}70%{transform:scale(1.12);}100%{transform:scale(1);opacity:1;}}
+@keyframes ring{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.12);opacity:.75;}}
+@keyframes tapme{0%,100%{transform:translate(0,0);}50%{transform:translate(-4px,-8px);}}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(0,195,254,.6);}50%{box-shadow:0 0 0 10px rgba(0,195,254,0);}}
+
+/* phone: one screen, no overlap — header, model (top), guide (fills the rest, scrolls inside), nav */
+@media (max-width:820px){
+  body{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden;}
+  .hdr{padding:8px 10px 0;gap:8px;flex:none;} .hdr h1{font-size:18px;min-width:0;} .ref{display:none;}
+  .pills li{height:34px;padding:0 9px;font-size:13px;} .pills li span{display:none;}
+  .wrap{flex:1;min-height:0;width:100%;padding:8px 8px calc(var(--nav-h) + 8px);}
+  .scene.on{height:100%;}
+  .layout{display:flex;flex-direction:column;height:100%;gap:8px;align-items:stretch;}
+  .viewport{flex:0 0 auto;min-height:0;border-radius:18px;}
+  .v3d{aspect-ratio:auto;height:36vh;height:36dvh;min-height:200px;}
+  .guide{position:static;flex:1 1 0;min-height:140px;overflow:auto;border-radius:18px;padding:12px;}
+  .g-num{width:38px;height:38px;font-size:18px;border-radius:12px;} .g-text{font-size:17.5px;padding-top:4px;}
+  .g-count{display:none;}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;}}
 </style>
 <style>
-/* ================= ACTIVITY-SPECIFIC CSS ================= */
-.board{background:linear-gradient(180deg,#fffaf0,#fdf1dc);border:1.5px solid #f0dfbd;border-radius:var(--r);padding:8px;position:relative;}
-.board svg{display:block;width:100%;height:auto;}
-.board .cnt{position:absolute;top:10px;inset-inline-start:10px;}
-.eyehot{cursor:pointer;outline:none;}
-.eyehot .ring{fill:transparent;stroke:transparent;stroke-width:4;}
-.eyehot:focus-visible .ring{stroke:var(--cyan);stroke-dasharray:6 5;}
-.eyehot.found .ring{stroke:var(--green);fill:rgba(18,160,106,.12);}
-.eyehot.hint .ring{stroke:var(--orange);stroke-dasharray:5 5;animation:pulse 1s ease-in-out infinite;}
-@keyframes pulse{50%{stroke-width:7;}}
-.zoomcard{display:none;margin-top:12px;animation:pop .4s ease both;}
-.zoomcard.show{display:block;}
-#cutSvg{touch-action:none;cursor:crosshair;user-select:none;-webkit-user-select:none;}
-.pcs{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
-.smallcard{display:grid;grid-template-columns:120px minmax(0,1fr);gap:10px;align-items:center;}
-.smallcard svg{width:120px;height:auto;}
-@media (max-width:420px){.smallcard{grid-template-columns:90px minmax(0,1fr);}.smallcard svg{width:90px;}}
-.decide{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:12px;}
-.decide .choice{display:flex;gap:12px;align-items:center;min-height:72px;}
-.decide .choice .big{font-size:30px;flex:none;}
-.timebar{display:flex;align-items:center;gap:10px;margin:10px 0;}
-.timebar .meter{flex:1;}
-.timebar .sky{font-size:24px;width:32px;text-align:center;}
-.garden svg{display:block;width:100%;height:auto;border-radius:var(--r);}
-.garden{border-radius:var(--r);overflow:hidden;border:1.5px solid var(--line);}
-.wkrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px;}
-.wkrow .wk{font-weight:900;font-size:18px;min-width:120px;}
-.wkrow input{flex:1;min-width:200px;}
-.results{list-style:none;padding:0;margin:10px 0 0;display:grid;gap:6px;}
-.results li{display:flex;gap:10px;align-items:flex-start;background:#fff;border:2px solid var(--line);border-radius:var(--r-s);padding:8px 12px;font-weight:700;font-size:15.5px;}
-.results li.ok{border-color:var(--green-b);background:var(--green-l);}
-.results li.bad{border-color:var(--red-b);background:var(--red-l);}
-.results li .n{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--navy);color:#fff;font-size:14px;}
-.sortz{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;}
-.sortz .zone{min-height:150px;}
-@media (max-width:420px){.sortz{grid-template-columns:1fr;}.sortz .zone{min-height:96px;}}
-.mini svg{display:block;width:100%;height:auto;}
-.mini{background:#fff;border:1.5px solid var(--line);border-radius:var(--r);padding:8px;margin-bottom:10px;}
-.mini .row{justify-content:center;}
-.garlic-c{transition:transform .6s cubic-bezier(.3,1.4,.5,1);}
-.onion-cut,.onion-whole{transition:opacity .4s;}
-.stat{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0;}
-.lbltag rect{fill:#fff;stroke:var(--navy);stroke-width:1.5;}
-.lbltag text{fill:var(--navy);font-weight:800;}
+/* ===== ACTIVITY CSS ===== */
+.viewport.farm{background:radial-gradient(ellipse at 50% 30%,#fffdf6 0%,#f3ead6 70%,#e9dcc0 100%);}
+.bench{display:flex;gap:8px;align-items:center;padding:8px 12px;background:#fff;border-top:1.5px solid var(--line);}
+.bench .kl{font-weight:800;font-size:14px;white-space:nowrap;}
+.bench input[type=range]{flex:1;min-width:0;}
+.bench .btn.sm{min-height:44px;flex:none;}
+.wk{display:flex;align-items:center;gap:10px;}
+.wk b{min-width:96px;font-size:16px;}
+.zones2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
+@media (max-width:820px){
+  .bench{padding:6px;gap:6px;} .bench .kl{display:none;} .bench .btn.sm{padding:0 10px;font-size:14px;}
+  #view1{height:29vh;height:29dvh;min-height:170px;}
+}
 </style>
 </head>
 <body>
-<div class="app">
-  <header class="topbar">
-    <span class="ref">📘 <b>الفصلُ ١</b> · الدرسُ ٢: التكاثرُ الخضريُّ · <span>كتابُ النشاطِ ص ٩–١٢</span></span>
-    <h1>«مزرعةُ الدرناتِ»<small>كيفَ أزرعُ البطاطا بالدرناتِ؟</small></h1>
-    <ol class="dots" id="dots" aria-label="مراحلُ النشاطِ"></ol>
-  </header>
+<header class="hdr">
+  <h1>🥔 مزرعةُ الدرناتِ</h1>
+  <span class="ref">📘 الفصلُ ١ · الدرسُ ٢: التكاثرُ الخضريُّ · كتابُ النشاطِ ص ٩–١٢</span>
+  <ol class="pills" id="pills" aria-label="أجزاءُ النشاطِ"></ol>
+</header>
 
-  <main id="main">
-    <!-- shared SVG defs -->
-    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-      <defs>
-        <radialGradient id="gSkin" cx="40%" cy="35%" r="75%">
-          <stop offset="0" stop-color="#f1cf8f"/><stop offset=".6" stop-color="#d9a660"/><stop offset="1" stop-color="#b17a36"/>
-        </radialGradient>
-        <radialGradient id="gOnion" cx="40%" cy="40%" r="70%">
-          <stop offset="0" stop-color="#f6d48f"/><stop offset=".7" stop-color="#d79a4a"/><stop offset="1" stop-color="#a86a2a"/>
-        </radialGradient>
-        <pattern id="corkPat" width="10" height="10" patternUnits="userSpaceOnUse">
-          <rect width="10" height="10" fill="#b98a4e"/>
-          <circle cx="2.5" cy="3" r="1.4" fill="#7a5226"/><circle cx="7.5" cy="7" r="1.2" fill="#8d6230"/>
-          <path d="M0 8 L4 6 M6 2 L10 0" stroke="#6b451c" stroke-width=".9"/>
-        </pattern>
-        <linearGradient id="gSoil" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#8a5a32"/><stop offset="1" stop-color="#5c3a1f"/>
-        </linearGradient>
-        <linearGradient id="gSky" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#cdefff"/><stop offset="1" stop-color="#f3fbff"/>
-        </linearGradient>
-      </defs>
-    </svg>
+<div class="wrap">
+  <section class="scene" data-scene="0">
+    <div class="layout">
+      <div class="viewport farm"><div class="v3d" id="view0"></div></div>
+      <aside class="guide"></aside>
+    </div>
+  </section>
 
-    <!-- ============ STAGE 1 ============ -->
-    <section class="stage" data-stage="0" aria-labelledby="s0h">
-      <div class="stage-h"><span class="kind">أستكشفُ</span><h2 id="s0h">أفحصُ الدرنةَ</h2></div>
-      <div class="stage-b">
-        <p class="book">التكاثرُ الخضريُّ نوعٌ من التكاثرِ الطبيعيِّ في النباتاتِ يحدثُ دونَ الحاجةِ إلى البذورِ، عن طريقِ أجزاءٍ أخرى من النباتِ كالجذورِ والسيقانِ والأوراقِ.</p>
-        <p class="task">أنتَ مزارعٌ صغيرٌ! انقرْ على كلِّ مجموعةٍ من الانخفاضاتِ الصغيرةِ على سطحِ الدرنةِ — هذه هي «العيونُ».</p>
-        <div class="grid2">
-          <div>
-            <div class="board">
-              <span class="badge cnt" id="eyeCount">العيونُ: ٠ / ٧</span>
-              <svg id="eyeSvg" viewBox="0 0 600 400" role="group" aria-label="درنةُ بطاطا كبيرةٌ. ابحثْ عن مجموعاتِ العيونِ"></svg>
-            </div>
-            <div class="row" style="margin-top:10px">
-              <button class="btn ghost sm" id="eyeHint" type="button" hidden>💡 أرني مكانَ العيونِ</button>
-            </div>
-            <div class="fb" id="fbEye"></div>
-          </div>
-          <div class="panel">
-            <h3>مهامّي</h3>
-            <ul class="missions" id="m1">
-              <li id="m1a" class="cur"><span class="st">١</span>أجدُ كلَّ مجموعاتِ العيونِ</li>
-              <li id="m1b"><span class="st">٢</span>أجيبُ: هل البطاطا جذرٌ أم ساقٌ؟</li>
-            </ul>
-            <div class="zoomcard panel" id="zoomEye" style="background:#fff">
-              <h3>عينٌ مكبّرةٌ 🔍</h3>
-              <svg viewBox="0 0 320 190" role="img" aria-label="جزءٌ مكبّرٌ من الدرنةِ: عينٌ يخرجُ منها ساقٌ وجذرٌ">
-                <path d="M0 130 Q160 95 320 130 L320 190 L0 190Z" fill="url(#gSkin)" stroke="#8a5a22" stroke-width="2"/>
-                <ellipse cx="160" cy="114" rx="16" ry="7" fill="#6b4318"/>
-                <path d="M160 112 C158 85 168 60 160 30" stroke="#5cae4a" stroke-width="6" fill="none" stroke-linecap="round"/>
-                <ellipse cx="172" cy="52" rx="12" ry="6" fill="#6cc25a" transform="rotate(-30 172 52)"/>
-                <ellipse cx="148" cy="70" rx="11" ry="5.5" fill="#6cc25a" transform="rotate(30 148 70)"/>
-                <path d="M152 114 q-20 6 -36 22 M150 116 q-8 14 -24 30 M168 114 q22 4 34 22 M170 116 q10 14 26 26" stroke="#f3ecd5" stroke-width="3" fill="none" stroke-linecap="round"/>
-                <path d="M152 114 q-20 6 -36 22 M150 116 q-8 14 -24 30 M168 114 q22 4 34 22 M170 116 q10 14 26 26" stroke="#b9a77a" stroke-width="1" fill="none"/>
-                <g class="lbltag" font-size="15">
-                  <line x1="218" y1="34" x2="166" y2="44" stroke="#200058" stroke-width="1.5"/><rect x="218" y="20" width="62" height="28" rx="8"/><text x="249" y="40" text-anchor="middle">ساقٌ</text>
-                  <line x1="82" y1="104" x2="150" y2="113" stroke="#200058" stroke-width="1.5"/><rect x="24" y="90" width="58" height="28" rx="8"/><text x="53" y="110" text-anchor="middle">عينٌ</text>
-                  <line x1="236" y1="168" x2="200" y2="150" stroke="#200058" stroke-width="1.5"/><rect x="236" y="154" width="62" height="28" rx="8"/><text x="267" y="174" text-anchor="middle">جذرٌ</text>
-                </g>
-              </svg>
-              <p class="book" style="margin-bottom:0">الدرنةُ ساقٌ أرضيةٌ متحوّرةٌ لخزنِ الغذاءِ، على سطحِها انتفاخاتٌ تسمّى العيونَ.</p>
-            </div>
-            <div id="qRoot" style="margin-top:12px">
-              <h3>هل البطاطا جذرٌ أم ساقٌ؟</h3>
-              <div class="choices" id="qRootCh">
-                <button type="button" class="choice" data-a="root">🌱 جذرٌ، لأنها تحتَ الأرضِ</button>
-                <button type="button" class="choice" data-a="stem">🥔 ساقٌ أرضيةٌ متحوّرةٌ</button>
-                <button type="button" class="choice" data-a="leaf">🍃 ورقةٌ</button>
-              </div>
-              <div class="fb" id="fbRoot"></div>
-              <button class="btn ghost sm" id="rootShow" type="button" hidden style="margin-top:8px">أرني الحلَّ</button>
-            </div>
-          </div>
+  <section class="scene" data-scene="1">
+    <div class="layout">
+      <div class="viewport farm"><div class="v3d" id="view1"></div>
+        <div class="bench" id="bench">
+          <label class="kl" for="knife">🔪 مكانُ القطعِ</label>
+          <input type="range" dir="ltr" id="knife" min="-150" max="150" step="5" value="-120" aria-label="مكانُ السكّينِ على الدرنةِ">
+          <button class="btn sm" id="cutBtn" type="button">🔪 اقطعْ</button>
+          <button class="btn sm ghost" id="undoBtn" type="button">↩ تراجعْ</button>
         </div>
       </div>
-    </section>
+      <aside class="guide"></aside>
+    </div>
+  </section>
 
-    <!-- ============ STAGE 2 ============ -->
-    <section class="stage" data-stage="1" aria-labelledby="s1h">
-      <div class="stage-h"><span class="kind">أجرّبُ</span><h2 id="s1h">أقطّعُ الدرنةَ</h2></div>
-      <div class="stage-b">
-        <p class="book">الدرنةُ الكبيرةُ تُقطّعُ إلى أجزاءٍ عدّةٍ، ويجبُ أن يحتويَ كلُّ جزءٍ على مجموعتينِ من العيونِ.</p>
-        <p class="task">اسحبْ خطّاً مستقيماً عبرَ الدرنةِ لتقطيعِها (حتى ٤ قطعاتٍ). الرقمُ على كلِّ قطعةٍ = عددُ مجموعاتِ العيونِ فيها.</p>
-        <div class="grid2">
-          <div>
-            <div class="board">
-              <span class="badge cnt" id="cutCount">القطعاتُ: ٠ / ٤</span>
-              <svg id="cutSvg" viewBox="0 0 600 400" role="img" aria-label="درنةٌ كبيرةٌ للتقطيعِ. اسحبْ خطّاً عبرَها"></svg>
-            </div>
-            <div class="row" style="margin-top:10px">
-              <button class="btn ghost sm" id="undoBtn" type="button">↩ تراجعْ</button>
-              <button class="btn ghost sm" id="resetBtn" type="button">⟲ ابدأْ من جديدٍ</button>
-              <button class="btn cyan sm" id="checkBtn" type="button">✔ افحصْ خطّتي</button>
-              <button class="btn ghost sm" id="cutShow" type="button" hidden>أرني الحلَّ</button>
-            </div>
-            <div class="pcs" id="pcsList" aria-live="polite"></div>
-            <div class="fb" id="fbCut"></div>
-          </div>
-          <div class="panel">
-            <h3>درنةٌ صغيرةٌ 🥔</h3>
-            <div class="smallcard">
-              <svg id="smallSvg" viewBox="150 110 300 180" role="img" aria-label="درنةٌ صغيرةٌ عليها ثلاثُ مجموعاتٍ من العيونِ"></svg>
-              <div>
-                <p style="margin:0 0 8px;font-weight:700">وجدتَ أيضاً درنةً صغيرةً. ماذا تفعلُ بها؟</p>
-                <div class="choices" id="smallCh" style="grid-template-columns:1fr">
-                  <button type="button" class="choice" data-a="cut">🔪 أقطّعُها</button>
-                  <button type="button" class="choice" data-a="whole">🌱 ازرعْها كاملةً</button>
-                </div>
-              </div>
-            </div>
-            <div class="fb" id="fbSmall"></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============ STAGE 3 ============ -->
-    <section class="stage" data-stage="2" aria-labelledby="s2h">
-      <div class="stage-h"><span class="kind">أقرّرُ</span><h2 id="s2h">أنتظرُ أم أزرعُ فوراً؟</h2></div>
-      <div class="stage-b">
-        <p class="task">قطعُك جاهزةٌ على الصينيةِ. اخترْ قرارَكَ، ثمَّ شاهدْ النتيجةَ في الحديقةِ.</p>
-        <div class="decide" id="decide">
-          <button type="button" class="choice" data-a="wait"><span class="big" aria-hidden="true">⏳</span><span>اتركِ القطعَ حتى تتكوّنَ الطبقةُ الفلّينيةُ</span></button>
-          <button type="button" class="choice" data-a="now"><span class="big" aria-hidden="true">⚡</span><span>ازرعْها الآنَ</span></button>
-        </div>
-        <div class="board">
-          <svg id="traySvg" viewBox="0 0 600 420" role="img" aria-label="قطعُ الدرنةِ على صينيةٍ"></svg>
-        </div>
-        <div class="timebar" id="timebar" hidden>
-          <span class="sky" id="sky" aria-hidden="true">☀️</span>
-          <div class="meter" role="progressbar" aria-label="مرورُ الوقتِ" aria-valuemin="0" aria-valuemax="100" id="dryMeter"><i id="dryBar" style="width:0%"></i></div>
-          <b id="dryTxt">يمرُّ الوقتُ…</b>
-        </div>
-        <div class="fb" id="fbDec"></div>
-        <p class="extra">لونُ الطبقةِ ونقوشُها رسمٌ توضيحيٌّ. الكتابُ يقولُ «تُتركُ مدةً» ولا يحدّدُ عددَ الأيامِ.</p>
-      </div>
-    </section>
-
-    <!-- ============ STAGE 4 ============ -->
-    <section class="stage" data-stage="3" aria-labelledby="s3h">
-      <div class="stage-h"><span class="kind">أراقبُ</span><h2 id="s3h">أزرعُ وأراقبُ</h2></div>
-      <div class="stage-b">
-        <p class="task">حرّكِ المؤشّرَ من الأسبوعِ ٠ إلى الأسبوعِ ٤ (أو اضغطْ ▶) وراقبْ كلَّ قطعةٍ تحتَ الترابِ.</p>
-        <div class="garden"><svg id="gardenSvg" viewBox="0 0 800 470" role="img" aria-label="مقطعٌ في التربةِ يُظهرُ القطعَ المزروعةَ"></svg></div>
-        <div class="wkrow">
-          <button class="btn cyan" id="playBtn" type="button" aria-label="شغّلْ مرورَ الأسابيعِ">▶ شغّلْ</button>
-          <span class="wk" id="wkTxt">الأسبوعُ ٠</span>
-          <input type="range" id="wk" min="0" max="4" step="0.05" value="0" aria-label="الأسبوعُ من ٠ إلى ٤">
-        </div>
-        <div class="slider-lbl" aria-hidden="true"><span>٠</span><span>١</span><span>٢</span><span>٣</span><span>٤</span></div>
-        <div class="row" style="margin-top:8px">
-          <button class="btn ghost sm" id="lblBtn" type="button" aria-pressed="true">🏷️ الأسماءُ</button>
-          <button class="btn sm" id="fixBtn" type="button">🔧 أصلحُ خطّتي</button>
-        </div>
-        <ul class="results" id="results"></ul>
-        <div class="fb" id="fbGrow"></div>
-        <p class="book">حقيقةٌ علميةٌ: البطاطا الواحدةُ يمكنُ أن تنتجَ ٣–٦ درناتٍ، وبعضُ الأصنافِ نحوَ ١٠–٢٠.</p>
-        <p class="extra">مشهدُ النموِّ أسبوعاً بعدَ أسبوعٍ رسمٌ توضيحيٌّ. الكتابُ يذكرُ دورَ الطبقةِ الفلّينيةِ في الحمايةِ من الأمراضِ الفطريةِ والتعفّنِ، وشرطَ المجموعتينِ من العيونِ؛ شكلُ العفنِ في الرسمِ للتوضيحِ.</p>
-      </div>
-    </section>
-
-    <!-- ============ STAGE 5 ============ -->
-    <section class="stage" data-stage="4" aria-labelledby="s4h">
-      <div class="stage-h"><span class="kind">أطبّقُ</span><h2 id="s4h">درنةٌ أم بصلةٌ؟</h2></div>
-      <div class="stage-b">
-        <div class="grid2">
-          <div>
-            <p class="task">اسحبْ كلَّ نباتٍ إلى مجموعتِه (أو انقرْه ثمَّ انقرِ المجموعةَ).</p>
-            <div class="chips" id="sortChips"></div>
-            <div class="sortz">
-              <div class="zone" data-k="t" aria-label="مجموعةُ الدرناتِ"><span class="zt">🥔 درناتٌ</span></div>
-              <div class="zone" data-k="b" aria-label="مجموعةُ الأبصالِ"><span class="zt">🧅 أبصالٌ</span></div>
-            </div>
-            <div class="row" style="margin-top:8px"><button class="btn ghost sm" id="sortShow" type="button" hidden>أرني الحلَّ</button></div>
-            <div class="fb" id="fbSort"></div>
-            <p class="book">التكاثرُ الخضريُّ الطبيعيُّ (لا دورَ للإنسانِ فيه): الدرناتُ والأبصالُ. أمّا الاصطناعيُّ: الأقلامُ والتطعيمُ والفسائلُ (تُدرسُ في الفصلِ القادمِ).</p>
-          </div>
-          <div>
-            <div class="mini">
-              <svg id="onionSvg" viewBox="0 0 380 260" role="img" aria-label="بصلةٌ كاملةٌ"></svg>
-              <div class="row"><button class="btn sm" id="onionBtn" type="button">🔪 اقطعِ البصلةَ</button></div>
-            </div>
-            <div class="mini">
-              <svg id="garlicSvg" viewBox="0 0 360 200" role="img" aria-label="بصلةُ ثومٍ كاملةٌ"></svg>
-              <div class="row"><button class="btn sm" id="garlicBtn" type="button">✋ افصلْ فصوصَ الثومِ</button></div>
-            </div>
-            <div class="panel">
-              <h3>أيُّ جزءٍ في البصلةِ هو الساقُ؟</h3>
-              <div class="choices" id="qOnion" style="grid-template-columns:1fr">
-                <button type="button" class="choice" data-a="rings">الحلقاتُ الشحميةُ</button>
-                <button type="button" class="choice" data-a="disc">القرصُ في القاعدةِ</button>
-                <button type="button" class="choice" data-a="roots">الجذورُ الليفيةُ</button>
-              </div>
-              <div class="fb" id="fbOnion"></div>
-              <button class="btn ghost sm" id="onionShow" type="button" hidden style="margin-top:8px">أرني الحلَّ</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============ STAGE 6 ============ -->
-    <section class="stage" data-stage="5" aria-labelledby="s5h">
-      <div class="stage-h"><span class="kind">أُلخّصُ</span><h2 id="s5h">خلاصةٌ</h2></div>
-      <div class="stage-b">
-        <div class="stat" id="myStats"></div>
-        <ul class="sum">
-          <li>🌱 التكاثرُ الخضريُّ يحدثُ دونَ بذورٍ، عن طريقِ أجزاءٍ من النباتِ كالجذورِ والسيقانِ والأوراقِ.</li>
-          <li>🥔 الدرنةُ <b>ساقٌ</b> أرضيةٌ متحوّرةٌ لخزنِ الغذاءِ — وليستْ جذراً. على سطحِها انتفاخاتٌ تسمّى العيونَ.</li>
-          <li>✂️ الدرنةُ الصغيرةُ تُزرعُ كاملةً، والكبيرةُ تُقطّعُ؛ ويجبُ أن يحتويَ كلُّ جزءٍ على <b>مجموعتينِ من العيونِ</b>.</li>
-          <li>⏳ نتركُ القطعَ مدةً حتى تتكوّنَ <b>الطبقةُ الفلّينيةُ</b>؛ فهي تحمي الدرنةَ من الأمراضِ الفطريةِ والتعفّنِ بعدَ الزراعةِ.</li>
-          <li>🧅 البصلةُ ساقٌ قرصيةٌ تخرجُ من قاعدتِها جذورٌ عرضيةٌ ليفيةٌ، وتحملُ أوراقاً ذاتَ قواعدَ شحميةٍ. والثومُ مقسّمٌ إلى فصوصٍ، وكلُّ فصٍّ بصلةٌ.</li>
-          <li>⚡ التكاثرُ الخضريُّ يعطي نباتاتٍ ناضجةً في وقتٍ قصيرٍ مقارنةً بالبذورِ، وهو طريقةٌ للتغلّبِ على الظروفِ المناخيةِ غيرِ الملائمةِ لنموِّ البذورِ.</li>
-        </ul>
-        <div class="row" style="margin-top:14px"><button class="btn ghost" id="againBtn" type="button">🔁 أزرعُ مرةً أخرى</button></div>
-      </div>
-    </section>
-  </main>
+  <section class="scene" data-scene="2">
+    <div class="layout">
+      <div class="viewport farm"><div class="v3d" id="view2"></div></div>
+      <aside class="guide"></aside>
+    </div>
+  </section>
 </div>
 
-<nav class="navbar" aria-label="التنقلُ بينَ المراحلِ">
+<nav class="navbar" aria-label="التنقلُ">
   <div class="in">
     <button class="btn ghost" id="prevBtn" type="button">→ السابقُ</button>
-    <div class="where" id="where" aria-live="polite"></div>
+    <div class="where" id="where"></div>
     <button class="btn" id="nextBtn" type="button">التالي ←</button>
   </div>
 </nav>
+<div id="spot" aria-hidden="true"></div><div id="hand" aria-hidden="true">👆</div>
 
 <script>
-/* ================= KIT (shared helpers) ================= */
+/* =====================================================================
+   KIT v2
+   Scenes & guided steps:
+     Kit.scene(i, { title:'أستكشفُ', book:'<p>…</p><p class="extra">…</p>', summary:['…'], steps:[ STEP, … ] })
+     STEP = { text:'اضغطْ على النواةِ', target: '#sel' | element | ()=>({x,y,r}) (client coords) | null,
+              body: html string | (el)=>{} , enter(){}, check(){ return true when done }, after:'feedback html shown when done' }
+     Kit.start()            begin
+     Kit.ping()             re-check current step now (call after any state change)
+     Kit.next()             force-advance current step
+     Kit.say(html,type)     feedback in the current guide card ('ok'|'bad'|'info'|'warn')
+     Kit.tries(key)         counts wrong tries; returns the count (use to reveal "أرني الحلَّ" after 2)
+   3D:
+     const V = Kit.view3d(el, { draw(R,t){…}, onPick(id,hit){…}, yaw, pitch, zoom, auto:false, dist })
+       R.sphere([x,y,z], r, '#hex', {id, label, labelColor, alpha})
+       R.cyl([x,y,z],[x,y,z], r, '#hex', {id, alpha})          (rod / bond / bone)
+       R.mesh(mesh, {pos,rot,scale}, {id, color:'#hex'|fn(c,n), alpha, doubleSided})
+       R.line(a,b,'#hex',width,{dash,glow})   R.poly([p…],'#hex',width,{closed,dash,glow})   R.text(p,'نص',{color,size,bg})
+       R.shadow([x,y,z], rx, rz)
+       V.screen([x,y,z]) -> client {x,y}   V.cam (yaw,pitch,zoom)   V.redraw()
+     Kit.mesh.ellipsoid({rx,ry,rz,seg,ring, bump:(u,v)=>k})  Kit.mesh.surface(fn(u,v)->[x,y,z], uSeg, vSeg, {closedU})
+     Kit.mesh.box(w,h,d)   Kit.mesh.lathe(profile[[r,y]…], seg)
+   Misc: Kit.ar(n) Arabic digits · Kit.dnd({chips,zones,accept,onDrop}) · Kit.celebrate() · Kit.toast(msg) · Kit.reduced
+   ===================================================================== */
 const Kit = (() => {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const $ = (s, r=document) => r.querySelector(s);
-  const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
-  const AR = '٠١٢٣٤٥٦٧٨٩';
-  const ar = n => String(n).replace(/[0-9]/g, d => AR[d]).replace('-', '−');
-  const shuffle = a => { a = a.slice(); for (let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; };
-  const el = (tag, attrs={}, html) => { const e=document.createElement(tag);
-    for (const k in attrs){ if(k==='class') e.className=attrs[k]; else if(k.startsWith('on')) e.addEventListener(k.slice(2),attrs[k]); else e.setAttribute(k,attrs[k]); }
-    if (html!=null) e.innerHTML=html; return e; };
+  const $ = (s, r=document) => r.querySelector(s), $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+  const AR='٠١٢٣٤٥٦٧٨٩', ar = n => String(n).replace(/[0-9]/g, d => AR[d]);
+  const shuffle = a => { a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; };
 
-  /* ---- feedback: Kit.say(box, 'ok'|'bad'|'info'|'warn', html) ---- */
-  const ICON = {ok:'✅', bad:'🤔', info:'💡', warn:'⚠️'};
-  function say(box, type, html){
-    if (typeof box==='string') box=$(box);
-    box.className='fb show '+type; box.setAttribute('role','status'); box.setAttribute('aria-live','polite');
-    box.innerHTML='<span class="ic" aria-hidden="true">'+ICON[type]+'</span><div>'+html+'</div>';
+  /* ---------------- scenes + guided steps ---------------- */
+  const S=[]; let cur=0, step=0, timer=null, advancing=false; const tryCount={};
+  function scene(i,cfg){ S[i]=Object.assign({done:false},cfg); }
+  function start(){
+    const pills=$('#pills'); pills.innerHTML='';
+    S.forEach((s,i)=>{ const li=document.createElement('li'); li.innerHTML='<b>'+ar(i+1)+'</b><span>'+s.title+'</span>'; li.title=s.title; pills.appendChild(li); });
+    $('#prevBtn').onclick=()=>goScene(cur-1); $('#nextBtn').onclick=()=>goScene(cur+1);
+    addEventListener('resize',placeSpot); addEventListener('scroll',placeSpot,{passive:true});
+    (function spotLoop(){ placeSpot(); requestAnimationFrame(spotLoop); })();
+    goScene(0,true);
   }
-  function hush(box){ if (typeof box==='string') box=$(box); box.className='fb'; box.innerHTML=''; }
+  function goScene(i,first){
+    if(i<0||i>=S.length) return;
+    if(!first && i>cur && !S[cur].done){ toast('أكملْ خطواتِ هذا الجزءِ أولاً 👆'); return; }
+    cur=i; $$('.scene').forEach((el,k)=>el.classList.toggle('on',k===i));
+    $$('#pills li').forEach((li,k)=>{ li.classList.toggle('on',k===i); li.classList.toggle('done',S[k].done&&k!==i); });
+    $('#prevBtn').disabled=i===0; $('#nextBtn').style.visibility=i===S.length-1?'hidden':'visible';
+    $('#where').textContent='الجزءُ '+ar(i+1)+' من '+ar(S.length);
+    if(!first) scrollTo({top:0,behavior:reduced?'auto':'smooth'});
+    S[i].enter&&S[i].enter();
+    if(S[i].done) showDone(); else goStep(0);
+    updateNext();
+  }
+  function card(){ return $$('.scene')[cur].querySelector('.guide'); }
+  function goStep(k){
+    step=k; advancing=false; const s=S[cur], st=s.steps[k], g=card();
+    const trail=s.steps.map((_,j)=>'<i class="'+(j<k?'done':j===k?'cur':'')+'"></i>').join('');
+    g.innerHTML='<div class="g-trail">'+trail+'</div><div class="g-count">الخطوةُ '+ar(k+1)+' من '+ar(s.steps.length)+'</div>'+
+      '<div class="g-step"><span class="g-num">'+ar(k+1)+'</span><p class="g-text">'+st.text+'</p></div><div class="g-body"></div><div class="fb"></div>'+
+      (s.book?'<details class="g-book"><summary>📘 من الكتابِ</summary>'+s.book+'</details>':'');
+    const body=g.querySelector('.g-body');
+    if(typeof st.body==='string') body.innerHTML=st.body; else if(typeof st.body==='function') st.body(body);
+    st.enter&&st.enter();
+    clearInterval(timer); timer=setInterval(ping,300);
+  }
+  function ping(){
+    const s=S[cur]; if(!s||s.done||advancing) return; const st=s.steps[step];
+    if(st && st.check && st.check()) next();
+  }
+  function next(){
+    const s=S[cur]; if(advancing||s.done) return; advancing=true; const st=s.steps[step];
+    if(st.after) say(st.after,'ok'); else say('أحسنتَ!','ok');
+    const wait=st.after?Math.max(1600,Math.min(4200,st.after.length*45)):800;
+    setTimeout(()=>{ if(step<s.steps.length-1) goStep(step+1); else { s.done=true; clearInterval(timer); showDone(); updateNext(); celebrate(); } }, reduced?Math.min(wait,900):wait);
+  }
+  function showDone(){
+    const s=S[cur], g=card(), last=cur===S.length-1;
+    g.innerHTML='<div class="g-trail">'+s.steps.map(()=>'<i class="done"></i>').join('')+'</div><div class="g-done"><div class="big">'+(last?'🏆':'✅')+'</div>'+
+      '<h3>'+(last?'أنهيتَ النشاطَ!':'أنهيتَ هذا الجزءَ')+'</h3>'+(s.summary?'<ul>'+s.summary.map(x=>'<li>✓ '+x+'</li>').join('')+'</ul>':'')+
+      (last?'<p style="margin:12px 0 0"><button class="btn ghost sm" type="button" onclick="location.reload()">↻ ابدأْ من جديدٍ</button></p>':'')+'</div>'+
+      (s.book?'<details class="g-book"><summary>📘 من الكتابِ</summary>'+s.book+'</details>':'');
+    s.onDone&&s.onDone();
+  }
+  function updateNext(){ const b=$('#nextBtn'); b.classList.toggle('glow',!!S[cur].done && cur<S.length-1); $$('#pills li')[cur].classList.toggle('done',false); }
+  function say(html,type='info'){
+    const box=card().querySelector('.fb'); if(!box) return;
+    const ic={ok:'✅',bad:'🤔',info:'💡',warn:'⚠️'}[type];
+    box.className='fb show '+type; box.setAttribute('role','status'); box.innerHTML='<span class="ic" aria-hidden="true">'+ic+'</span><div>'+html+'</div>';
+  }
+  function tries(key){ tryCount[key]=(tryCount[key]||0)+1; return tryCount[key]; }
 
-  /* ---- stages + nav. canLeave(i) may return false or a message string to block "next". ---- */
-  let stages=[], cur=0, names=[], hooks={};
-  function setupStages(stageNames, opts={}){
-    names=stageNames; hooks=opts; stages=$$('.stage');
-    const dots=$('#dots'); dots.innerHTML='';
-    names.forEach((n,i)=>{ const li=el('li',{title:n,'aria-label':'المرحلة '+ar(i+1)+': '+n},ar(i+1)); dots.appendChild(li); });
-    $('#prevBtn').onclick=()=>go(cur-1); $('#nextBtn').onclick=()=>go(cur+1);
-    go(0, true);
+  /* spotlight */
+  function placeSpot(){
+    const sp=$('#spot'), hd=$('#hand'); const s=S[cur]; const st=s&&!s.done&&s.steps[step];
+    let t=st&&st.target, r=null;
+    if(typeof t==='function'){ try{ r=t(); }catch(e){ r=null; } }
+    else if(typeof t==='string'){ const el=$$(t,$$('.scene')[cur]).find(e=>e.offsetParent!==null); if(el){ const b=el.getBoundingClientRect(); r={x:b.left+b.width/2,y:b.top+b.height/2,w:b.width+14,h:b.height+14,box:true}; } }
+    else if(t instanceof Element){ const b=t.getBoundingClientRect(); r={x:b.left+b.width/2,y:b.top+b.height/2,w:b.width+14,h:b.height+14,box:true}; }
+    if(!r||advancing){ sp.style.display='none'; hd.style.display='none'; return; }
+    const w=r.w||(r.r||26)*2, h=r.h||(r.r||26)*2;
+    sp.className=r.box?'box':''; sp.style.display='block'; sp.style.left=(r.x-w/2)+'px'; sp.style.top=(r.y-h/2)+'px'; sp.style.width=w+'px'; sp.style.height=h+'px';
+    hd.style.display='block'; hd.style.left=(r.x+w/2-14)+'px'; hd.style.top=(r.y+h/2-10)+'px';
   }
-  function go(i, first){
-    if (i<0||i>=stages.length) return;
-    if (!first && i>cur && hooks.canLeave){ const r=hooks.canLeave(cur); if (r!==true && r!==undefined){ toast(r||'أكملِ المهمةَ أولاً'); return; } }
-    stages.forEach((s,k)=>s.classList.toggle('on',k===i));
-    $$('#dots li').forEach((d,k)=>{ d.classList.toggle('on',k===i); d.classList.toggle('done',k<i); });
-    cur=i; $('#where').textContent=ar(i+1)+' / '+ar(stages.length)+' · '+names[i];
-    $('#prevBtn').disabled=i===0; $('#nextBtn').style.visibility=i===stages.length-1?'hidden':'visible';
-    if(!first) window.scrollTo({top:0,behavior:reduced?'auto':'smooth'});
-    hooks.onEnter && hooks.onEnter(i);
-  }
+
   let toastT;
   function toast(msg){
-    let t=$('#kitToast'); if(!t){ t=el('div',{id:'kitToast',role:'alert'}); Object.assign(t.style,{position:'fixed',bottom:'86px',left:'50%',
-      transform:'translateX(-50%)',background:'#200058',color:'#fff',padding:'12px 20px',borderRadius:'999px',fontWeight:'800',
-      zIndex:1000,boxShadow:'0 10px 30px rgba(0,0,0,.25)',maxWidth:'90vw',textAlign:'center'}); document.body.appendChild(t); }
-    t.textContent=msg; t.style.display='block'; clearTimeout(toastT); toastT=setTimeout(()=>t.style.display='none',2600);
+    let t=$('#kitToast'); if(!t){ t=document.createElement('div'); t.id='kitToast'; t.setAttribute('role','alert');
+      Object.assign(t.style,{position:'fixed',top:'14px',left:'50%',transform:'translateX(-50%)',background:'#200058',color:'#fff',padding:'12px 20px',borderRadius:'999px',fontWeight:'800',zIndex:1000,boxShadow:'0 10px 30px rgba(0,0,0,.25)',maxWidth:'90vw',textAlign:'center'}); document.body.appendChild(t); }
+    t.textContent=msg; t.style.display='block'; clearTimeout(toastT); toastT=setTimeout(()=>t.style.display='none',2400);
   }
 
-  /* ---- drag & drop with tap-to-place + keyboard.
-     Kit.dnd({ chips:[chipEls], zones:[zoneEls], accept:(chip,zone)=>bool|string, onDrop:(chip,zone,ok)=>{} , lockCorrect:true })
-     chips need data-id. zone gets the chip appended when accepted (or always, if place:'always'). ---- */
+  /* ---------------- drag & drop (drag, tap-then-tap, keyboard) ---------------- */
   function dnd(cfg){
-    let sel=null;
-    const zones=cfg.zones;
-    const clear=()=>{ if(sel){sel.classList.remove('sel'); sel.setAttribute('aria-pressed','false');} sel=null; };
-    function drop(chip, zone){
-      const ok = cfg.accept ? cfg.accept(chip, zone) : true;
-      if (ok===true || cfg.place==='always'){ zone.appendChild(chip); }
-      if (ok===true){ chip.classList.remove('bad'); if(cfg.lockCorrect!==false){ chip.classList.add('ok'); chip.dataset.locked='1'; chip.setAttribute('tabindex','-1'); chip.setAttribute('aria-disabled','true'); } }
+    let sel=null; const zones=cfg.zones;
+    const clear=()=>{ if(sel){ sel.classList.remove('sel'); sel.setAttribute('aria-pressed','false'); } sel=null; };
+    function drop(chip,zone){
+      const ok=cfg.accept?cfg.accept(chip,zone):true;
+      if(ok===true){ zone.appendChild(chip); chip.classList.remove('bad'); chip.classList.add('ok'); chip.dataset.locked='1'; chip.setAttribute('tabindex','-1'); }
       else { chip.classList.remove('bad'); void chip.offsetWidth; chip.classList.add('bad'); }
-      cfg.onDrop && cfg.onDrop(chip, zone, ok===true, ok);
+      cfg.onDrop&&cfg.onDrop(chip,zone,ok===true); ping();
     }
-    zones.forEach(z=>{
-      z.setAttribute('tabindex', z.getAttribute('tabindex')||'0'); z.setAttribute('role','button');
-      const act=()=>{ if(sel){ const c=sel; clear(); drop(c,z);} };
-      z.addEventListener('click', e=>{ if(e.target.closest('.chip') && !sel) return; act(); });
-      z.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); act(); } });
-    });
+    zones.forEach(z=>{ z.tabIndex=0; z.setAttribute('role','button');
+      const act=()=>{ if(sel){ const c=sel; clear(); drop(c,z); } };
+      z.addEventListener('click',e=>{ if(e.target.closest('.chip')&&!sel) return; act(); });
+      z.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); act(); } }); });
     cfg.chips.forEach(chip=>{
-      chip.setAttribute('tabindex','0'); chip.setAttribute('role','button'); chip.setAttribute('aria-pressed','false');
-      chip.addEventListener('keydown', e=>{ if(chip.dataset.locked) return; if(e.key==='Enter'||e.key===' '){ e.preventDefault(); const was=sel===chip; clear(); if(!was){sel=chip;chip.classList.add('sel');chip.setAttribute('aria-pressed','true');} } });
-      let start=null, ghost=null, moved=false, overZ=null;
-      chip.addEventListener('pointerdown', e=>{
-        if (chip.dataset.locked || e.button>0) return;
-        start={x:e.clientX,y:e.clientY}; moved=false; chip.setPointerCapture(e.pointerId);
-      });
-      chip.addEventListener('pointermove', e=>{
-        if(!start) return;
-        if(!moved && Math.hypot(e.clientX-start.x,e.clientY-start.y)>7){
-          moved=true; clear(); ghost=chip.cloneNode(true); ghost.classList.add('ghost'); ghost.classList.remove('sel','bad');
-          document.body.appendChild(ghost); chip.classList.add('dragging');
-        }
-        if(moved){
-          ghost.style.left=(e.clientX-ghost.offsetWidth/2)+'px'; ghost.style.top=(e.clientY-ghost.offsetHeight/2)+'px';
-          const under=document.elementFromPoint(e.clientX,e.clientY); const z=under&&under.closest('.zone');
-          const zz = z && zones.includes(z) ? z : null;
-          if(zz!==overZ){ overZ&&overZ.classList.remove('hot'); overZ=zz; overZ&&overZ.classList.add('hot'); }
-        }
-      });
-      const end=e=>{
-        if(!start) return; start=null;
-        if(moved){ ghost.remove(); ghost=null; chip.classList.remove('dragging'); if(overZ){ overZ.classList.remove('hot'); drop(chip,overZ); overZ=null; } }
-        else if(e.type==='pointerup'){ const was=sel===chip; clear(); if(!was){ sel=chip; chip.classList.add('sel'); chip.setAttribute('aria-pressed','true'); } }
-      };
-      chip.addEventListener('pointerup', end); chip.addEventListener('pointercancel', end);
+      chip.tabIndex=0; chip.setAttribute('role','button'); chip.setAttribute('aria-pressed','false');
+      const pick=()=>{ const was=sel===chip; clear(); if(!was){ sel=chip; chip.classList.add('sel'); chip.setAttribute('aria-pressed','true'); } };
+      chip.addEventListener('keydown',e=>{ if(chip.dataset.locked) return; if(e.key==='Enter'||e.key===' '){ e.preventDefault(); pick(); } });
+      let st=null, ghost=null, moved=false, over=null;
+      chip.addEventListener('pointerdown',e=>{ if(chip.dataset.locked||e.button>0) return; st={x:e.clientX,y:e.clientY}; moved=false; chip.setPointerCapture(e.pointerId); });
+      chip.addEventListener('pointermove',e=>{ if(!st) return;
+        if(!moved&&Math.hypot(e.clientX-st.x,e.clientY-st.y)>7){ moved=true; clear(); ghost=chip.cloneNode(true); ghost.classList.add('ghost'); document.body.appendChild(ghost); chip.classList.add('dragging'); }
+        if(moved){ ghost.style.left=(e.clientX-ghost.offsetWidth/2)+'px'; ghost.style.top=(e.clientY-ghost.offsetHeight/2)+'px';
+          const u=document.elementFromPoint(e.clientX,e.clientY), z=u&&u.closest('.zone'), zz=z&&zones.includes(z)?z:null;
+          if(zz!==over){ over&&over.classList.remove('hot'); over=zz; over&&over.classList.add('hot'); } } });
+      const end=e=>{ if(!st) return; st=null;
+        if(moved){ ghost.remove(); chip.classList.remove('dragging'); if(over){ over.classList.remove('hot'); drop(chip,over); over=null; } }
+        else if(e.type==='pointerup') pick(); };
+      chip.addEventListener('pointerup',end); chip.addEventListener('pointercancel',end);
     });
-    return { clear, reset(home){ cfg.chips.forEach(c=>{ c.classList.remove('ok','bad','sel'); delete c.dataset.locked; c.setAttribute('tabindex','0'); c.removeAttribute('aria-disabled'); home.appendChild(c); }); } };
+    return {clear};
   }
 
-  /* ---- 3D orbit view: Kit.orbit(container, draw(ctx, cam, w, h, t), {yaw,pitch,zoom,auto}) ----
-     cam.project(x,y,z) -> {x,y,s,z}  (s = perspective scale, z = depth: larger = closer to viewer) */
-  function orbit(box, draw, o={}){
-    const cv=document.createElement('canvas'); box.prepend(cv);
-    const ctx=cv.getContext('2d');
-    const cam={yaw:o.yaw??0.6, pitch:o.pitch??0.35, zoom:o.zoom??1, dist:o.dist??900, auto:o.auto??true, vy:0, vp:0};
-    let W=0,H=0,dpr=1, drag=null, last=performance.now(), userTouched=false;
-    function size(){ const r=box.getBoundingClientRect(); dpr=Math.min(2,devicePixelRatio||1); W=r.width; H=r.height; cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
+  /* ---------------- tiny 3D engine (canvas 2D, painter's algorithm, lambert light) ---------------- */
+  const sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]], cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+  const norm=a=>{ const l=Math.hypot(a[0],a[1],a[2])||1; return [a[0]/l,a[1]/l,a[2]/l]; }, dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+  function hexRgb(h){ if(h[0]!=='#') { const m=h.match(/\d+/g); return m?m.slice(0,3).map(Number):[128,128,128]; } const n=parseInt(h.length===4?h.slice(1).split('').map(c=>c+c).join(''):h.slice(1),16); return [n>>16,n>>8&255,n&255]; }
+  const rgb=(c,k,a)=>'rgba('+Math.min(255,c[0]*k|0)+','+Math.min(255,c[1]*k|0)+','+Math.min(255,c[2]*k|0)+','+(a==null?1:a)+')';
+  function rotXYZ(p,r){ if(!r) return p; let [x,y,z]=p;
+    if(r[0]){ const c=Math.cos(r[0]),s=Math.sin(r[0]); [y,z]=[y*c-z*s,y*s+z*c]; }
+    if(r[1]){ const c=Math.cos(r[1]),s=Math.sin(r[1]); [x,z]=[x*c+z*s,-x*s+z*c]; }
+    if(r[2]){ const c=Math.cos(r[2]),s=Math.sin(r[2]); [x,y]=[x*c-y*s,x*s+y*c]; } return [x,y,z]; }
+  function xf(p,t){ if(!t) return p; let q=p; const s=t.scale; if(s!=null) q=Array.isArray(s)?[q[0]*s[0],q[1]*s[1],q[2]*s[2]]:[q[0]*s,q[1]*s,q[2]*s];
+    q=rotXYZ(q,t.rot); if(t.pos) q=[q[0]+t.pos[0],q[1]+t.pos[1],q[2]+t.pos[2]]; return q; }
+
+  function view3d(box,o={}){
+    const cv=document.createElement('canvas'); box.prepend(cv); const ctx=cv.getContext('2d');
+    if(!box.querySelector('.rot')){ const h=document.createElement('div'); h.className='rot'; h.textContent='↻ اسحبْ لتدويرِ النموذجِ'; box.appendChild(h); }
+    const cam={yaw:o.yaw??0.5,pitch:o.pitch??0.3,zoom:o.zoom??1,dist:o.dist??1100,vy:0,vp:0,auto:!!o.auto};
+    let W=0,H=0,dpr=1,drag=null,picks=[],dirty=true;
+    const L=norm([-0.45,0.65,0.62]);
+    function size(){ const r=box.getBoundingClientRect(); dpr=Math.min(2,devicePixelRatio||1); W=r.width; H=r.height; cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); dirty=true; }
     new ResizeObserver(size).observe(box); size();
-    cam.project=(x,y,z)=>{
-      const cy=Math.cos(cam.yaw), sy=Math.sin(cam.yaw), cp=Math.cos(cam.pitch), sp=Math.sin(cam.pitch);
-      let X=x*cy - z*sy, Z=x*sy + z*cy;           // yaw around Y
-      let Y=y*cp - Z*sp; Z=y*sp + Z*cp;            // pitch around X
-      const unit=Math.min(W,H)/520*cam.zoom;
-      const s=cam.dist/(cam.dist - Z);
-      return {x:W/2 + X*s*unit, y:H/2 - Y*s*unit, s:s*unit, z:Z};
+    const toCam=p=>{ const cy=Math.cos(cam.yaw),sy=Math.sin(cam.yaw),cp=Math.cos(cam.pitch),sp=Math.sin(cam.pitch);
+      let X=p[0]*cy-p[2]*sy, Z=p[0]*sy+p[2]*cy; const Y=p[1]*cp-Z*sp; Z=p[1]*sp+Z*cp; return [X,Y,Z]; };
+    const proj=c=>{ const unit=Math.min(W,H)/520*cam.zoom, s=cam.dist/(cam.dist-c[2]); return {x:W/2+c[0]*s*unit,y:H/2-c[1]*s*unit,s:s*unit,z:c[2]}; };
+    const project=p=>proj(toCam(p));
+    let items=[];
+    const R={
+      sphere(p,r,col,op={}){ const q=project(p); items.push({k:'s',z:q.z,q,r:r*q.s,c:hexRgb(col),op}); },
+      cyl(a,b,r,col,op={}){ const A=project(a),B=project(b); items.push({k:'c',z:(A.z+B.z)/2,A,B,r:r*(A.s+B.s)/2,c:hexRgb(col),op}); },
+      line(a,b,col,w=2,op={}){ const A=project(a),B=project(b); items.push({k:'l',z:Math.max(A.z,B.z)+(op.front?1e4:0),pts:[A,B],col,w,op}); },
+      poly(ps,col,w=2,op={}){ const P=ps.map(project); const z=op.front?1e4:P.reduce((m,p)=>m+p.z,0)/P.length; items.push({k:'l',z,pts:P,col,w,op}); },
+      text(p,txt,op={}){ const q=project(p); items.push({k:'t',z:op.behind?q.z:1e5,q,txt,op}); },
+      shadow(p,rx,rz){ const pts=[]; for(let i=0;i<20;i++){ const a=i/20*Math.PI*2; pts.push(project([p[0]+Math.cos(a)*rx,p[1],p[2]+Math.sin(a)*rz])); } items.push({k:'sh',z:-1e5,pts}); },
+      mesh(m,t,op={}){ const V=m.v.map(v=>toCam(xf(v,t))), P=V.map(proj), c0=op.color||'#cccccc', fn=typeof c0==='function'?c0:null, base=fn?null:hexRgb(c0);
+        for(let i=0;i<m.f.length;i++){ const f=m.f[i], a=V[f[0]],b=V[f[1]],c=V[f[2]]; let n=norm(cross(sub(b,a),sub(c,a)));
+          if(n[2]<0){ if(!op.doubleSided) continue; n=[-n[0],-n[1],-n[2]]; }
+          const lam=0.42+0.68*Math.max(0,dot(n,L)), col=fn?hexRgb(fn(m.v[f[0]],i)):base;
+          items.push({k:'f',z:(a[2]+b[2]+c[2])/3,pts:[P[f[0]],P[f[1]],P[f[2]]],fill:rgb(col,lam,op.alpha),op}); } }
     };
-    box.addEventListener('pointerdown',e=>{ drag={x:e.clientX,y:e.clientY}; userTouched=true; box.setPointerCapture(e.pointerId); box.style.cursor='grabbing'; });
-    box.addEventListener('pointermove',e=>{ if(!drag) return; const dx=e.clientX-drag.x, dy=e.clientY-drag.y; drag={x:e.clientX,y:e.clientY};
-      cam.vy=-dx*0.008; cam.vp=dy*0.006; cam.yaw+=cam.vy; cam.pitch=Math.max(-1.3,Math.min(1.3,cam.pitch+cam.vp)); });
-    const up=()=>{ drag=null; box.style.cursor='grab'; };
-    box.addEventListener('pointerup',up); box.addEventListener('pointercancel',up);
-    box.addEventListener('wheel',e=>{ e.preventDefault(); cam.zoom=Math.max(.6,Math.min(2.2,cam.zoom*(e.deltaY<0?1.08:.92))); },{passive:false});
-    box.tabIndex=0; box.setAttribute('role','img');
-    box.addEventListener('keydown',e=>{ const k=e.key; if(k==='ArrowLeft'){cam.yaw+=.15;} else if(k==='ArrowRight'){cam.yaw-=.15;}
-      else if(k==='ArrowUp'){cam.pitch=Math.max(-1.3,cam.pitch-.12);} else if(k==='ArrowDown'){cam.pitch=Math.min(1.3,cam.pitch+.12);}
-      else if(k==='+'||k==='='){cam.zoom=Math.min(2.2,cam.zoom*1.1);} else if(k==='-'){cam.zoom=Math.max(.6,cam.zoom*.9);} else return; e.preventDefault(); userTouched=true; });
-    function frame(now){
-      const dt=Math.min(50,now-last); last=now;
-      if(!drag){ cam.vy*=0.93; cam.vp*=0.9; cam.yaw+=cam.vy; cam.pitch=Math.max(-1.3,Math.min(1.3,cam.pitch+cam.vp));
-        if(cam.auto && !reduced && Math.abs(cam.vy)<0.002) cam.yaw+=dt*0.00018*(userTouched?0.4:1); }
-      ctx.clearRect(0,0,W,H); draw(ctx,cam,W,H,reduced?0:now,dt);
-      requestAnimationFrame(frame);
+    function render(t){
+      ctx.clearRect(0,0,W,H); items=[]; picks=[]; o.draw&&o.draw(R,t);
+      items.sort((a,b)=>a.z-b.z);
+      for(const it of items){
+        const op=it.op||{}; ctx.globalAlpha=1;
+        if(it.k==='f'){ ctx.beginPath(); ctx.moveTo(it.pts[0].x,it.pts[0].y); ctx.lineTo(it.pts[1].x,it.pts[1].y); ctx.lineTo(it.pts[2].x,it.pts[2].y); ctx.closePath();
+          ctx.fillStyle=it.fill; ctx.fill(); ctx.strokeStyle=it.fill; ctx.lineWidth=.6; ctx.stroke(); if(op.id!=null) picks.push({id:op.id,tri:it.pts,z:it.z}); }
+        else if(it.k==='s'){ const {q,r,c}=it; if(r<.5) continue; if(op.alpha!=null) ctx.globalAlpha=op.alpha;
+          const g=ctx.createRadialGradient(q.x-r*.35,q.y-r*.4,r*.12,q.x,q.y,r); g.addColorStop(0,rgb(c,1.55)); g.addColorStop(.3,rgb(c,1)); g.addColorStop(1,rgb(c,.5));
+          ctx.beginPath(); ctx.arc(q.x,q.y,r,0,7); ctx.fillStyle=g; ctx.fill();
+          if(op.ring){ ctx.lineWidth=3; ctx.strokeStyle=op.ring; ctx.stroke(); }
+          if(op.label&&r>7){ ctx.fillStyle=op.labelColor||'#fff'; ctx.font='900 '+Math.round(Math.min(r*1.05,30))+'px '+getComputedStyle(document.body).fontFamily; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(op.label,q.x,q.y+r*.06); }
+          if(op.id!=null) picks.push({id:op.id,cx:q.x,cy:q.y,r:Math.max(r,14),z:q.z}); }
+        else if(it.k==='c'){ const {A,B,r,c}=it; if(op.alpha!=null) ctx.globalAlpha=op.alpha; const dx=B.x-A.x,dy=B.y-A.y,l=Math.hypot(dx,dy)||1,nx=-dy/l,ny=dx/l;
+          const g=ctx.createLinearGradient(A.x+nx*r,A.y+ny*r,A.x-nx*r,A.y-ny*r); g.addColorStop(0,rgb(c,.55)); g.addColorStop(.35,rgb(c,1.35)); g.addColorStop(1,rgb(c,.6));
+          ctx.beginPath(); ctx.moveTo(A.x+nx*r,A.y+ny*r); ctx.lineTo(B.x+nx*r,B.y+ny*r); ctx.lineTo(B.x-nx*r,B.y-ny*r); ctx.lineTo(A.x-nx*r,A.y-ny*r); ctx.closePath(); ctx.fillStyle=g; ctx.fill();
+          ctx.beginPath(); ctx.arc(A.x,A.y,r,0,7); ctx.arc(B.x,B.y,r,0,7); ctx.fillStyle=rgb(c,.85); ctx.fill();
+          if(op.id!=null) picks.push({id:op.id,seg:[A,B],r:Math.max(r,12),z:it.z}); }
+        else if(it.k==='l'){ ctx.beginPath(); it.pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)); if(op.closed) ctx.closePath();
+          ctx.setLineDash(op.dash||[]); ctx.lineCap='round'; ctx.lineJoin='round'; if(op.alpha!=null) ctx.globalAlpha=op.alpha;
+          if(op.glow){ ctx.shadowColor=it.col; ctx.shadowBlur=14; } ctx.strokeStyle=it.col; ctx.lineWidth=it.w; ctx.stroke(); ctx.shadowBlur=0; ctx.setLineDash([]); }
+        else if(it.k==='sh'){ ctx.beginPath(); it.pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)); ctx.closePath(); ctx.fillStyle='rgba(0,0,0,.22)'; ctx.filter='blur(6px)'; ctx.fill(); ctx.filter='none'; }
+        else if(it.k==='t'){ const {q,txt}=it, sz=op.size||15; ctx.font='800 '+sz+'px '+getComputedStyle(document.body).fontFamily; ctx.textAlign='center'; ctx.textBaseline='middle';
+          const w=ctx.measureText(txt).width+16, x=q.x+(op.dx||0), y=q.y+(op.dy||0);
+          if(op.bg!==false){ ctx.fillStyle=op.bg||'rgba(255,255,255,.95)'; ctx.beginPath(); ctx.roundRect?ctx.roundRect(x-w/2,y-sz*.8,w,sz*1.6,sz*.8):ctx.rect(x-w/2,y-sz*.8,w,sz*1.6); ctx.fill(); }
+          ctx.fillStyle=op.color||'#200058'; ctx.fillText(txt,x,y+1); }
+      }
+      ctx.globalAlpha=1;
     }
-    requestAnimationFrame(frame);
-    return cam;
-  }
-  /* shaded sphere */
-  function ball(ctx,x,y,r,color,label,labelColor){
-    if(r<=0.5) return;
-    const g=ctx.createRadialGradient(x-r*.35,y-r*.4,r*.15,x,y,r);
-    g.addColorStop(0,'#ffffff'); g.addColorStop(.25,color); g.addColorStop(1,shade(color,-0.45));
-    ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
-    if(label && r>8){ ctx.fillStyle=labelColor||'#fff'; ctx.font='900 '+Math.round(r*1.05)+'px '+getComputedStyle(document.body).fontFamily;
-      ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(label,x,y+r*.05); }
-  }
-  function shade(hex,p){ const n=parseInt(hex.slice(1),16); let r=n>>16,g=n>>8&255,b=n&255;
-    const f=v=>Math.max(0,Math.min(255,Math.round(p<0?v*(1+p):v+(255-v)*p))); return 'rgb('+f(r)+','+f(g)+','+f(b)+')'; }
-
-  /* small celebration */
-  function celebrate(){
-    if(reduced) return;
-    const c=document.createElement('canvas'); c.className='confetti'; document.body.appendChild(c);
-    const x=c.getContext('2d'); c.width=innerWidth; c.height=innerHeight;
-    const cols=['#00c3fe','#12a06a','#ffd15c','#7b5cff','#e8425a'];
-    const P=Array.from({length:90},()=>({x:innerWidth/2+(Math.random()-.5)*200,y:innerHeight*.35,vx:(Math.random()-.5)*9,vy:-Math.random()*9-3,
-      s:5+Math.random()*6,c:cols[Math.random()*5|0],r:Math.random()*6}));
-    let t=0; (function f(){ t++; x.clearRect(0,0,c.width,c.height);
-      P.forEach(p=>{ p.vy+=.28; p.x+=p.vx; p.y+=p.vy; p.r+=.15; x.save(); x.translate(p.x,p.y); x.rotate(p.r); x.fillStyle=p.c; x.fillRect(-p.s/2,-p.s/4,p.s,p.s/2); x.restore(); });
-      if(t<110) requestAnimationFrame(f); else c.remove(); })();
+    function hit(x,y){ let best=null;
+      for(const p of picks){ let ok=false;
+        if(p.tri){ const [a,b,c]=p.tri, d=(b.y-c.y)*(a.x-c.x)+(c.x-b.x)*(a.y-c.y); const l1=((b.y-c.y)*(x-c.x)+(c.x-b.x)*(y-c.y))/d, l2=((c.y-a.y)*(x-c.x)+(a.x-c.x)*(y-c.y))/d; ok=l1>=0&&l2>=0&&l1+l2<=1; }
+        else if(p.seg){ const [A,B]=p.seg, dx=B.x-A.x, dy=B.y-A.y, l2=dx*dx+dy*dy||1, t=Math.max(0,Math.min(1,((x-A.x)*dx+(y-A.y)*dy)/l2)); ok=Math.hypot(x-(A.x+t*dx),y-(A.y+t*dy))<=p.r; }
+        else ok=Math.hypot(x-p.cx,y-p.cy)<=p.r;
+        if(ok&&(!best||p.z>best.z)) best=p; }
+      return best; }
+    let down=null;
+    box.addEventListener('pointerdown',e=>{ down={x:e.clientX,y:e.clientY,moved:false}; drag={x:e.clientX,y:e.clientY}; box.setPointerCapture(e.pointerId); });
+    box.addEventListener('pointermove',e=>{ if(!drag) return; const dx=e.clientX-drag.x, dy=e.clientY-drag.y; drag={x:e.clientX,y:e.clientY};
+      if(down&&Math.hypot(e.clientX-down.x,e.clientY-down.y)>6) down.moved=true;
+      if(down&&down.moved&&o.rotate!==false){ cam.vy=-dx*.009; cam.vp=dy*.007; cam.yaw+=cam.vy; cam.pitch=Math.max(-1.35,Math.min(1.35,cam.pitch+cam.vp)); box.style.cursor='grabbing'; } });
+    const up=e=>{ if(down&&!down.moved&&o.onPick){ const b=cv.getBoundingClientRect(), h=hit(e.clientX-b.left,e.clientY-b.top); o.onPick(h?h.id:null,h); ping(); }
+      drag=null; down=null; box.style.cursor='grab'; };
+    box.addEventListener('pointerup',up); box.addEventListener('pointercancel',()=>{drag=null;down=null;});
+    box.addEventListener('wheel',e=>{ e.preventDefault(); cam.zoom=Math.max(.6,Math.min(2.4,cam.zoom*(e.deltaY<0?1.08:.92))); },{passive:false});
+    box.tabIndex=0; box.setAttribute('role','img'); box.setAttribute('aria-label',o.label||'نموذجٌ ثلاثيُّ الأبعادِ: استعملِ الأسهمَ للتدويرِ');
+    box.addEventListener('keydown',e=>{ const k=e.key; if(k==='ArrowLeft')cam.yaw+=.15; else if(k==='ArrowRight')cam.yaw-=.15; else if(k==='ArrowUp')cam.pitch=Math.max(-1.35,cam.pitch-.12); else if(k==='ArrowDown')cam.pitch=Math.min(1.35,cam.pitch+.12); else return; e.preventDefault(); });
+    let last=performance.now();
+    (function frame(now){ const dt=Math.min(50,now-last); last=now;
+      if(!drag){ cam.vy*=.92; cam.vp*=.88; cam.yaw+=cam.vy; cam.pitch=Math.max(-1.35,Math.min(1.35,cam.pitch+cam.vp)); if(cam.auto&&!reduced&&Math.abs(cam.vy)<.002) cam.yaw+=dt*.00015; }
+      if(box.offsetParent!==null) render(reduced?0:now); requestAnimationFrame(frame); })(last);
+    return { cam, project, screen(p){ const q=project(p), b=cv.getBoundingClientRect(); return {x:b.left+q.x,y:b.top+q.y,s:q.s}; }, hit, canvas:cv };
   }
 
-  return {$, $$, ar, el, shuffle, say, hush, setupStages, go, toast, dnd, orbit, ball, shade, celebrate, reduced, get cur(){return cur;}};
+  /* mesh builders */
+  const mesh={
+    surface(fn,us,vs,op={}){ const v=[],f=[]; for(let j=0;j<=vs;j++) for(let i=0;i<=us;i++) v.push(fn(i/us,j/vs));
+      const W=us+1; for(let j=0;j<vs;j++) for(let i=0;i<us;i++){ const a=j*W+i,b=a+1,c=a+W,d=c+1; f.push([a,c,b],[b,c,d]); } return {v,f}; },
+    ellipsoid(o={}){ const rx=o.rx||100, ry=o.ry||rx, rz=o.rz||rx, bump=o.bump||(()=>1);
+      return mesh.surface((u,v)=>{ const th=u*Math.PI*2, ph=v*Math.PI, k=bump(u,v); return [Math.cos(th)*Math.sin(ph)*rx*k, Math.cos(ph)*ry*k, -Math.sin(th)*Math.sin(ph)*rz*k]; }, o.seg||28, o.ring||18); },
+    lathe(prof,seg=24){ return mesh.surface((u,v)=>{ const i=v*(prof.length-1), a=prof[Math.floor(i)], b=prof[Math.min(prof.length-1,Math.floor(i)+1)], t=i-Math.floor(i), r=a[0]+(b[0]-a[0])*t, y=a[1]+(b[1]-a[1])*t, th=u*Math.PI*2; return [Math.cos(th)*r,y,-Math.sin(th)*r]; }, seg, (prof.length-1)*2); },
+    box(w,h,d){ const x=w/2,y=h/2,z=d/2, v=[[-x,-y,-z],[x,-y,-z],[x,y,-z],[-x,y,-z],[-x,-y,z],[x,-y,z],[x,y,z],[-x,y,z]];
+      return {v,f:[[0,2,1],[0,3,2],[4,5,6],[4,6,7],[0,1,5],[0,5,4],[3,6,2],[3,7,6],[1,2,6],[1,6,5],[0,4,7],[0,7,3]]}; }
+  };
+
+  function celebrate(){ if(reduced) return; const c=document.createElement('canvas'); c.className='confetti'; document.body.appendChild(c); const x=c.getContext('2d'); c.width=innerWidth; c.height=innerHeight;
+    const cols=['#00c3fe','#12a06a','#ffd15c','#7b5cff','#e8425a'], P=Array.from({length:70},()=>({x:innerWidth/2+(Math.random()-.5)*160,y:innerHeight*.3,vx:(Math.random()-.5)*8,vy:-Math.random()*8-3,s:5+Math.random()*5,c:cols[Math.random()*5|0],r:Math.random()*6}));
+    let t=0; (function f(){ t++; x.clearRect(0,0,c.width,c.height); P.forEach(p=>{ p.vy+=.28; p.x+=p.vx; p.y+=p.vy; p.r+=.15; x.save(); x.translate(p.x,p.y); x.rotate(p.r); x.fillStyle=p.c; x.fillRect(-p.s/2,-p.s/4,p.s,p.s/2); x.restore(); }); if(t<100) requestAnimationFrame(f); else c.remove(); })(); }
+
+  return {$,$$,ar,shuffle,scene,start,ping,next,say,tries,toast,dnd,view3d,mesh,celebrate,reduced,goScene,get scene_(){return cur;},get step_(){return step;}};
 })();
 </script>
 <script>
-/* ================= ACTIVITY JS ================= */
-(() => {
-const {$, $$, ar, say, hush, toast} = Kit;
-const cl = v => Math.max(0, Math.min(1, v));
-function rng(seed){ return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
-  t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
-const f1 = n => Math.round(n * 10) / 10;
-const tlen = t => t.replace(/[\u064B-\u0652]/g,'').length;
+/* ===== ACTIVITY JS ===== */
+/* ---------- shared potato geometry ---------- */
+const L=170, RY=88, RZ=105, ar=Kit.ar;
+const bump=(ph,th)=>1+0.045*Math.sin(3*th+2*ph)+0.035*Math.cos(5*ph+th);
+function P(ph,th){ const k=bump(ph,th), s=Math.sin(ph); return [-L*Math.cos(ph), RY*s*k*Math.cos(th), RZ*s*k*Math.sin(th)]; }
+function nrm(p){ const n=[p[0]/(L*L),p[1]/(RY*RY),p[2]/(RZ*RZ)], l=Math.hypot(...n)||1; return n.map(v=>v/l); }
+const add=(a,b,k=1)=>[a[0]+b[0]*k,a[1]+b[1]*k,a[2]+b[2]*k];
+const phiOf=x=>Math.acos(Math.max(-1,Math.min(1,-x/L)));
+// a piece of the tuber between angles a..b; c0/c1 = flat cut faces at the ends
+function pieceMesh(a,b,c0,c1){
+  const us=20, n=Math.max(3,Math.round((b-a)/Math.PI*14)), rows=[], v=[], f=[];
+  if(c0) rows.push({ph:a,c:true}); for(let i=0;i<=n;i++) rows.push({ph:a+(b-a)*i/n}); if(c1) rows.push({ph:b,c:true});
+  rows.forEach(r=>{ for(let i=0;i<=us;i++){ const th=i/us*Math.PI*2; v.push(r.c?[-L*Math.cos(r.ph),0,0]:P(r.ph,th)); } });
+  const W=us+1; for(let j=0;j<rows.length-1;j++) for(let i=0;i<us;i++){ const p=j*W+i,q=p+1,c=p+W,d=c+1; f.push([p,q,c],[q,d,c]); }
+  return {v,f,us,rows:rows.length,c0,c1};
+}
+function pieceColor(m,capCol){ const per=2*m.us, last=m.rows-2;
+  return (vx,i)=>{ const row=Math.floor(i/per); return (m.c0&&row===0)||(m.c1&&row===last)?capCol:((i>>1)%7===0?'#b9844b':'#c8955a'); }; }
+// eye groups: phi along the tuber, theta around it (some on the back)
+const EYES=[[0.45,0.7],[0.95,2.5],[1.35,4.4],[1.8,1.3],[2.25,3.7],[2.7,5.5]].map(([ph,th])=>{ const p=P(ph,th), n=nrm(p);
+  const t1=nrm(add(P(ph+.01,th),p,-1).map(x=>x*1000)), dots=[[0,0],[.07,.22],[-.05,.25]].map(([dp,dt])=>{ const q=P(ph+dp,th+dt); return add(q,nrm(q),3); });
+  return {ph,th,p,n,x:p[0],dots}; });
+function drawEyes(R,dx,o={}){ EYES.forEach((e,i)=>{ e.dots.forEach(d=>R.sphere(add(d,[dx(e.x),0,0]),5.5,'#4a2c12',{ring:o.ring&&o.ring(i)})); }); }
+const wholeMesh=pieceMesh(0,Math.PI,false,false), wholeCol=pieceColor(wholeMesh,'#c8955a');
+let lastDown={x:0,y:0};
+function frontFacing(V,p,n){ return V.project(add(p,n,20)).z>V.project(p).z; }
 
-/* ---------- geometry ---------- */
-function hull(P){
-  const p = P.slice().sort((a,b)=>a.x-b.x||a.y-b.y);
-  const cr = (o,a,b)=>(a.x-o.x)*(b.y-o.y)-(a.y-o.y)*(b.x-o.x);
-  const lo=[], up=[];
-  for (const q of p){ while(lo.length>=2 && cr(lo[lo.length-2],lo[lo.length-1],q)<=0) lo.pop(); lo.push(q); }
-  for (let i=p.length-1;i>=0;i--){ const q=p[i]; while(up.length>=2 && cr(up[up.length-2],up[up.length-1],q)<=0) up.pop(); up.push(q); }
-  up.pop(); lo.pop(); return lo.concat(up);
-}
-function makePotato(cx, cy, rx, ry, rot, n, seed){
-  const pts=[], c=Math.cos(rot), s=Math.sin(rot);
-  for (let i=0;i<n;i++){
-    const t=2*Math.PI*i/n, r=1+0.035*Math.sin(2*t+seed)+0.02*Math.cos(3*t+seed*2);
-    const x=rx*Math.cos(t)*r, y=ry*Math.sin(t)*r;
-    pts.push({x:cx+x*c-y*s, y:cy+x*s+y*c});
-  }
-  return hull(pts).map(p=>({x:f1(p.x), y:f1(p.y), cut:false}));
-}
-const area = p => { let a=0; for (let i=0;i<p.length;i++){ const q=p[i], r=p[(i+1)%p.length]; a+=q.x*r.y-r.x*q.y; } return a/2; };
-function centroid(p){ let a=0,cx=0,cy=0; for (let i=0;i<p.length;i++){ const q=p[i], r=p[(i+1)%p.length], f=q.x*r.y-r.x*q.y; a+=f; cx+=(q.x+r.x)*f; cy+=(q.y+r.y)*f; }
-  a/=2; return {x:cx/(6*a), y:cy/(6*a)}; }
-function inside(pt, p){ let c=false; for (let i=0,j=p.length-1;i<p.length;j=i++){ const a=p[i], b=p[j];
-  if (((a.y>pt.y)!==(b.y>pt.y)) && pt.x < (b.x-a.x)*(pt.y-a.y)/(b.y-a.y)+a.x) c=!c; } return c; }
-function bbox(p){ let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9; p.forEach(q=>{x0=Math.min(x0,q.x);y0=Math.min(y0,q.y);x1=Math.max(x1,q.x);y1=Math.max(y1,q.y);}); return {x0,y0,x1,y1,w:x1-x0,h:y1-y0}; }
-function segX(a,b,c,d){
-  const rx=b.x-a.x, ry=b.y-a.y, sx=d.x-c.x, sy=d.y-c.y, den=rx*sy-ry*sx;
-  if (Math.abs(den)<1e-9) return null;
-  const t=((c.x-a.x)*sy-(c.y-a.y)*sx)/den, u=((c.x-a.x)*ry-(c.y-a.y)*rx)/den;
-  return (t>=0&&t<=1&&u>=0&&u<=1) ? {x:a.x+t*rx, y:a.y+t*ry} : null;
-}
-function crossCount(poly,a,b){
-  const hits=[];
-  for (let i=0;i<poly.length;i++){ const q=segX(a,b,poly[i],poly[(i+1)%poly.length]);
-    if (q && !hits.some(z=>Math.hypot(z.x-q.x,z.y-q.y)<0.5)) hits.push(q); }
-  return hits.length;
-}
-/* clip a convex polygon to one side of line a-b. Each vertex carries `cut` = flag of the edge leaving it. */
-function clipHalf(poly,a,b,sign){
-  const side=p=>{ const v=sign*((b.x-a.x)*(p.y-a.y)-(b.y-a.y)*(p.x-a.x)); return Math.abs(v)<1e-7?0:v; };
-  const out=[];
-  for (let i=0;i<poly.length;i++){
-    const P=poly[i], Q=poly[(i+1)%poly.length], sP=side(P), sQ=side(Q);
-    const I=()=>{ const t=sP/(sP-sQ); return {x:P.x+t*(Q.x-P.x), y:P.y+t*(Q.y-P.y)}; };
-    if (sP>=0){
-      if (sQ>=0) out.push({x:P.x,y:P.y,cut:P.cut});
-      else if (sP>0){ out.push({x:P.x,y:P.y,cut:P.cut}); const q=I(); out.push({x:q.x,y:q.y,cut:true}); }
-      else out.push({x:P.x,y:P.y,cut:true});
-    } else if (sQ>0){ const q=I(); out.push({x:q.x,y:q.y,cut:P.cut}); }
-  }
-  const res=[];
-  out.forEach(v=>{ const l=res[res.length-1]; if (l && Math.hypot(l.x-v.x,l.y-v.y)<0.05) res[res.length-1]=v; else res.push(v); });
-  while (res.length>1 && Math.hypot(res[0].x-res[res.length-1].x,res[0].y-res[res.length-1].y)<0.05) res.pop();
-  return res;
-}
-
-/* ---------- the potatoes ---------- */
-const BIG = makePotato(300,200,232,138,-0.06,44,0.8);
-const GROUPS = [
-  {x:132,y:178,d:[[-9,-6,5],[7,-2,4.5],[-1,9,4]]},
-  {x:212,y:112,d:[[-8,2,5],[8,-3,4.5]]},
-  {x:332,y:96, d:[[-10,0,4.5],[4,-5,5],[6,8,4]]},
-  {x:452,y:128,d:[[-6,-6,5],[8,4,4.5]]},
-  {x:494,y:232,d:[[-7,-7,4.5],[6,0,5],[-4,10,4]]},
-  {x:382,y:270,d:[[-9,0,5],[8,-4,4.5]]},
-  {x:236,y:268,d:[[-8,-5,4.5],[7,3,5],[-6,10,4]]}
-];
-const SMALL = makePotato(300,200,108,70,0.08,32,2.1);
-const SMALL_G = [
-  {x:240,y:185,d:[[-6,-3,4],[6,3,4]]},
-  {x:330,y:160,d:[[-6,0,4],[5,-5,3.6],[4,6,3.6]]},
-  {x:350,y:236,d:[[-5,-4,4],[6,3,4]]}
-];
-const SPECK = (()=>{ const R=rng(7), a=[]; for (let i=0;i<70;i++){ const p={x:70+R()*460,y:60+R()*280,r:1.2+R()*2.2}; if (inside(p,BIG)) a.push(p);} return a; })();
-const SPECK_S = (()=>{ const R=rng(9), a=[]; for (let i=0;i<30;i++){ const p={x:190+R()*220,y:130+R()*140,r:1+R()*1.6}; if (inside(p,SMALL)) a.push(p);} return a; })();
-
-const pts = p => p.map(q=>f1(q.x)+','+f1(q.y)).join(' ');
-function eyeSVG(g){
-  return g.d.map(([dx,dy,r])=>{ r*=1.3; const x=g.x+dx*1.3, y=g.y+dy*1.3;
-    return `<ellipse cx="${x}" cy="${y}" rx="${r*1.35}" ry="${r}" fill="#6b4318"/><ellipse cx="${x+r*.2}" cy="${y+r*.2}" rx="${r*.7}" ry="${r*.45}" fill="#4a2c0c"/>`+
-      `<path d="M${x-r*1.3} ${y-r*.4} q${r*1.3} ${-r*1.3} ${r*2.6} 0" stroke="#f6dca8" stroke-width="1.3" fill="none" opacity=".9"/>`; }).join('');
-}
-const countEyes = pc => pc.groups.filter(g=>inside(g,pc.pts)).length;
-
-/* draw one piece. o: {id, tf, s, dry(0..1), rot(0..1), badge} */
-function pieceSVG(pc, o){
-  const s=o.s||1, P=pc.pts, id=o.id;
-  let h=`<g transform="${o.tf||''}"><clipPath id="${id}"><polygon points="${pts(P)}"/></clipPath>`;
-  h+=`<polygon points="${pts(P)}" fill="url(#gSkin)"/>`;
-  h+=`<g clip-path="url(#${id})">`;
-  (pc.small?SPECK_S:SPECK).forEach(q=>{ h+=`<circle cx="${f1(q.x)}" cy="${f1(q.y)}" r="${f1(q.r)}" fill="#a8742f" opacity=".45"/>`; });
-  pc.groups.forEach(g=>{ if (inside(g,P)) h+=eyeSVG(g); });
-  // cut surfaces
-  const edges=[]; P.forEach((v,i)=>{ if (v.cut) edges.push([v,P[(i+1)%P.length]]); });
-  edges.forEach(([a,b])=>{
-    h+=`<line x1="${f1(a.x)}" y1="${f1(a.y)}" x2="${f1(b.x)}" y2="${f1(b.y)}" stroke="#fff3c9" stroke-width="${f1(26/s)}"/>`;
-    if (o.dry>0) h+=`<line x1="${f1(a.x)}" y1="${f1(a.y)}" x2="${f1(b.x)}" y2="${f1(b.y)}" stroke="url(#corkPat)" stroke-width="${f1(26/s)}" opacity="${f1(o.dry)}"/>`;
-  });
-  if (o.rot>0 && edges.length){
-    h+=`<polygon points="${pts(P)}" fill="#3b3320" opacity="${f1(.35*o.rot)}"/>`;
-    const R=rng(pc.seed||3);
-    for (let k=0;k<14;k++){
-      const [a,b]=edges[k%edges.length], t=R(), off=(R()*16)/s;
-      const c=centroid(P), x=a.x+(b.x-a.x)*t, y=a.y+(b.y-a.y)*t, d=Math.hypot(c.x-x,c.y-y)||1;
-      const px=x+(c.x-x)/d*off, py=y+(c.y-y)/d*off, r=(3+R()*5)/s*cl(o.rot*1.4-k*0.04);
-      if (r>0.1) h+=`<circle cx="${f1(px)}" cy="${f1(py)}" r="${f1(r)}" fill="${k%3?'#56603a':'#2b2616'}" opacity=".9"/><circle cx="${f1(px-r*.3)}" cy="${f1(py-r*.3)}" r="${f1(r*.35)}" fill="#e7eddc" opacity=".8"/>`;
-    }
-  }
-  h+=`</g><polygon points="${pts(P)}" fill="none" stroke="#7a4d1c" stroke-width="${f1(2.2/s)}" stroke-linejoin="round"/>`;
-  if (o.badge){
-    const c=centroid(P), n=countEyes(pc), ok=n>=2;
-    h+=`<g aria-hidden="true"><circle cx="${f1(c.x)}" cy="${f1(c.y)}" r="27" fill="#fff" stroke="${ok?'#12a06a':'#e8425a'}" stroke-width="4"/>`+
-       `<text x="${f1(c.x)}" y="${f1(c.y+8)}" text-anchor="middle" font-size="23" font-weight="900" fill="${ok?'#0b7a50':'#c22b43'}">${ok?'✓':'⚠'}${ar(n)}</text></g>`;
-  }
-  return h+'</g>';
-}
-
-/* ================= STAGE 1: find the eyes ================= */
-const found=new Set(); let eyeMiss=0, rootOK=false, rootWrong=0;
-function drawEyeStage(){
-  const svg=$('#eyeSvg');
-  let h=pieceSVG({pts:BIG,groups:GROUPS},{id:'e-cp'});
-  h=`<rect x="0" y="0" width="600" height="400" fill="transparent" id="eyeBg"/><ellipse cx="305" cy="352" rx="210" ry="18" fill="#000" opacity=".08"/>`+h;
-  GROUPS.forEach((g,i)=>{
-    h+=`<g class="eyehot${found.has(i)?' found':''}" data-i="${i}" role="button" tabindex="0" aria-label="مجموعةُ عيونٍ رقم ${ar(i+1)}${found.has(i)?' — وجدتَها':''}">`+
-       `<circle class="ring" cx="${g.x}" cy="${g.y}" r="42"/>`+
-       (found.has(i)?`<text x="${g.x+22}" y="${g.y-18}" font-size="20" font-weight="900" fill="#12a06a" text-anchor="middle">✓</text>`:'')+`</g>`;
-  });
-  svg.innerHTML=h;
-  $('#eyeCount').textContent='العيونُ: '+ar(found.size)+' / '+ar(GROUPS.length);
-}
-function findEye(i){
-  if (found.has(i)) { say('#fbEye','info','وجدتَ هذه المجموعةَ من قبلُ. ابحثْ عن غيرِها.'); return; }
-  found.add(i); drawEyeStage();
-  const left=GROUPS.length-found.size;
-  if (left>0) say('#fbEye','ok','أحسنتَ! هذه مجموعةٌ من <b>العيونِ</b>: انخفاضاتٌ صغيرةٌ متقاربةٌ. بقيَ '+ar(left)+'.');
-  else {
-    say('#fbEye','ok','رائعٌ! وجدتَ كلَّ مجموعاتِ العيونِ السبعِ. انظرْ إلى العينِ المكبّرةِ: منها يخرجُ ساقٌ وجذرٌ.');
-    $('#m1a').className='done'; $('#m1a .st').textContent='✓'; if(!rootOK) $('#m1b').className='cur';
-    $('#zoomEye').classList.add('show'); $('#eyeHint').hidden=true;
-    $$('#eyeSvg .eyehot').forEach(e=>e.classList.remove('hint'));
-  }
-}
-$('#eyeSvg').addEventListener('click',e=>{
-  const hot=e.target.closest('.eyehot');
-  if (hot) { findEye(+hot.dataset.i); const n=$(`#eyeSvg .eyehot[data-i="${hot.dataset.i}"]`); n&&n.focus(); return; }
-  if (found.size===GROUPS.length) return;
-  eyeMiss++;
-  say('#fbEye','info','هنا سطحٌ أملسُ. ابحثْ عن <b>انخفاضاتٍ صغيرةٍ داكنةٍ</b> متجمّعةً معاً — تلكَ هي العيونُ.');
-  if (eyeMiss>=2) $('#eyeHint').hidden=false;
-});
-$('#eyeSvg').addEventListener('keydown',e=>{ const hot=e.target.closest('.eyehot'); if(hot&&(e.key==='Enter'||e.key===' ')){ e.preventDefault(); const i=hot.dataset.i; findEye(+i); const n=$(`#eyeSvg .eyehot[data-i="${i}"]`); n&&n.focus(); } });
-$('#eyeHint').onclick=()=>{ $$('#eyeSvg .eyehot').forEach(e=>{ if(!found.has(+e.dataset.i)) e.classList.add('hint'); }); say('#fbEye','info','الدوائرُ البرتقاليةُ تُظهرُ أماكنَ العيونِ الباقيةِ. انقرْ عليها.'); };
-
-const rootMsg={
-  root:'حاولْ مرةً أخرى — وجودُ الدرنةِ تحتَ الأرضِ لا يجعلُها جذراً. الكتابُ يقولُ إنَّ الدرنةَ <b>ساقٌ</b> أرضيةٌ متحوّرةٌ لخزنِ الغذاءِ، وعلى سطحِها عيونٌ يخرجُ منها ساقٌ جديدٌ.',
-  leaf:'حاولْ مرةً أخرى — الدرنةُ ليستْ ورقةً؛ إنّها تنمو تحتَ الأرضِ وتخزنُ الغذاءَ. فكّرْ: من العينِ المكبّرةِ يخرجُ ساقٌ وجذرٌ… فما الدرنةُ نفسُها؟',
-  stem:'صحيحٌ! البطاطا <b>ساقٌ أرضيةٌ متحوّرةٌ</b> لخزنِ الغذاءِ، وليستْ جذراً، رغمَ أنّها تنمو تحتَ الأرضِ. العيونُ على سطحِها دليلٌ على ذلك.'
-};
-function answerRoot(a, btn){
-  if (rootOK) return;
-  $$('#qRootCh .choice').forEach(b=>b.classList.remove('bad'));
-  if (a==='stem'){ rootOK=true; btn.classList.add('ok'); say('#fbRoot','ok',rootMsg.stem); $('#rootShow').hidden=true;
-    $('#m1b').className='done'; $('#m1b .st').textContent='✓'; }
-  else { rootWrong++; btn.classList.add('bad'); say('#fbRoot','bad',rootMsg[a]); if (rootWrong>=2) $('#rootShow').hidden=false; }
-}
-$$('#qRootCh .choice').forEach(b=>b.onclick=()=>answerRoot(b.dataset.a,b));
-$('#rootShow').onclick=()=>answerRoot('stem',$('#qRootCh [data-a="stem"]'));
-
-/* ================= STAGE 2: cutting ================= */
-let pieces=[{pts:BIG,groups:GROUPS,seed:1}], hist=[], cuts=0, cutWrong=0, planVer=0, smallWhole=false, smallWrong=0;
-let drag=null;
-function drawCut(line){
-  let h='<ellipse cx="305" cy="352" rx="210" ry="18" fill="#000" opacity=".08"/>';
-  pieces.forEach((pc,i)=>{ h+=pieceSVG(pc,{id:'c-cp'+i,badge:cuts>0}); });
-  if (line) h+=`<line x1="${f1(line.a.x)}" y1="${f1(line.a.y)}" x2="${f1(line.b.x)}" y2="${f1(line.b.y)}" stroke="#e8425a" stroke-width="4" stroke-dasharray="12 8" stroke-linecap="round"/>`+
-    `<text x="${f1(line.b.x)}" y="${f1(line.b.y-12)}" font-size="28" text-anchor="middle">🔪</text>`;
-  $('#cutSvg').innerHTML=h;
-  $('#cutCount').textContent='القطعاتُ: '+ar(cuts)+' / ٤';
-  $('#undoBtn').disabled=!hist.length; $('#resetBtn').disabled=!hist.length;
-  const good=pieces.filter(p=>countEyes(p)>=2).length, bad=pieces.length-good;
-  $('#pcsList').innerHTML = cuts===0 ? '<span class="badge">لم تقطعْ بعدُ — اسحبْ خطّاً عبرَ الدرنةِ</span>' :
-    `<span class="badge">عددُ القطعِ: ${ar(pieces.length)}</span><span class="badge ok">✓ جاهزةٌ: ${ar(good)}</span>`+
-    (bad?`<span class="badge bad">⚠ تحتاجُ مجموعتينِ من العيونِ: ${ar(bad)}</span>`:'');
-}
-function toSvg(e){ const svg=$('#cutSvg'), pt=svg.createSVGPoint(); pt.x=e.clientX; pt.y=e.clientY; const m=svg.getScreenCTM(); if(!m) return {x:0,y:0}; const r=pt.matrixTransform(m.inverse()); return {x:r.x,y:r.y}; }
-function applyCut(a,b){
-  const L=Math.hypot(b.x-a.x,b.y-a.y);
-  if (L<30) return 'short';
-  if (cuts>=4) { say('#fbCut','info','استعملتَ ٤ قطعاتٍ. اضغطْ «تراجعْ» أو «ابدأْ من جديدٍ» إذا أردتَ خطّةً أخرى.'); return 'max'; }
-  const ux=(b.x-a.x)/L, uy=(b.y-a.y)/L, A={x:a.x-ux*10,y:a.y-uy*10}, B={x:b.x+ux*10,y:b.y+uy*10};
-  const next=[]; let n=0;
-  pieces.forEach(pc=>{
-    if (crossCount(pc.pts,A,B)>=2){
-      const l=clipHalf(pc.pts,A,B,1), r=clipHalf(pc.pts,A,B,-1);
-      if (l.length>=3 && r.length>=3 && Math.abs(area(l))>500 && Math.abs(area(r))>500){
-        next.push({pts:l,groups:pc.groups,seed:pc.seed*3+1},{pts:r,groups:pc.groups,seed:pc.seed*3+2}); n++; return; }
-    }
-    next.push(pc);
-  });
-  if (!n){ say('#fbCut','warn','لم تُقطَعْ أيُّ قطعةٍ. اسحبِ الخطَّ <b>من خارجِ القطعةِ إلى خارجِها</b> ليمرَّ عبرَها كلِّها.'); return 'miss'; }
-  hist.push(pieces); pieces=next; cuts++; planVer++;
-  return 'ok';
-}
-function afterCut(){
-  drawCut();
-  const good=pieces.filter(p=>countEyes(p)>=2).length;
-  if (good===pieces.length) say('#fbCut','ok','كلُّ القطعِ فيها مجموعتانِ من العيونِ أو أكثرُ. ✓ جاهزةٌ!');
-  else say('#fbCut','info','بعضُ القطعِ عليها ⚠ : فيها أقلُّ من مجموعتينِ من العيونِ. يمكنُكَ التراجعُ، أو المتابعةُ لترى ماذا يحدثُ لها في الحديقةِ.');
-}
-const cs=$('#cutSvg');
-cs.addEventListener('pointerdown',e=>{ if(e.button>0) return; e.preventDefault(); cs.setPointerCapture(e.pointerId); const p=toSvg(e); drag={a:p,b:p}; });
-cs.addEventListener('pointermove',e=>{ if(!drag) return; drag.b=toSvg(e); drawCut(drag); });
-const endCut=e=>{ if(!drag) return; const d=drag; drag=null; if (e.type==='pointercancel'){ drawCut(); return; }
-  const r=applyCut(d.a,d.b); if (r==='ok') afterCut(); else { drawCut(); if (r==='short') say('#fbCut','info','اسحبْ خطّاً أطولَ عبرَ الدرنةِ كلِّها.'); } };
-cs.addEventListener('pointerup',endCut); cs.addEventListener('pointercancel',endCut);
-$('#undoBtn').onclick=()=>{ if(!hist.length) return; pieces=hist.pop(); cuts--; planVer++; drawCut(); hush('#fbCut'); };
-$('#resetBtn').onclick=()=>{ if(!hist.length) return; pieces=hist[0]; hist=[]; cuts=0; planVer++; drawCut(); hush('#fbCut'); };
-$('#checkBtn').onclick=()=>{
-  if (cuts===0){ say('#fbCut','info','ابدأْ بالتقطيعِ: اسحبْ خطّاً مستقيماً عبرَ الدرنةِ.'); return; }
-  const bad=pieces.filter(p=>countEyes(p)<2).length;
-  if (!bad) say('#fbCut','ok','خطّةٌ ممتازةٌ! كلُّ قطعةٍ فيها مجموعتانِ من العيونِ على الأقلِّ، كما يقولُ الكتابُ.');
-  else { cutWrong++; say('#fbCut','bad',`حاولْ مرةً أخرى — ${ar(bad)} من القطعِ فيها أقلُّ من مجموعتينِ من العيونِ، لأنَّ كلَّ جزءٍ <b>يجبُ أن يحتويَ على مجموعتينِ من العيونِ</b>. جرّبْ قطعاتٍ أقلَّ أو في مكانٍ آخرَ.`);
-    if (cutWrong>=2) $('#cutShow').hidden=false; }
-};
-$('#cutShow').onclick=()=>{
-  pieces=[{pts:BIG,groups:GROUPS,seed:1}]; hist=[]; cuts=0; planVer++;
-  applyCut({x:282,y:20},{x:282,y:385}); applyCut({x:272,y:184},{x:590,y:176});
-  drawCut(); say('#fbCut','ok','هذه خطّةٌ صحيحةٌ: قطعتانِ فقط تعطيانِ ٣ قطعٍ، في كلٍّ منها مجموعتانِ من العيونِ أو أكثرُ. لاحظْ أنَّ الكثيرَ من القطعِ الصغيرةِ يتركُ قطعاً بلا عيونٍ كافيةٍ.');
-};
-// small tuber
-$('#smallSvg').innerHTML=pieceSVG({pts:SMALL,groups:SMALL_G,small:true},{id:'s-cp'});
-$$('#smallCh .choice').forEach(b=>b.onclick=()=>{
-  if (smallWhole) return;
-  $$('#smallCh .choice').forEach(x=>x.classList.remove('bad'));
-  if (b.dataset.a==='whole'){ smallWhole=true; b.classList.add('ok'); planVer++;
-    say('#fbSmall','ok','صحيحٌ! <b>الدرنةُ الصغيرةُ تُزرعُ كاملةً</b>. ستُزرعُ مع قطعِكَ في الحديقةِ.'); }
-  else { smallWrong++; b.classList.add('bad'); say('#fbSmall','bad','حاولْ مرةً أخرى — الكتابُ يقولُ: الدرنةُ الصغيرةُ تُزرعُ كاملةً؛ أمّا التقطيعُ فللدرنةِ الكبيرةِ. لو قطّعناها لكانتْ كلُّ قطعةٍ صغيرةً جدّاً.'); }
-});
-
-/* ================= STAGE 3: wait or plant now ================= */
-let decision=null, decVer=-1, dry=0, dryAnim=null;
-function trayPieces(){
-  const list=pieces.map(p=>p);
-  return list;
-}
-function drawTray(){
-  const svg=$('#traySvg');
-  let h='<rect x="20" y="20" width="560" height="380" rx="30" fill="#dfe7ee" stroke="#9fb2c3" stroke-width="4"/><rect x="38" y="38" width="524" height="344" rx="22" fill="#eef3f7"/>';
-  const k = smallWhole ? 0.78 : 0.86;
-  const ox = smallWhole ? -40 : 0;
-  pieces.forEach((pc,i)=>{
-    const c=centroid(pc.pts), dx=(c.x-300)*0.16, dy=(c.y-200)*0.2;
-    const tf=`translate(${f1(300+ox)} 210) scale(${k}) translate(-300 -200) translate(${f1(dx)} ${f1(dy)})`;
-    h+=pieceSVG(pc,{id:'t-cp'+i,tf,s:k,dry});
-  });
-  if (smallWhole) h+=pieceSVG({pts:SMALL,groups:SMALL_G,small:true},{id:'t-cps',tf:'translate(500 330) scale(.42) translate(-300 -200)',s:.42});
-  svg.innerHTML=h;
-}
-function chooseDec(a){
-  cancelAnimationFrame(dryAnim);
-  decision=a; decVer=planVer;
-  $$('#decide .choice').forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.a===a)));
-  if (a==='now'){ dry=0; drawTray(); $('#timebar').hidden=true;
-    say('#fbDec','info','قرارُكَ: <b>الزراعةُ فوراً</b>. سطوحُ القطعِ ما زالتْ طريّةً ومكشوفةً. انتقلْ إلى الحديقةِ لترى النتيجةَ!'); return; }
-  $('#timebar').hidden=false; hush('#fbDec');
-  const T=Kit.reduced?1:2600, t0=performance.now();
-  const step=now=>{
-    const p=cl((now-t0)/T); dry=p; drawTray();
-    $('#dryBar').style.width=(p*100)+'%'; $('#dryMeter').setAttribute('aria-valuenow',Math.round(p*100));
-    $('#sky').textContent = (Math.floor(p*8)%2)?'🌙':'☀️';
-    if (p<1) dryAnim=requestAnimationFrame(step);
-    else { $('#dryTxt').textContent='مرّتْ مدةٌ ✓'; $('#sky').textContent='☀️';
-      say('#fbDec','ok','تكوّنتْ على سطوحِ القطعِ <b>طبقةٌ فلّينيةٌ</b>. الطبقةُ الفلّينيةُ تحمي الدرنةَ من الأمراضِ الفطريةِ والتعفّنِ بعدَ الزراعةِ. انتقلْ إلى الحديقةِ!'); }
-  };
-  $('#dryTxt').textContent='يمرُّ الوقتُ…';
-  dryAnim=requestAnimationFrame(step);
-}
-$$('#decide .choice').forEach(b=>b.onclick=()=>chooseDec(b.dataset.a));
-function enterDecide(){
-  if (decVer!==planVer){ decision=null; dry=0; $$('#decide .choice').forEach(b=>b.setAttribute('aria-pressed','false')); $('#timebar').hidden=true; hush('#fbDec'); }
-  drawTray();
-}
-
-/* ================= STAGE 4: garden ================= */
-const SOIL=190, Y0=300;
-let LS=1, planted=[], week=0, reachedEnd=false, celebrated=-1, showLbl=true, playAnim=null;
-function buildPlan(){
-  planted=pieces.map((pc,i)=>({pc, eyes:countEyes(pc), cutp:pc.pts.some(v=>v.cut), whole:false}));
-  if (smallWhole) planted.push({pc:{pts:SMALL,groups:SMALL_G,small:true,seed:99}, eyes:SMALL_G.length, cutp:false, whole:true});
-  planted.forEach((p,i)=>{ p.rot = p.cutp && decision!=='wait'; p.grow = !p.rot && p.eyes>=2; p.nT = 3 + ((i*7+p.eyes*3)%4); });
-}
-function plantSVG(sx, k, w, nT, seed, labels){
-  const R=rng(seed); let h='';
-  const g1=cl((w-0.4)/3.0), g2=cl((w-0.6)/2.4), g3=cl((w-2.2)/1.8), gs=cl((w-1.8)/1.2);
-  const H=118*Math.max(.6,Math.min(1,k));
-  const top=(Y0-16) - g1*((Y0-16-SOIL)+H);
-  // roots
-  if (g2>0) for (let r=0;r<6;r++){ const ang=-1.1+r*0.44+(R()-.5)*.2, len=(38+R()*26)*g2*Math.max(.7,k);
-    const ex=sx+Math.sin(ang)*len, ey=Y0+14+Math.cos(ang)*len*0.9;
-    h+=`<path d="M${f1(sx)} ${Y0+10} Q${f1(sx+Math.sin(ang)*len*.3+(R()-.5)*10)} ${f1(Y0+14+len*.5)} ${f1(ex)} ${f1(ey)}" stroke="#f1e6c4" stroke-width="${f1(2.2*Math.max(.7,k))}" fill="none" stroke-linecap="round"/>`; }
-  // underground stems + new tubers
-  const tub=[];
-  if (gs>0) for (let t=0;t<nT;t++){
-    const side=t%2?1:-1, row=t>>1, tx=sx+side*(16+row*13)*Math.max(.55,k), ty=Y0-30+row*24+(t%3)*6;
-    tub.push({tx,ty});
-    h+=`<path d="M${f1(sx)} ${Y0-26} Q${f1(sx+side*8)} ${f1(ty-18)} ${f1(tx)} ${f1(ty)}" stroke="#d9cf9a" stroke-width="${f1(3*Math.max(.7,k))}" fill="none" stroke-linecap="round" pathLength="1" stroke-dasharray="${f1(gs)} 2"/>`;
-  }
-  if (g3>0) tub.forEach(({tx,ty})=>{ const rx=11*g3*Math.max(.6,k), ry=8*g3*Math.max(.6,k);
-    h+=`<ellipse cx="${f1(tx)}" cy="${f1(ty)}" rx="${f1(rx)}" ry="${f1(ry)}" fill="url(#gSkin)" stroke="#7a4d1c" stroke-width="1.2"/>`; });
-  // stem
-  if (g1>0){
-    const ug=Math.max(top,SOIL);
-    h+=`<path d="M${f1(sx)} ${Y0-14} L${f1(sx)} ${f1(ug)}" stroke="#c9d98e" stroke-width="${f1(5*Math.max(.7,k))}" stroke-linecap="round"/>`;
-    if (top<SOIL){
-      h+=`<path d="M${f1(sx)} ${SOIL} Q${f1(sx-5)} ${f1((SOIL+top)/2)} ${f1(sx)} ${f1(top)}" stroke="#2f9a4a" stroke-width="${f1(5*Math.max(.7,k))}" fill="none" stroke-linecap="round"/>`;
-      for (let l=0;l<6;l++){ const ly=SOIL-14-l*19; if (ly<=top+4) break;
-        const sz=cl((ly-top)/34)*15*Math.max(.6,k), side=l%2?1:-1;
-        h+=`<ellipse cx="${f1(sx+side*sz*.9)}" cy="${f1(ly)}" rx="${f1(sz)}" ry="${f1(sz*.5)}" fill="#4fb85a" stroke="#2f8a3f" stroke-width="1" transform="rotate(${side*-28} ${f1(sx+side*sz*.9)} ${f1(ly)})"/>`; }
-      h+=`<circle cx="${f1(sx)}" cy="${f1(top)}" r="${f1(4*Math.max(.7,k))}" fill="#6fd17a"/>`;
-    }
-  }
-  if (labels && w>=3.6){
-    const t0=tub[0]||{tx:sx,ty:Y0};
-    const tag=(x,y,px,py,txt)=>{ const W=(tlen(txt)*9.5+20)*LS; x=Math.max(W/2+4,Math.min(796-W/2,x));
-      return `<g class="lbltag" font-size="${f1(15*LS)}"><line x1="${f1(x)}" y1="${f1(y)}" x2="${f1(px)}" y2="${f1(py)}" stroke="#200058" stroke-width="${f1(1.6*LS)}"/>`+
-      `<rect x="${f1(x-W/2)}" y="${f1(y-15*LS)}" width="${f1(W)}" height="${f1(28*LS)}" rx="8"/><text x="${f1(x)}" y="${f1(y+5*LS)}" text-anchor="middle">${txt}</text></g>`; };
-    const dir = sx>400 ? -1 : 1;
-    h+=tag(sx+dir*120, SOIL-70, sx+3*dir, SOIL-60, 'ساقٌ هوائيٌّ');
-    h+=tag(sx+dir*125, SOIL+30, sx, SOIL+40, 'ساقٌ تحتَ الأرضِ');
-    h+=tag(sx+dir*130, Y0+30, t0.tx, t0.ty, 'درناتٌ');
-    h+=tag(sx-dir*0+dir*95, Y0+105, sx+dir*12, Y0+52, 'جذرٌ');
-  }
-  return h;
-}
-function drawGarden(){
-  const n=planted.length, slot=760/Math.max(n,1);
-  LS=Math.min(2.2,Math.max(1,800/($('#gardenSvg').getBoundingClientRect().width||800)*0.72));
-  let h=`<rect width="800" height="${SOIL}" fill="url(#gSky)"/><circle cx="70" cy="60" r="30" fill="#ffd15c"/><circle cx="70" cy="60" r="40" fill="#ffd15c" opacity=".25"/>`+
-        `<rect y="${SOIL}" width="800" height="${470-SOIL}" fill="url(#gSoil)"/>`+
-        `<path d="M0 ${SOIL} Q200 ${SOIL-6} 400 ${SOIL} T800 ${SOIL}" stroke="#4d7a2c" stroke-width="6" fill="none"/>`;
-  const R=rng(5); for (let i=0;i<60;i++) h+=`<circle cx="${f1(R()*800)}" cy="${f1(SOIL+10+R()*270)}" r="${f1(1+R()*2.5)}" fill="#3e2714" opacity=".5"/>`;
-  const labIdx=planted.findIndex(p=>p.grow);
-  planted.forEach((p,i)=>{
-    const sx=780-slot*(i+.5), k=Math.min(1,slot/120);
-    if (p.grow) h+=plantSVG(sx,k,week,p.nT,i+11, showLbl && i===labIdx);
-  });
-  planted.forEach((p,i)=>{
-    const sx=780-slot*(i+.5), b=bbox(p.pc.pts), c=centroid(p.pc.pts);
-    const s=Math.min(0.3, slot*0.78/b.w, 54/b.h);
-    const rot = p.rot ? cl((week-0.3)/2.2) : 0;
-    h+=pieceSVG(p.pc,{id:'g-cp'+i, tf:`translate(${f1(sx)} ${Y0}) scale(${f1(s)}) translate(${f1(-c.x)} ${f1(-c.y)})`, s, dry: decision==='wait'&&p.cutp?1:0, rot});
-    const st = week<1 ? '' : (p.grow?'✓':'✗');
-    const L=Math.min(LS,slot/34), cy=468-17*L;
-    h+=`<g aria-hidden="true"><circle cx="${f1(sx)}" cy="${f1(cy)}" r="${f1(15*L)}" fill="#fff" stroke="${p.grow?'#12a06a':(week<1?'#200058':'#e8425a')}" stroke-width="3"/>`+
-       `<text x="${f1(sx)}" y="${f1(cy+6*L)}" text-anchor="middle" font-size="${f1(16*L)}" font-weight="900" fill="#200058">${ar(i+1)}</text>`+
-       (st?`<text x="${f1(sx+16*L)}" y="${f1(cy-14*L)}" text-anchor="middle" font-size="${f1(18*L)}" font-weight="900" fill="${p.grow?'#bff5d6':'#ffc2cc'}">${st}</text>`:'')+`</g>`;
-  });
-  $('#gardenSvg').innerHTML=h;
-  $('#wkTxt').textContent='الأسبوعُ '+ar(Math.floor(week+1e-6));
-}
-function reason(p){
-  if (p.grow) return `نمتْ! خرجَ ساقٌ هوائيٌّ وجذورٌ، وتكوّنتْ ${ar(p.nT)} درناتٍ جديدةٍ تحتَ الأرضِ.`+(p.whole?' (الدرنةُ الصغيرةُ زُرعتْ كاملةً.)':'');
-  if (p.rot) return 'تعفّنتْ — زُرعتْ دونَ أن تتكوّنَ الطبقةُ الفلّينيةُ. الطبقةُ الفلّينيةُ تحمي من الأمراضِ الفطريةِ والتعفّنِ.'+(p.eyes<2?' وفيها أيضاً أقلُّ من مجموعتينِ من العيونِ.':'');
-  return p.eyes===1 ? 'لم تنبتْ — هذه القطعةُ فيها مجموعةُ عيونٍ واحدةٌ فقط، والكتابُ يقولُ: يجبُ أن يحتويَ كلُّ جزءٍ على مجموعتينِ من العيونِ.'
-                    : 'لم تنبتْ — هذه القطعةُ ليسَ فيها أيُّ مجموعةٍ من العيونِ. كلُّ جزءٍ يجبُ أن يحتويَ على مجموعتينِ من العيونِ.';
-}
-function updateResults(){
-  const ul=$('#results');
-  if (week<1){ ul.innerHTML=''; hush('#fbGrow'); return; }
-  ul.innerHTML=planted.map((p,i)=>`<li class="${p.grow?'ok':'bad'}"><span class="n">${ar(i+1)}</span><span>${p.grow?'✓':'✗'} ${reason(p)}</span></li>`).join('');
-  if (week>=3.99){
-    reachedEnd=true;
-    const g=planted.filter(p=>p.grow).length, tubers=planted.filter(p=>p.grow).reduce((a,p)=>a+p.nT,0);
-    if (g===planted.length){
-      say('#fbGrow','ok',`ممتازٌ! نمتْ كلُّ القطعِ (${ar(g)}). بعدَ ٤ أسابيعَ تكوّنتْ ${ar(tubers)} درنةً جديدةً تحتَ الأرضِ. لاحظْ الأسماءَ على النبتةِ: ساقٌ هوائيٌّ، ساقٌ تحتَ الأرضِ، درناتٌ، جذرٌ.`);
-      if (celebrated!==planVer*10+(decision==='wait'?1:0)){ celebrated=planVer*10+(decision==='wait'?1:0); Kit.celebrate(); }
-    } else {
-      const anyRot=planted.some(p=>p.rot);
-      say('#fbGrow','warn',`نمتْ ${ar(g)} من ${ar(planted.length)} فقط. `+(anyRot?'القطعُ المقطوعةُ تعفّنتْ لأنّها زُرعتْ فوراً — جرّبِ الانتظارَ حتى تتكوّنَ الطبقةُ الفلّينيةُ. ':'')+
-        (planted.some(p=>!p.rot&&p.eyes<2)?'وبعضُ القطعِ فيها أقلُّ من مجموعتينِ من العيونِ. ':'')+'اضغطْ «أصلحُ خطّتي» وجرّبْ مرةً أخرى.');
-    }
-  } else hush('#fbGrow');
-}
-function setWeek(w){ week=w; $('#wk').value=w; drawGarden(); updateResults(); }
-$('#wk').addEventListener('input',e=>{ cancelAnimationFrame(playAnim); setWeek(+e.target.value); });
-$('#playBtn').onclick=()=>{
-  cancelAnimationFrame(playAnim);
-  let from=week>=3.99?0:week; if (Kit.reduced){ setWeek(4); return; }
-  const t0=performance.now();
-  const step=now=>{ const w=Math.min(4, from+(now-t0)/1100); setWeek(w); if (w<4) playAnim=requestAnimationFrame(step); };
-  playAnim=requestAnimationFrame(step);
-};
-$('#lblBtn').onclick=()=>{ showLbl=!showLbl; $('#lblBtn').setAttribute('aria-pressed',String(showLbl)); drawGarden(); };
-$('#fixBtn').onclick=()=>{ cancelAnimationFrame(playAnim); Kit.go(1); };
-function enterGarden(){
-  if (decVer!==planVer) decision=null;
-  buildPlan(); cancelAnimationFrame(playAnim); setWeek(0);
-  if (!decision) say('#fbGrow','info','لم تخترْ قرارَكَ بعدُ في المرحلةِ ٣ — سنفترضُ أنّكَ زرعتَ القطعَ فوراً.');
-}
-
-/* ================= STAGE 5: sort + onion ================= */
-const ITEMS=[['potato','البطاطا','t'],['ginger','الزنجبيلُ','t'],['licorice','السوسُ','t'],['onion','البصلُ','b'],['garlic','الثومُ','b'],
-  ['lily','الزنبقُ','b'],['narc','النرجسُ','b'],['saffron','الزعفرانُ','b'],['lav','الخزامى','b']];
-const WHY={
-  potato:'البطاطا درنةٌ: ساقٌ أرضيةٌ متحوّرةٌ لخزنِ الغذاءِ، وعلى سطحِها عيونٌ.',
-  ginger:'الزنجبيلُ من أمثلةِ الدرناتِ في الكتابِ.',
-  licorice:'السوسُ من أمثلةِ الدرناتِ في الكتابِ.',
-  onion:'البصلُ بصلةٌ: ساقٌ قرصيةٌ تحملُ أوراقاً ذاتَ قواعدَ شحميةٍ.',
-  garlic:'الثومُ بصلةٌ مقسّمةٌ إلى فصوصٍ، وكلُّ فصٍّ بصلةٌ.',
-  lily:'الزنبقُ من نباتاتِ الزينةِ التي تتكاثرُ بالأبصالِ.',
-  narc:'النرجسُ من نباتاتِ الزينةِ التي تتكاثرُ بالأبصالِ.',
-  saffron:'الزعفرانُ من نباتاتِ الزينةِ التي تتكاثرُ بالأبصالِ.',
-  lav:'الخزامى من نباتاتِ الزينةِ التي تتكاثرُ بالأبصالِ.'
-};
-let sortWrong=0, sortDone=0;
-const sc=$('#sortChips');
-Kit.shuffle(ITEMS).forEach(([id,name,k])=>sc.appendChild(Kit.el('span',{class:'chip','data-id':id,'data-k':k},name)));
-const chips=$$('#sortChips .chip'), zones=$$('.sortz .zone');
-const dd=Kit.dnd({chips, zones,
-  accept:(c,z)=>c.dataset.k===z.dataset.k,
-  onDrop:(c,z,ok)=>{
-    if (ok){ sortDone++; say('#fbSort','ok','صحيحٌ! '+WHY[c.dataset.id]); if (sortDone===ITEMS.length){ say('#fbSort','ok','أحسنتَ! صنّفتَ كلَّ النباتاتِ: الدرناتُ (البطاطا، الزنجبيلُ، السوسُ) والأبصالُ (البصلُ، الثومُ، الزنبقُ، النرجسُ، الزعفرانُ، الخزامى).'); $('#sortShow').hidden=true; } }
-    else { sortWrong++; say('#fbSort','bad','حاولْ مرةً أخرى — '+WHY[c.dataset.id]); if (sortWrong>=2 && sortDone<ITEMS.length) $('#sortShow').hidden=false; }
-  }});
-$('#sortShow').onclick=()=>{
-  chips.forEach(c=>{ if (!c.dataset.locked){ const z=zones.find(z=>z.dataset.k===c.dataset.k); z.appendChild(c); c.classList.remove('bad','sel'); c.classList.add('ok'); c.dataset.locked='1'; c.setAttribute('tabindex','-1'); sortDone++; } });
-  dd.clear(); $('#sortShow').hidden=true;
-  say('#fbSort','info','هذا هو الحلُّ: البطاطا والزنجبيلُ والسوسُ <b>درناتٌ</b> (سيقانٌ أرضيةٌ متحوّرةٌ لخزنِ الغذاءِ). البصلُ والثومُ والزنبقُ والنرجسُ والزعفرانُ والخزامى <b>أبصالٌ</b>.');
-};
-
-// onion drawing
-const ONION='M230 34 C222 66 150 86 150 150 C150 196 192 212 230 212 C268 212 310 196 310 150 C310 86 238 66 230 34Z';
-let onionCut=false, garlicOpen=false;
-function drawOnion(){
-  let roots=''; for (let i=0;i<9;i++){ const x=206+i*6; roots+=`<path d="M${x} 212 q${(i-4)*3} 16 ${(i-4)*5} 34" stroke="#e9dcb6" stroke-width="2.4" fill="none" stroke-linecap="round"/>`; }
-  let h='<g transform="translate(24 0)">'+roots;
-  if (!onionCut){
-    h+=`<path d="${ONION}" fill="url(#gOnion)" stroke="#8a5320" stroke-width="2.5"/>`;
-    for (let i=-2;i<=2;i++) h+=`<path d="M230 40 Q${230+i*34} 120 ${230+i*22} 208" stroke="#a7692b" stroke-width="1.3" fill="none" opacity=".7"/>`;
-    h+=`<text x="80" y="130" text-anchor="middle" font-size="16" font-weight="800" fill="#200058">بصلةٌ كاملةٌ</text><text x="80" y="156" text-anchor="middle" font-size="14" fill="#5f5a85">اضغطْ «اقطعْ» 🔪</text>`;
-    h+='</g>';
-  } else {
-    h+=`<path d="${ONION}" fill="#fbf4ff" stroke="#8a5320" stroke-width="2.5"/>`;
-    for (let k=1;k<=5;k++){ const s=1-k*0.15; h+=`<path d="${ONION}" fill="${k%2?'#f3e6fb':'#fbf4ff'}" stroke="#b58ad0" stroke-width="${f1(2.2/s)}" transform="translate(230 204) scale(${f1(s)}) translate(-230 -204)"/>`; }
-    h+=`<rect x="198" y="198" width="64" height="16" rx="7" fill="#d8b77a" stroke="#8a5320" stroke-width="2"/></g>`;
-    const tag=(x,y,px,py,t1)=>{ const W=tlen(t1)*7.4+18; x=Math.max(x,W/2+3); px+=24; return `<g class="lbltag" font-size="14"><line x1="${x+W/2}" y1="${y}" x2="${px}" y2="${py}" stroke="#200058" stroke-width="1.5"/><rect x="${x-W/2}" y="${y-14}" width="${W}" height="26" rx="8"/><text x="${x}" y="${y+4}" text-anchor="middle">${t1}</text></g>`; };
-    h+=tag(78,80,196,120,'أوراقٌ ذاتُ قواعدَ شحميةٍ');
-    h+=tag(82,170,200,206,'ساقٌ قرصيةٌ');
-    h+=tag(82,232,206,236,'جذورٌ عرضيةٌ ليفيةٌ');
-  }
-  $('#onionSvg').innerHTML=h;
-  $('#onionSvg').setAttribute('aria-label', onionCut?'مقطعٌ في البصلةِ: ساقٌ قرصيةٌ في القاعدةِ، أوراقٌ ذاتُ قواعدَ شحميةٍ، جذورٌ عرضيةٌ ليفيةٌ':'بصلةٌ كاملةٌ');
-  $('#onionBtn').textContent = onionCut ? '↺ أعدِ البصلةَ كاملةً' : '🔪 اقطعِ البصلةَ';
-}
-function drawGarlic(){
-  const CL='M0 -38 C14 -30 18 0 12 22 C8 34 -8 34 -12 22 C-18 0 -14 -30 0 -38Z';
-  let h='';
-  const n=7;
-  for (let i=0;i<n;i++){
-    const a=(i-(n-1)/2)*0.32, x=garlicOpen? 230+(i-(n-1)/2)*30 : 230+(i-(n-1)/2)*9, y=garlicOpen?110+Math.abs(i-(n-1)/2)*6:104;
-    const r=garlicOpen?(i-(n-1)/2)*8:a*40;
-    h+=`<g class="garlic-c" style="transform:translate(${f1(x)}px,${f1(y)}px) rotate(${f1(r)}deg)"><path d="${CL}" fill="#fbf7ec" stroke="#b7a98a" stroke-width="2"/><path d="M0 -36 L0 26" stroke="#e5dcc6" stroke-width="1.5"/></g>`;
-  }
-  if (!garlicOpen) h=`<path d="M230 52 C200 60 180 80 180 112 C180 140 204 152 230 152 C256 152 280 140 280 112 C280 80 260 60 230 52Z" fill="#fbf7ec" stroke="#b7a98a" stroke-width="2.5"/>`+
-     `<path d="M230 52 L226 28 M230 52 L235 30" stroke="#b7a98a" stroke-width="4" stroke-linecap="round"/>`+
-     [-30,-15,0,15,30].map(d=>`<path d="M230 56 Q${230+d*1.6} 104 ${230+d} 150" stroke="#d9ccb0" stroke-width="1.4" fill="none"/>`).join('')+
-     `<text x="80" y="100" text-anchor="middle" font-size="16" font-weight="800" fill="#200058">بصلةُ ثومٍ</text>`;
-  else h+=`<g class="lbltag" font-size="14"><rect x="10" y="22" width="150" height="28" rx="8"/><text x="85" y="42" text-anchor="middle">كلُّ فصٍّ بصلةٌ</text><line x1="160" y1="40" x2="${230-90}" y2="80" stroke="#200058" stroke-width="1.5"/></g>`+
-     `<text x="230" y="182" text-anchor="middle" font-size="15" font-weight="800" fill="#200058">فصوصُ الثومِ</text>`;
-  $('#garlicSvg').innerHTML=h;
-  $('#garlicSvg').setAttribute('aria-label', garlicOpen?'فصوصُ الثومِ منفصلةً: كلُّ فصٍّ بصلةٌ':'بصلةُ ثومٍ كاملةٌ');
-  $('#garlicBtn').textContent = garlicOpen ? '↺ أعدِ الثومَ' : '✋ افصلْ فصوصَ الثومِ';
-}
-$('#onionBtn').onclick=()=>{ onionCut=!onionCut; drawOnion(); if(onionCut) say('#fbOnion','info','انظرْ إلى المقطعِ: في القاعدةِ <b>ساقٌ قرصيةٌ</b> تخرجُ منها جذورٌ عرضيةٌ ليفيةُ الشكلِ، وتحملُ أوراقاً ذاتَ قواعدَ شحميةٍ تخزنُ كمياتٍ كبيرةً من الماءِ.'); };
-$('#onionSvg').addEventListener('click',()=>$('#onionBtn').click());
-$('#garlicBtn').onclick=()=>{ garlicOpen=!garlicOpen; drawGarlic(); if(garlicOpen) say('#fbOnion','info','الثومُ: كلُّ بصلةٍ مقسّمةٌ إلى أجزاءٍ صغيرةٍ تسمّى <b>فصوصاً</b>، وكلُّ فصٍّ بصلةٌ.'); };
-$('#garlicSvg').addEventListener('click',()=>$('#garlicBtn').click());
-let onionOK=false, onionWrong=0;
-const onionMsg={
-  rings:'حاولْ مرةً أخرى — الحلقاتُ الشحميةُ هي <b>قواعدُ الأوراقِ</b> التي تخزنُ الماءَ. الساقُ هو الجزءُ الذي يحملُ هذه الأوراقَ.',
-  roots:'حاولْ مرةً أخرى — الخيوطُ الرفيعةُ في الأسفلِ هي <b>جذورٌ عرضيةٌ ليفيةٌ</b> تخرجُ من قاعدةِ الساقِ.',
-  disc:'صحيحٌ! البصلةُ <b>ساقٌ قرصيةٌ</b> في القاعدةِ: تخرجُ منها الجذورُ، وتحملُ الأوراقَ ذاتَ القواعدِ الشحميةِ. إذنْ البصلةُ — مثلُ الدرنةِ — ساقٌ متحوّرةٌ وليستْ جذراً.'
-};
-function answerOnion(a,b){
-  if (onionOK) return; $$('#qOnion .choice').forEach(x=>x.classList.remove('bad'));
-  if (a==='disc'){ onionOK=true; b.classList.add('ok'); say('#fbOnion','ok',onionMsg.disc); $('#onionShow').hidden=true; if(!onionCut){ onionCut=true; drawOnion(); } }
-  else { onionWrong++; b.classList.add('bad'); say('#fbOnion','bad',onionMsg[a]); if(onionWrong>=2) $('#onionShow').hidden=false; }
-}
-$$('#qOnion .choice').forEach(b=>b.onclick=()=>answerOnion(b.dataset.a,b));
-$('#onionShow').onclick=()=>answerOnion('disc',$('#qOnion [data-a="disc"]'));
-drawOnion(); drawGarlic();
-
-/* ================= STAGE 6 ================= */
-let sumCele=false;
-function enterSummary(){
-  const g=planted.filter(p=>p.grow), t=g.reduce((a,p)=>a+p.nT,0);
-  $('#myStats').innerHTML = planted.length ?
-    `<span class="badge">🔪 قطعاتُكَ: ${ar(cuts)}</span><span class="badge ok">🌱 نباتاتٌ نمتْ: ${ar(g.length)} / ${ar(planted.length)}</span><span class="badge ok">🥔 درناتٌ جديدةٌ: ${ar(t)}</span>`+
-    `<span class="badge">${decision==='wait'?'⏳ انتظرتَ الطبقةَ الفلّينيةَ':'⚡ زرعتَ فوراً'}</span>` : '';
-  if (!sumCele){ sumCele=true; Kit.celebrate(); }
-}
-$('#againBtn').onclick=()=>Kit.go(1);
-
-/* ================= stages ================= */
-Kit.setupStages(['أفحصُ الدرنةَ','أقطّعُ الدرنةَ','أنتظرُ أم أزرعُ؟','أزرعُ وأراقبُ','درنةٌ أم بصلةٌ؟','خلاصةٌ'],{
-  canLeave(i){
-    if (i===0){ if (found.size<GROUPS.length) return 'ابحثْ عن كلِّ مجموعاتِ العيونِ أولاً'; if (!rootOK) return 'أجبْ عن السؤالِ: جذرٌ أم ساقٌ؟'; }
-    if (i===1){ if (cuts<1) return 'قطّعِ الدرنةَ الكبيرةَ أولاً (اسحبْ خطّاً عبرَها)'; if (!smallWhole) return 'قرّرْ ماذا تفعلُ بالدرنةِ الصغيرةِ'; }
-    if (i===2){ if (!decision || decVer!==planVer) return 'اخترْ: تنتظرُ أم تزرعُ فوراً؟'; }
-    if (i===3){ if (!reachedEnd) return 'حرّكِ المؤشّرَ حتى الأسبوعِ ٤'; }
-    if (i===4){ if (sortDone<ITEMS.length) return 'صنّفْ كلَّ النباتاتِ أولاً'; }
-    return true;
+/* ================= Scene 1: explore the tuber ================= */
+const found=new Set(); let s1q=false, yaw0=0;
+const v0=Kit.view3d(Kit.$('#view0'),{yaw:.3,pitch:.38,zoom:1.12,label:'درنةُ بطاطا ثلاثيةُ الأبعادِ: اسحبْ لتدويرِها',
+  draw(R){
+    R.shadow([0,-RY-6,0],L*.95,RZ*.8);
+    R.mesh(wholeMesh,null,{id:'potato',color:wholeCol});
+    drawEyes(R,()=>0,{ring:i=>found.has(i)?'#ffd15c':null});
+    EYES.forEach((e,i)=>{ if(found.has(i)) R.text(add(e.p,e.n,30),'👁 '+ar([...found].indexOf(i)+1),{size:13,behind:true,bg:'rgba(255,209,92,.95)'}); });
+    if(found.size===EYES.length){ const e=EYES[3], tip=add(e.p,e.n,48), rt=add(add(e.p,e.n,-2),[0,-1,0],34);
+      R.cyl(e.p,tip,4,'#3fa34d'); R.sphere(tip,9,'#5cc46a'); R.cyl(e.p,rt,2.2,'#efe2c4');
+      R.text(add(tip,[0,22,0]),'ساقٌ',{size:13}); R.text(add(rt,[0,-14,0]),'جذرٌ',{size:13}); }
+    R.text([0,RY+70,0],'👁 مجموعاتُ العيونِ: '+ar(found.size)+' / '+ar(EYES.length),{size:15,bg:'rgba(32,0,88,.88)',color:'#fff'});
+    if(s1q) R.text([0,-RY-34,0],'ساقٌ أرضيةٌ متحوّرةٌ لخزنِ الغذاءِ',{size:15,bg:'rgba(18,160,106,.95)',color:'#fff'});
   },
-  onEnter(i){
-    if (i===1) drawCut();
-    if (i===2) enterDecide();
-    if (i===3) enterGarden();
-    if (i===5) enterSummary();
-  }
-});
-drawEyeStage(); drawCut();
-window.__potato={get pieces(){return pieces;}, get planted(){return planted;}, applyCut, countEyes};
-})();
+  onPick(){ if(Kit.step_!==1||Kit.scene_!==0) return; const pick=nearEye(v0,()=>0);
+    if(pick==null){ Kit.say('ليستْ هنا — ابحثْ عن <b>نقاطٍ داكنةٍ متجمّعةٍ</b>. دوِّرِ الدرنةَ لترى الجهةَ الأخرى.','bad'); return; }
+    if(found.has(pick)){ Kit.say('وجدتَ هذه من قبلُ. ابحثْ عن غيرِها — دوِّرِ الدرنةَ.','info'); return; }
+    found.add(pick); if(found.size<EYES.length) Kit.say('أحسنتَ! بقيَ '+ar(EYES.length-found.size)+'.','ok'); }});
+Kit.$('#view0').addEventListener('pointerdown',e=>{ lastDown={x:e.clientX,y:e.clientY}; });
+function nearEye(V,dx,skip){ let best=null,bd=40;
+  EYES.forEach((e,i)=>{ const p=add(e.p,[dx(e.x),0,0]); if(skip&&skip(i)) return; if(!frontFacing(V,p,e.n)) return; const s=V.screen(p), d=Math.hypot(s.x-lastDown.x,s.y-lastDown.y); if(d<bd){bd=d;best=i;} });
+  return best; }
+function nextEyeTarget(){ let best=null;
+  EYES.forEach((e,i)=>{ if(found.has(i)||best) return; if(frontFacing(v0,e.p,e.n)){ const s=v0.screen(e.p); best={x:s.x,y:s.y,r:26}; } });
+  if(best) return best; const b=Kit.$('#view0').getBoundingClientRect(); return {x:b.left+b.width*.5,y:b.top+b.height*.5,r:70}; }
+function quiz(el,opts,good,why,bads,key){
+  el.innerHTML='<div class="choices">'+opts.map((o,i)=>'<button class="choice" type="button" data-i="'+i+'">'+o+'</button>').join('')+'</div>';
+  el.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{ const i=+b.dataset.i;
+    if(i===good){ b.classList.add('ok'); el.dataset.ok='1'; Kit.ping(); }
+    else { b.classList.remove('bad'); void b.offsetWidth; b.classList.add('bad'); const n=Kit.tries(key);
+      Kit.say('حاولْ مرةً أخرى — '+bads[i]+(n>=2?'<br><b>الحلُّ:</b> '+opts[good]+' — '+why:''),'bad'); el.onwrong&&el.onwrong(i); } });
+}
+const bodyOk=()=>{ const b=document.querySelector('.scene.on .g-body'); return !!b&&b.dataset.ok==='1'; };
+Kit.scene(0,{title:'أستكشفُ',
+  book:'<p><b>التكاثرُ الخضريُّ</b> يحدثُ دونَ الحاجةِ إلى البذورِ، عن طريقِ أجزاءٍ من النباتِ كالجذورِ والسيقانِ والأوراقِ.</p><p>الدرنةُ <b>ساقٌ أرضيةٌ متحوّرةٌ لخزنِ الغذاءِ</b>، على سطحِها انتفاخاتٌ تسمّى <b>العيونَ</b>.</p><p class="extra">عددُ مجموعاتِ العيونِ وأماكنُها في النموذجِ للتوضيحِ.</p>',
+  summary:['على سطحِ الدرنةِ مجموعاتٌ من العيونِ','من العينِ يخرجُ ساقٌ وجذرٌ','البطاطا ساقٌ أرضيةٌ متحوّرةٌ لخزنِ الغذاءِ'],
+  steps:[
+    {text:'دوِّرِ الدرنةَ بإصبعِك لترى كلَّ جهاتِها 👆', target:()=>{ const b=Kit.$('#view0').getBoundingClientRect(); return {x:b.left+b.width*.5,y:b.top+b.height*.5,r:60}; },
+      enter(){ yaw0=v0.cam.yaw; }, check(){ return Math.abs(v0.cam.yaw-yaw0)>0.8; }, after:'هذه <b>درنةُ</b> بطاطا. على سطحِها نقاطٌ داكنةٌ متجمّعةٌ.'},
+    {text:'اضغطْ على كلِّ <b>مجموعةِ عيونٍ</b> (٦ مجموعاتٍ)', target:nextEyeTarget,
+      body:'<p style="margin:0;color:var(--muted);font-weight:700">💡 لا ترى عيوناً؟ دوِّرِ الدرنةَ: بعضُها في الخلفِ.</p>',
+      check(){ return found.size===EYES.length; }, after:'هذه <b>العيونُ</b>. من العينِ يخرجُ <b>ساقٌ وجذرٌ</b> — انظرْ إلى النموذجِ.'},
+    {text:'هل البطاطا جذرٌ أم ساقٌ؟',
+      body(el){ quiz(el,['🌱 جذرٌ، لأنّها تحتَ الأرضِ','🥔 ساقٌ أرضيةٌ متحوّرةٌ','🍃 ورقةٌ'],1,'الدرنةُ ساقٌ أرضيةٌ متحوّرةٌ لخزنِ الغذاءِ.',
+        ['وجودُها تحتَ الأرضِ لا يجعلُها جذراً؛ على سطحِها عيونٌ يخرجُ منها ساقٌ جديدٌ.','','الدرنةُ ليستْ ورقةً؛ إنّها تنمو تحتَ الأرضِ وتخزنُ الغذاءَ.'],'root'); },
+      check(){ if(bodyOk()) s1q=true; return bodyOk(); }, after:'صحيحٌ! البطاطا <b>ساقٌ أرضيةٌ متحوّرةٌ</b> لخزنِ الغذاءِ، وليستْ جذراً.'}
+  ]});
+
+/* ================= Scene 2: cut, wait, plant ================= */
+const GAP=80, S2={cuts:[],cork:false,rot:false,week:0,planted:false};
+const meshCache={};
+function pieces(){ const b=[-L,...S2.cuts,L], out=[];
+  for(let i=0;i<b.length-1;i++){ const eyes=EYES.filter(e=>e.x>b[i]&&e.x<b[i+1]).length; out.push({x0:b[i],x1:b[i+1],eyes,dx:(i-(b.length-2)/2)*GAP}); } return out; }
+function shiftOf(x){ const ps=pieces(); const p=ps.find(p=>x>=p.x0&&x<=p.x1)||ps[0]; return p.dx; }
+function pieceDraw(R,p,i,n){ const key=p.x0+'|'+p.x1+'|'+S2.cork;
+  let c=meshCache[key]; if(!c){ const m=pieceMesh(phiOf(p.x0),phiOf(p.x1),p.x0>-L,p.x1<L); c=meshCache[key]={m,col:pieceColor(m,S2.cork?'#93643a':'#fff4d2')}; }
+  R.mesh(c.m,{pos:[p.dx,0,0]},{color:c.col}); }
+const dome=Kit.mesh.surface((u,v)=>{ const th=u*Math.PI*2, ph=v*Math.PI/2; return [Math.cos(th)*Math.sin(ph),Math.cos(ph),-Math.sin(th)*Math.sin(ph)]; },16,6);
+const soil=Kit.mesh.surface((u,v)=>[-300+u*600,-RY-4,-140+v*280],10,4);
+const v1=Kit.view3d(Kit.$('#view1'),{yaw:0,pitch:.32,zoom:innerWidth<820?1.3:.95,label:'قطعُ درنةِ البطاطا: اسحبْ لتدويرِها',
+  draw(R){
+    const ps=pieces(), knife=+Kit.$('#knife').value, plant=S2.planted&&S2.week>0;
+    if(S2.planted) R.mesh(soil,null,{color:(c,i)=>(i>>1)%3?'#7a4e2c':'#6a4224'});
+    ps.forEach((p,i)=>{
+      const cx=(p.x0+p.x1)/2+p.dx, half=(p.x1-p.x0)/2;
+      if(!plant){ if(!S2.planted) R.shadow([cx,-RY-6,0],half*.95,RZ*.8); pieceDraw(R,p,i,ps.length); }
+      else { R.mesh(dome,{pos:[cx,-RY-4,0],scale:[half+22,RY*1.15,RZ+20]},{color:'#5e3a1e'});
+        const h=[0,0,40,95,150][S2.week], top=[cx,RY*1.15-RY-4,0];
+        if(h){ const tip=add(top,[0,h,0]); R.cyl(top,tip,5,'#3fa34d');
+          if(S2.week>=3) [[-1,.55],[1,.75],[-1,.95],[1,1]].forEach(([s,k])=>R.sphere(add(top,[s*18,h*k,0]),S2.week>=4?15:10,'#5cc46a'));
+          if(S2.week===4&&i===0) R.text(add(tip,[0,34,0]),'ساقٌ هوائيٌّ',{size:13}); }
+      }
+      if(!S2.planted&&S2.cuts.length){ const ok=p.eyes>=2; R.text([cx,RY+58,0],(ok?'✓ ':'⚠ ')+ar(p.eyes)+' 👁',{size:16,bg:ok?'rgba(18,160,106,.95)':'rgba(232,66,90,.95)',color:'#fff'}); }
+      if(S2.rot&&!S2.planted){ [p.x0>-L?p.x0:null,p.x1<L?p.x1:null].forEach(x=>{ if(x==null) return; const c=[x+p.dx,0,0], nn=[x===p.x0?-1:1,0,0]; if(!frontFacing(v1,c,nn)) return; [[22,18],[-28,-12],[4,-38],[-6,30]].forEach(([y,z],k)=>R.text([c[0]+nn[0]*2,y,z],'●',{bg:false,color:k%2?'#4f6b2a':'#2f4416',size:k%2?20:26})); }); }
+    });
+    if(!S2.planted){
+      EYES.forEach(e=>{ const dx=shiftOf(e.x); e.dots.forEach(d=>R.sphere(add(d,[dx,0,0]),5.5,'#4a2c12')); R.text([e.x+dx,RY+18,0],'👁',{size:15,bg:false}); });
+      if(Kit.scene_===1&&Kit.step_<2){ const x=knife+shiftOf(knife), H=RY+30, Z=RZ+30; R.poly([[x,-H,-Z],[x,H,-Z],[x,H,Z],[x,-H,Z]],'#00a8e0',3,{closed:true,dash:[8,6],glow:true,front:true}); }
+      if(S2.rot) R.text([0,-RY-30,0],'⚠ عفنٌ على السطوحِ المقطوعةِ (توضيحٌ)',{size:14,bg:'rgba(232,66,90,.95)',color:'#fff'});
+      if(S2.cork){ const p=ps[1]; R.text([p.x0+p.dx-10,-RY-26,0],'طبقةٌ فلّينيةٌ',{size:14,bg:'rgba(147,100,58,.95)',color:'#fff'}); }
+    } else R.text([0,RY+72,0],'📅 الأسبوعُ '+ar(S2.week),{size:16,bg:'rgba(32,0,88,.88)',color:'#fff'});
+  }});
+Kit.$('#cutBtn').onclick=()=>{
+  if(Kit.scene_!==1||Kit.step_>1) return;
+  const x=+Kit.$('#knife').value;
+  if(S2.cuts.length>=3){ Kit.toast('٣ قطعاتٍ تكفي — اضغطْ «↩ تراجعْ»'); return; }
+  if(S2.cuts.some(c=>Math.abs(c-x)<25)){ Kit.toast('قريبٌ جدّاً من قطعٍ آخرَ — حرّكِ السكّينَ'); return; }
+  S2.cuts.push(x); S2.cuts.sort((a,b)=>a-b);
+  const bad=pieces().filter(p=>p.eyes<2).length;
+  if(bad && Kit.step_===1){ const n=Kit.tries('cut'); Kit.say('حاولْ مرةً أخرى — قطعةٌ ⚠ فيها أقلُّ من <b>مجموعتينِ من العيونِ</b>. اضغطْ «↩ تراجعْ».'+(n>=2?'<br><b>الحلُّ:</b> قطعٌ بين المجموعةِ ٢ و٣، وقطعٌ بين ٤ و٥ ← ٣ قطعٍ، في كلٍّ منها مجموعتانِ.':''),'bad'); }
+  else if(Kit.step_===1) Kit.say(pieces().length<3?'جيّدٌ، كلُّ قطعةٍ ✓. نحتاجُ <b>٣ قطعٍ</b>.':'✓','info');
+  Kit.ping(); };
+Kit.$('#undoBtn').onclick=()=>{ if(Kit.scene_!==1||Kit.step_>1) return; const x=+Kit.$('#knife').value;
+  if(!S2.cuts.length) return; let k=0; S2.cuts.forEach((c,i)=>{ if(Math.abs(c-x)<Math.abs(S2.cuts[k]-x)) k=i; }); S2.cuts.splice(k,1); Kit.ping(); };
+const allGood=()=>pieces().length===3&&pieces().every(p=>p.eyes>=2);
+Kit.scene(1,{title:'أجرّبُ',
+  book:'<p>الدرنةُ الصغيرةُ تُزرعُ كاملةً، والكبيرةُ <b>تُقطّعُ</b> إلى أجزاءٍ عدّةٍ، ويجبُ أن يحتويَ كلُّ جزءٍ على <b>مجموعتينِ من العيونِ</b>.</p><p>تُتركُ القطعُ مدةً حتى تتكوّنَ <b>الطبقةُ الفلّينيةُ</b> التي تحمي من الأمراضِ الفطريةِ والتعفّنِ، ثمَّ تُزرعُ.</p><p class="extra">لونُ الطبقةِ الفلّينيةِ وبقعُ العفنِ والأسابيعُ رسمٌ توضيحيٌّ؛ الكتابُ لا يحدّدُ المدةَ.</p>',
+  summary:['كلُّ قطعةٍ فيها مجموعتانِ من العيونِ على الأقلِّ','ننتظرُ الطبقةَ الفلّينيةَ قبلَ الزراعةِ','كلُّ قطعةٍ جيّدةٍ تنمو نبتةً جديدةً'],
+  steps:[
+    {text:'حرّكِ السكّينَ ثمَّ اضغطْ «🔪 اقطعْ»', target:'#bench',
+      check(){ return S2.cuts.length>0; }, after:'الرقمُ فوقَ كلِّ قطعةٍ = عددُ <b>مجموعاتِ العيونِ</b> فيها.'},
+    {text:'اصنعْ <b>٣ قطعٍ</b>، في كلٍّ منها <b>مجموعتانِ</b> من العيونِ', target:'#bench',
+      body:'<p style="margin:0;color:var(--muted);font-weight:700">💡 «↩ تراجعْ» يُزيلُ القطعَ الأقربَ إلى السكّينِ.</p>',
+      check(){ return allGood(); }, after:'خطّةٌ ممتازةٌ! كلُّ قطعةٍ فيها <b>مجموعتانِ من العيونِ</b> كما يقولُ الكتابُ.'},
+    {text:'ماذا تفعلُ قبلَ الزراعةِ؟',
+      enter(){ v1.cam.yaw=-.8; v1.cam.pitch=.35; ['#knife','#cutBtn','#undoBtn'].forEach(q=>Kit.$(q).disabled=true); },
+      body(el){ el.onwrong=()=>{ S2.rot=true; };
+        quiz(el,['⚡ أزرعُ القطعَ الآنَ','⏳ أتركُها حتى تتكوّنَ الطبقةُ الفلّينيةُ'],1,'الطبقةُ الفلّينيةُ تحمي من الأمراضِ الفطريةِ والتعفّنِ.',
+          ['السطوحُ المقطوعةُ طريّةٌ ومكشوفةٌ فتتعفّنُ بعدَ الزراعةِ — انظرِ البقعَ.',''],'cork'); },
+      check(){ if(bodyOk()){ S2.rot=false; S2.cork=true; } return bodyOk(); }, after:'تكوّنتِ <b>الطبقةُ الفلّينيةُ</b>؛ فهي تحمي القطعَ من <b>الأمراضِ الفطريةِ والتعفّنِ</b>.'},
+    {text:'ازرعِ القطعَ: حرّكِ الأسابيعَ حتى ٤', target:'.scene.on #week',
+      enter(){ S2.planted=true; S2.week=0; v1.cam.yaw=-.4; v1.cam.pitch=.3; },
+      body(el){ el.innerHTML='<div class="wk"><b id="wkLbl">الأسبوعُ ٠</b><input type="range" dir="ltr" id="week" min="0" max="4" step="1" value="0" aria-label="الأسابيعُ بعدَ الزراعةِ"></div>';
+        el.querySelector('#week').oninput=e=>{ S2.week=+e.target.value; el.querySelector('#wkLbl').textContent='الأسبوعُ '+ar(S2.week); Kit.ping(); }; },
+      check(){ return S2.week===4; }, after:'نمتْ <b>كلُّ القطعِ</b>: في كلٍّ منها مجموعتانِ من العيونِ وطبقةٌ فلّينيةٌ.'}
+  ]});
+
+/* ================= Scene 3: tuber or bulb + onion section ================= */
+const OUT=[[0,-70],[38,-66],[72,-45],[90,-10],[86,25],[62,62],[30,92],[12,112],[5,130]];
+function outline(u){ const n=OUT.length-1; let t=u*2*n, side=1; if(t>n){ t=2*n-t; side=-1; }
+  const i=Math.min(n-1,Math.floor(t)), f=t-i, a=OUT[i], b=OUT[i+1]; return [side*(a[0]+(b[0]-a[0])*f), a[1]+(b[1]-a[1])*f]; }
+const OC=[0,-58], RINGS=7;
+const ringMesh=Kit.mesh.surface((u,s)=>{ const o=outline(u); return [OC[0]+(o[0]-OC[0])*s, OC[1]+(o[1]-OC[1])*s, 0]; },32,RINGS);
+const shell=Kit.mesh.surface((u,v)=>{ const th=u*Math.PI, o=outline(v/2); return [Math.cos(th)*o[0],o[1],-Math.sin(th)*o[0]]; },12,16);
+const ROOTS=[-26,-14,-3,9,20,30].map((x,i)=>[[x*.8,-70,2],[x*1.6,-118-(i%2)*14,(i%3-1)*14]]);
+const S3={stem:false,top:false};
+const v2=Kit.view3d(Kit.$('#view2'),{yaw:.25,pitch:.2,zoom:1.15,label:'مقطعٌ في بصلةٍ: اسحبْ لتدويرِها',
+  draw(R){
+    R.shadow([0,-124,0],90,70);
+    R.mesh(shell,null,{id:'skin',color:'#c98a4b',doubleSided:true});
+    R.mesh(ringMesh,null,{id:'rings',color:(c,i)=>{ const r=Math.floor(i/64); return r===RINGS-1?'#b8743a':(r%2?'#e9d3ee':'#f8eedb'); }});
+    R.cyl([-32,-66,4],[32,-66,4],8,'#d6ad55',{id:'disc'});
+    ROOTS.forEach(([a,b])=>R.cyl(a,b,2.2,'#eadfc6',{id:'roots'}));
+    R.text([0,158,0],'🧅 مقطعٌ في بصلةٍ',{size:15,bg:'rgba(32,0,88,.88)',color:'#fff'});
+    if(S3.stem){ R.text([0,-66,40],'ساقٌ قرصيةٌ',{size:14,bg:'rgba(214,173,85,.97)',dx:-95});
+      R.text([40,20,20],'أوراقٌ ذاتُ قواعدَ شحميةٍ',{size:13,dx:20}); R.text([0,-140,0],'جذورٌ عرضيةٌ ليفيةٌ',{size:13}); }
+  },
+  onPick(id){ if(Kit.scene_!==2||Kit.step_!==1||S3.stem) return;
+    if(id==='disc'){ S3.stem=true; return; }
+    const m={rings:'الحلقاتُ الشحميةُ هي <b>قواعدُ الأوراقِ</b> التي تخزنُ الماءَ.',roots:'الخيوطُ الرفيعةُ هي <b>جذورٌ عرضيةٌ ليفيةٌ</b> تخرجُ من قاعدةِ الساقِ.',skin:'هذه القشرةُ الخارجيةُ.'};
+    const n=Kit.tries('stem'); Kit.say('حاولْ مرةً أخرى — '+(m[id]||'اضغطْ على جزءٍ من البصلةِ.')+(n>=2?'<br><b>الحلُّ:</b> الساقُ هي <b>القرصُ</b> في القاعدةِ، تخرجُ منه الجذورُ.':''),'bad'); }});
+const sortText={potato:'البطاطا درنةٌ: ساقٌ أرضيةٌ متحوّرةٌ لخزنِ الغذاءِ.',ginger:'الزنجبيلُ من أمثلةِ الدرناتِ في الكتابِ.',licorice:'السوسُ من أمثلةِ الدرناتِ في الكتابِ.',
+  onion:'البصلُ بصلةٌ: ساقٌ قرصيةٌ تحملُ أوراقاً ذاتَ قواعدَ شحميةٍ.',garlic:'الثومُ بصلةٌ مقسّمةٌ إلى فصوصٍ، وكلُّ فصٍّ بصلةٌ.',narcissus:'النرجسُ من نباتاتِ الزينةِ التي تتكاثرُ بالأبصالِ.'};
+Kit.scene(2,{title:'أتحدّى',
+  book:'<p>من أمثلةِ <b>الدرناتِ</b>: البطاطا والزنجبيلُ والسوسُ. ومن أمثلةِ <b>الأبصالِ</b>: البصلُ والثومُ والزنبقُ والنرجسُ.</p><p>البصلةُ <b>ساقٌ قرصيةٌ</b> تخرجُ من قاعدتِها جذورٌ عرضيةٌ ليفيةٌ، وتحملُ أوراقاً ذاتَ قواعدَ شحميةٍ. والتكاثرُ الخضريُّ يعطي نباتاتٍ ناضجةً في وقتٍ قصيرٍ مقارنةً بالبذورِ.</p>',
+  summary:['درناتٌ: البطاطا، الزنجبيلُ، السوسُ','أبصالٌ: البصلُ، الثومُ، النرجسُ','ساقُ البصلةِ قرصٌ في قاعدتِها'],
+  steps:[
+    {text:'صنّفْ: <b>درنةٌ</b> أم <b>بصلةٌ</b>؟ (اسحبْ أو انقرْ ثمَّ انقرْ)', target:'.scene.on #pool',
+      body(el){ const items=[['potato','🥔 البطاطا','t'],['onion','🧅 البصلُ','b'],['ginger','الزنجبيلُ','t'],['garlic','🧄 الثومُ','b'],['licorice','السوسُ','t'],['narcissus','🌼 النرجسُ','b']];
+        el.innerHTML='<div class="chips" id="pool">'+items.map(([id,t,g])=>'<span class="chip" data-id="'+id+'" data-g="'+g+'">'+t+'</span>').join('')+'</div>'+
+          '<div class="zones2"><div class="zone" data-z="t"><span class="zt">🥔 درناتٌ</span></div><div class="zone" data-z="b"><span class="zt">🧅 أبصالٌ</span></div></div>';
+        Kit.dnd({chips:[...el.querySelectorAll('.chip')],zones:[...el.querySelectorAll('.zone')],accept:(c,z)=>c.dataset.g===z.dataset.z,
+          onDrop(c,z,ok){ if(ok) Kit.say(sortText[c.dataset.id],'ok'); else { const n=Kit.tries('sort'); Kit.say('حاولْ مرةً أخرى — '+sortText[c.dataset.id]+(n>=2?'<br><b>الحلُّ:</b> درناتٌ: البطاطا والزنجبيلُ والسوسُ. أبصالٌ: البصلُ والثومُ والنرجسُ.':''),'bad'); } }}); },
+      check(){ return document.querySelectorAll('.scene.on .g-body .chip.ok').length===6; }, after:'الدرنةُ والبصلةُ كلتاهما <b>ساقٌ متحوّرةٌ</b> للتكاثرِ الخضريِّ.'},
+    {text:'اضغطْ على <b>الساقِ</b> في مقطعِ البصلةِ', target:()=>{ const s=v2.screen([0,0,0]); return {x:s.x,y:s.y,r:Math.max(60,95*s.s)}; },
+      check(){ return S3.stem; }, after:'صحيحٌ! البصلةُ <b>ساقٌ قرصيةٌ</b> في القاعدةِ: تخرجُ منها الجذورُ، وتحملُ أوراقاً ذاتَ <b>قواعدَ شحميةٍ</b>.'},
+    {text:'ما ميزةُ التكاثرِ الخضريِّ مقارنةً بالبذورِ؟',
+      body(el){ quiz(el,['يحتاجُ إلى بذورٍ كثيرةٍ','يعطي نباتاتٍ ناضجةً في وقتٍ قصيرٍ','يحدثُ في الأوراقِ فقط'],1,'هذه ميزةُ التكاثرِ الخضريِّ كما في الكتابِ.',
+        ['التكاثرُ الخضريُّ يحدثُ <b>دونَ الحاجةِ إلى البذورِ</b>.','','يحدثُ عن طريقِ الجذورِ والسيقانِ والأوراقِ — والدرنةُ ساقٌ.'],'adv'); },
+      check(){ return bodyOk(); }, after:'صحيحٌ! التكاثرُ الخضريُّ يعطي <b>نباتاتٍ ناضجةً في وقتٍ قصيرٍ</b> مقارنةً بالبذورِ.'}
+  ]});
+
+Kit.start();
 </script>
 </body>
 </html>
