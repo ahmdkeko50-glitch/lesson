@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>رحلةٌ داخلَ الجلدِ</title>
+<style>
+/* ================= DESIGN TOKENS (from the book's brand) ================= */
+:root{
+  --navy:#200058; --navy-2:#3a1f7a; --ink:#200058; --muted:#5f5a85;
+  --cyan:#00c3fe; --cyan-d:#0a8fc0; --cyan-l:#e3f8ff; --cyan-b:#b8ebff;
+  --green:#12a06a; --green-d:#0b7a50; --green-l:#e4f6ee; --green-b:#9cd9bd;
+  --red:#e8425a; --red-d:#c22b43; --red-l:#fde8ec; --red-b:#f5b3bf;
+  --yellow:#ffd15c; --orange:#f6a723; --yellow-l:#fff6dc;
+  --purple:#7b5cff; --purple-l:#efeaff;
+  --bg:#f1f0fb; --bg-2:#e3f8ff; --card:#ffffff; --line:#e0ddf0; --soft:#faf9fe;
+  --r-s:12px; --r:18px; --r-l:26px;
+  --sh:0 6px 18px rgba(32,0,88,.08); --sh-l:0 18px 50px rgba(32,0,88,.14);
+  --font: "Segoe UI","Noto Sans Arabic","Noto Naskh Arabic","Geeza Pro","Arial",Tahoma,system-ui,sans-serif;
+  --tap:48px;
+}
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{margin:0;min-height:100vh;font-family:var(--font);color:var(--ink);
+  background:linear-gradient(180deg,var(--bg) 0%,var(--bg-2) 100%) fixed;line-height:1.7;}
+button,input,select,textarea{font-family:inherit;color:inherit;}
+img,svg,canvas{max-width:100%;}
+:focus-visible{outline:3px solid var(--cyan);outline-offset:3px;border-radius:8px;}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+
+/* ================= SHELL ================= */
+.app{max-width:1120px;margin:0 auto;padding:14px 16px 110px;}
+.topbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--card);border:1.5px solid var(--line);
+  border-radius:var(--r);box-shadow:var(--sh);padding:10px 14px;}
+.ref{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13.5px;font-weight:700;color:var(--cyan-d);
+  background:var(--cyan-l);border:1.5px solid var(--cyan-b);border-radius:999px;padding:6px 14px;}
+.ref b{color:var(--navy);}
+.topbar h1{flex:1;min-width:200px;margin:0;font-size:clamp(19px,2.6vw,26px);font-weight:900;line-height:1.3;}
+.topbar h1 small{display:block;font-size:13px;font-weight:600;color:var(--muted);}
+.dots{display:flex;gap:6px;align-items:center;list-style:none;margin:0;padding:0;}
+.dots li{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:14px;
+  background:var(--soft);border:2px solid var(--line);color:var(--muted);transition:all .25s;}
+.dots li.on{background:var(--navy);border-color:var(--navy);color:#fff;transform:scale(1.08);}
+.dots li.done{background:var(--green);border-color:var(--green);color:#fff;}
+
+.stage{display:none;margin-top:16px;background:var(--card);border-radius:var(--r-l);box-shadow:var(--sh-l);overflow:hidden;
+  animation:rise .4s ease both;}
+.stage.on{display:block;}
+.stage-h{background:var(--navy);color:#fff;padding:14px 22px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.stage-h .kind{font-size:13px;font-weight:800;background:rgba(255,255,255,.14);border-radius:999px;padding:4px 12px;}
+.stage-h h2{margin:0;font-size:clamp(18px,2.4vw,23px);font-weight:900;}
+.stage-b{padding:20px 22px 24px;}
+.lead{font-size:17px;margin:0 0 14px;}
+.task{display:flex;gap:10px;align-items:flex-start;background:var(--yellow-l);border:1.5px solid #f3dc97;border-radius:var(--r-s);
+  padding:10px 14px;font-weight:700;margin:0 0 14px;}
+.task::before{content:"👆";font-size:20px;line-height:1.4;}
+.book{font-size:15px;background:var(--purple-l);border-inline-start:5px solid var(--purple);border-radius:var(--r-s);padding:10px 14px;margin:10px 0;}
+.book::before{content:"📘 من الكتاب: ";font-weight:800;color:var(--purple);}
+.extra{font-size:13.5px;color:var(--muted);background:var(--soft);border:1.5px dashed var(--line);border-radius:var(--r-s);padding:8px 12px;margin:10px 0;}
+.extra::before{content:"ℹ️ توضيح للنشاط وليس من الكتاب: ";font-weight:800;}
+.grid2{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:20px;align-items:start;}
+@media (max-width:820px){.grid2{grid-template-columns:minmax(0,1fr);}}
+.panel{background:var(--soft);border:1.5px solid var(--line);border-radius:var(--r);padding:14px;}
+.panel h3{margin:0 0 8px;font-size:17px;font-weight:900;}
+
+/* ================= CONTROLS ================= */
+.btn{min-height:var(--tap);min-width:var(--tap);display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:0 20px;border-radius:999px;border:2px solid transparent;font-size:16px;font-weight:800;cursor:pointer;
+  background:var(--navy);color:#fff;transition:transform .12s,background .2s,box-shadow .2s;touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;user-select:none;}
+.btn:active{transform:scale(.96);}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+.btn.cyan{background:var(--cyan);color:var(--navy);}
+.btn.green{background:var(--green);}
+.btn.red{background:var(--red);}
+.btn.ghost{background:#fff;color:var(--navy);border-color:var(--line);}
+.btn.ghost[aria-pressed="true"]{background:var(--navy);color:#fff;border-color:var(--navy);}
+.btn.sm{min-height:40px;font-size:14.5px;padding:0 14px;}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;}
+.choice{min-height:56px;text-align:start;padding:10px 14px;border-radius:var(--r-s);border:2px solid var(--line);background:#fff;
+  font-size:16px;font-weight:700;cursor:pointer;transition:all .15s;}
+.choice:hover{border-color:var(--cyan);}
+.choice[aria-pressed="true"]{border-color:var(--navy);background:var(--purple-l);}
+.choice.ok{border-color:var(--green);background:var(--green-l);}
+.choice.bad{border-color:var(--red);background:var(--red-l);}
+input[type=range]{width:100%;height:44px;accent-color:var(--cyan-d);cursor:pointer;}
+.slider-lbl{display:flex;justify-content:space-between;font-size:13.5px;font-weight:700;color:var(--muted);}
+
+/* chips + drop zones (Kit.dnd) */
+.chips{display:flex;flex-wrap:wrap;gap:8px;min-height:56px;padding:8px;border-radius:var(--r-s);background:var(--soft);
+  border:1.5px dashed var(--line);}
+.chip{min-height:46px;display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;background:#fff;
+  border:2px solid var(--cyan-b);font-weight:800;font-size:15.5px;cursor:grab;touch-action:none;user-select:none;
+  -webkit-user-select:none;box-shadow:0 2px 0 var(--cyan-b);transition:transform .12s,box-shadow .12s,border-color .2s;}
+.chip.sel{border-color:var(--navy);box-shadow:0 0 0 4px rgba(0,195,254,.35);transform:translateY(-2px);}
+.chip.dragging{opacity:.35;}
+.chip.ghost{position:fixed;z-index:999;pointer-events:none;opacity:.95;transform:rotate(-3deg) scale(1.05);box-shadow:var(--sh-l);}
+.chip.ok{border-color:var(--green);background:var(--green-l);box-shadow:0 2px 0 var(--green-b);cursor:default;}
+.chip.bad{border-color:var(--red);background:var(--red-l);animation:shake .4s;}
+.zone{min-height:64px;border:2.5px dashed var(--cyan-b);border-radius:var(--r-s);padding:8px;background:#fff;
+  transition:background .15s,border-color .15s;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;}
+.zone.hot{background:var(--cyan-l);border-color:var(--cyan);border-style:solid;}
+.zone .zt{width:100%;font-weight:900;font-size:15px;color:var(--navy);}
+
+/* feedback */
+.fb{display:none;margin-top:12px;border-radius:var(--r-s);padding:12px 14px 12px 14px;font-size:16px;font-weight:600;
+  border:2px solid;animation:rise .25s ease both;}
+.fb.show{display:flex;gap:10px;align-items:flex-start;}
+.fb .ic{font-size:22px;line-height:1.3;flex:none;}
+.fb.ok{background:var(--green-l);border-color:var(--green-b);color:#064b31;}
+.fb.bad{background:var(--red-l);border-color:var(--red-b);color:#7a1426;}
+.fb.info{background:var(--cyan-l);border-color:var(--cyan-b);color:#06456a;}
+.fb.warn{background:var(--yellow-l);border-color:#f3dc97;color:#5a4200;}
+
+/* meters & badges */
+.meter{height:16px;border-radius:999px;background:#ece9f8;overflow:hidden;}
+.meter>i{display:block;height:100%;border-radius:999px;background:var(--cyan);transition:width .4s;}
+.badge{display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:14px;border-radius:999px;padding:4px 12px;
+  background:var(--soft);border:1.5px solid var(--line);}
+.badge.ok{background:var(--green-l);border-color:var(--green-b);color:var(--green-d);}
+.badge.bad{background:var(--red-l);border-color:var(--red-b);color:var(--red-d);}
+.missions{list-style:none;margin:0;padding:0;display:grid;gap:8px;}
+.missions li{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-s);background:#fff;
+  border:2px solid var(--line);font-weight:700;}
+.missions li .st{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--soft);
+  border:2px solid var(--line);flex:none;font-size:15px;}
+.missions li.cur{border-color:var(--cyan);}
+.missions li.done{border-color:var(--green-b);background:var(--green-l);}
+.missions li.done .st{background:var(--green);border-color:var(--green);color:#fff;}
+
+/* 3D canvas wrapper (Kit.orbit) */
+.view3d{position:relative;border-radius:var(--r);background:radial-gradient(ellipse at 50% 40%,#2d1670 0%,#160038 75%);
+  overflow:hidden;touch-action:none;cursor:grab;aspect-ratio:4/3;width:100%;}
+.view3d canvas{display:block;width:100%;height:100%;}
+.view3d .hint3d{position:absolute;bottom:10px;inset-inline-start:10px;font-size:13px;font-weight:700;color:#d9d2ff;
+  background:rgba(255,255,255,.1);border-radius:999px;padding:4px 12px;pointer-events:none;}
+
+/* nav footer */
+.navbar{position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);
+  border-top:1.5px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));}
+.navbar .in{max-width:1120px;margin:0 auto;display:flex;gap:10px;align-items:center;justify-content:space-between;}
+.navbar .where{font-weight:800;color:var(--muted);font-size:14.5px;text-align:center;flex:1;}
+
+/* summary card */
+.sum{display:grid;gap:10px;}
+.sum li{background:var(--green-l);border:1.5px solid var(--green-b);border-radius:var(--r-s);padding:10px 14px;font-weight:700;list-style:none;}
+.sum{padding:0;margin:0;}
+
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:998;}
+@keyframes rise{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+@keyframes shake{0%,100%{transform:none;}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+@keyframes pop{0%{transform:scale(.6);opacity:0;}70%{transform:scale(1.08);}100%{transform:scale(1);opacity:1;}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;scroll-behavior:auto !important;}}
+@media (max-width:560px){.stage-b{padding:16px 14px 20px;}.stage-h{padding:12px 14px;}.dots li{width:28px;height:28px;font-size:12.5px;}.btn{padding:0 16px;}}
+</style>
+<style>
+/* ================= ACTIVITY-SPECIFIC CSS ================= */
+/* ---------- 3D skin viewer ---------- */
+.viewer{display:grid;gap:10px;min-width:0;}
+.scene{position:relative;width:100%;aspect-ratio:1/0.9;max-height:520px;border-radius:var(--r);overflow:hidden;
+  background:radial-gradient(ellipse at 50% 38%,#33197a 0%,#170040 78%);perspective:1150px;perspective-origin:50% 40%;
+  touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;}
+.scene::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:var(--warm,0);
+  background:radial-gradient(ellipse at 80% 0%,#ffb347 0%,rgba(255,120,40,.55) 35%,rgba(255,90,40,0) 75%);transition:opacity .3s;}
+.scene.grab{cursor:grabbing;}
+.scene:focus-visible{outline:4px solid var(--cyan);outline-offset:2px;}
+.block{position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d;}
+.grp{position:absolute;left:0;top:0;width:0;height:0;transform-style:preserve-3d;transition:transform .8s cubic-bezier(.2,.8,.2,1);}
+.face{position:absolute;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;}
+.face svg{display:block;width:100%;height:100%;}
+.face.side::after{content:"";position:absolute;inset:0;background:rgba(32,0,88,.2);pointer-events:none;}
+.face.dtop::after{content:"";position:absolute;inset:0;background:rgba(32,0,88,.06);pointer-events:none;}
+.anc{position:absolute;width:2px;height:2px;margin:-1px 0 0 -1px;pointer-events:none;}
+.stand{position:absolute;left:0;transform-origin:50% 100%;
+  transform:translate3d(var(--x),-93px,var(--z)) rotateY(calc(var(--ny,0) * 1deg)) rotateZ(var(--t,0deg));}
+.hair{width:3.6px;margin-left:-1.8px;border-radius:3px 3px 0 0;background:linear-gradient(90deg,#2a170c,#5a3a22 60%,#2a170c);}
+.bead{width:10px;height:12px;top:-11px;margin-left:-5px;border-radius:50% 50% 50% 50%/58% 58% 42% 42%;
+  background:radial-gradient(circle at 35% 30%,#fff 0 12%,#8fdcff 40%,#1592d0 100%);
+  transform:translate3d(var(--x),-93px,var(--z)) rotateY(calc(var(--ny,0) * 1deg)) scale(var(--sw,0));opacity:calc(var(--sw,0) * 3);}
+/* SVG parts */
+.s-pore ellipse{fill:#8a4f38;stroke:#ffe1cc;stroke-width:.8;}
+.drops circle{fill:#1aa7e6;stroke:#fff;stroke-width:.6;opacity:0;}
+.scene.sweating .drops circle{opacity:var(--sw,0);}
+.scene.sweating .dD{animation:dUp 1.5s linear infinite;}
+.scene.sweating .dE{animation:dUpE .75s linear infinite;}
+.dD:nth-child(2),.dE:nth-child(2){animation-delay:-.5s !important;}
+.dD:nth-child(3),.dE:nth-child(3){animation-delay:-1s !important;}
+@keyframes dUp{from{transform:translateY(0);}to{transform:translateY(-88px);}}
+@keyframes dUpE{from{transform:translateY(0);}to{transform:translateY(-34px);}}
+.scene.sweating .s-sweat{animation:pulse .9s ease-in-out infinite alternate;}
+@keyframes pulse{from{filter:none;}to{filter:drop-shadow(0 0 3px #fff) drop-shadow(0 0 5px #00c3fe);}}
+.sig{opacity:0;}
+/* highlights */
+.block.hl-epi .epi .face{outline:3px solid #ffd15c;outline-offset:-3px;}
+.block.hl-der .der .face{outline:3px solid #ffd15c;outline-offset:-3px;}
+.block.hl-pore .s-pore,.block.hl-hair .s-hair,.block.hl-hair .s-root,.block.hl-root .s-root,.block.hl-sebum .s-sebum,
+.block.hl-sweat .s-sweat,.block.hl-vessels .s-vessels,.block.hl-nerve .s-nerve{filter:drop-shadow(0 0 1.5px #fff) drop-shadow(0 0 4px #ffd15c);}
+.block.hl-pore .s-pore ellipse{fill:#00c3fe;}
+.block.hl-hair .hair{background:#ffd15c;}
+/* pins on top of the 3D view */
+.pin{position:absolute;left:0;top:0;z-index:3;}
+.mk{width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;border:3px solid #fff;background:var(--navy);color:#fff;
+  font-weight:900;font-size:19px;display:grid;place-items:center;cursor:pointer;padding:0;box-shadow:0 4px 12px rgba(0,0,0,.4);
+  touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+.mk:not(.seen)::after{content:"";position:absolute;inset:-7px;border-radius:50%;border:3px solid rgba(0,195,254,.8);animation:ring 1.6s ease-out infinite;pointer-events:none;}
+@keyframes ring{from{transform:scale(.8);opacity:1;}to{transform:scale(1.35);opacity:0;}}
+.mk.seen{background:var(--green);}
+.mk.cur{background:var(--yellow);color:var(--navy);border-color:var(--navy);box-shadow:0 0 0 5px rgba(255,209,92,.55),0 4px 12px rgba(0,0,0,.4);}
+.tag{width:0;height:0;pointer-events:none;}
+.tag span{position:absolute;top:-15px;left:0;white-space:nowrap;font-weight:900;font-size:14px;line-height:1;padding:7px 10px;border-radius:999px;
+  background:#fff;color:var(--navy);box-shadow:0 3px 10px rgba(0,0,0,.3);}
+.tag.tg-der span{background:#ffe3da;}
+.scene[data-mode=explore] .tag,.scene:not([data-mode=explore]) .mk{display:none;}
+.exitTag{display:none;}
+.scene[data-mode=touch] .exitTag{display:block;}
+.exitTag span{position:absolute;top:4px;left:-50px;width:100px;text-align:center;font-weight:900;font-size:13.5px;color:#3b2a00;background:var(--yellow);
+  border-radius:999px;padding:4px 6px;box-shadow:0 3px 10px rgba(0,0,0,.3);}
+.exitTag.go span{animation:pop .5s ease both;background:#fff36b;box-shadow:0 0 0 5px rgba(255,209,92,.6);}
+.dropper{width:0;height:0;pointer-events:none;}
+.dropper svg{position:absolute;width:52px;height:52px;left:-26px;top:-50px;filter:drop-shadow(0 4px 6px rgba(0,0,0,.4));}
+.dropper.fall svg{animation:fall .6s cubic-bezier(.5,0,.8,1) both;}
+@keyframes fall{from{transform:translateY(-80px);opacity:0;}30%{opacity:1;}to{transform:none;opacity:1;}}
+.ping{width:0;height:0;pointer-events:none;}
+.ping i{position:absolute;left:-22px;top:-12px;width:44px;height:24px;border-radius:50%;border:3px solid #ffd15c;opacity:0;}
+.ping.go i{animation:pingA .8s ease-out 2;}
+@keyframes pingA{from{transform:scale(.4);opacity:1;}to{transform:scale(1.6);opacity:0;}}
+.hint3d{position:absolute;bottom:10px;inset-inline-start:10px;font-size:13px;font-weight:700;color:#e6defe;
+  background:rgba(255,255,255,.12);border-radius:999px;padding:4px 12px;pointer-events:none;z-index:2;}
+.scene[data-mode=heat] .ctlSep{display:none;}
+.viewer .ctl{justify-content:center;}
+.scene[data-mode=heat]~.ctl .ctlSep,.scene[data-mode=touch]~.ctl .ctlSep{display:none;}
+
+/* ---------- stage 1 ---------- */
+.info{min-height:150px;}
+.info .nm{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:900;margin:0 0 6px;}
+.info .num{width:34px;height:34px;border-radius:50%;background:var(--yellow);display:grid;place-items:center;font-weight:900;flex:none;}
+.info .where{font-weight:800;color:var(--cyan-d);margin:4px 0 0;}
+.info .look{font-size:14.5px;color:var(--muted);margin:6px 0 0;}
+.found{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:6px;}
+.found li{font-size:14px;font-weight:800;border-radius:999px;padding:4px 10px;background:#fff;border:1.5px dashed var(--line);color:var(--muted);}
+.found li.ok{background:var(--green-l);border:1.5px solid var(--green-b);color:var(--green-d);}
+.side-col{display:grid;gap:12px;min-width:0;}
+
+/* ---------- stage 2 ---------- */
+.zones2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;}
+.zones2 .zone{min-height:150px;}
+.zone .zt small{display:block;font-weight:700;font-size:13px;color:var(--muted);}
+.zone.z-epi{border-color:#f3b48f;}
+.zone.z-der{border-color:#e89b8a;}
+.chip .dot{width:14px;height:14px;border-radius:50%;flex:none;border:2px solid rgba(0,0,0,.2);}
+@media (max-width:420px){.zones2 .zone{min-height:120px;}.chip{font-size:14.5px;padding:6px 10px;}}
+
+/* ---------- stage 3 ---------- */
+.heatbox{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;}
+.thermo{width:64px;height:190px;}
+.tstat{font-size:17px;font-weight:900;}
+.tstat small{display:block;font-weight:700;font-size:13.5px;color:var(--muted);}
+.airlbl{font-size:18px;font-weight:900;text-align:center;margin:4px 0;}
+.flow{list-style:none;margin:0;padding:0;display:grid;gap:6px;}
+.flow li{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:var(--r-s);border:2px solid var(--line);background:#fff;font-weight:800;
+  color:var(--muted);transition:all .3s;}
+.flow li .st{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--soft);border:2px solid var(--line);flex:none;}
+.flow li.on{color:var(--navy);border-color:var(--green-b);background:var(--green-l);}
+.flow li.on .st{background:var(--green);border-color:var(--green);color:#fff;}
+.locked{opacity:.45;pointer-events:none;}
+
+/* ---------- stage 4 ---------- */
+.tools{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
+.tool{min-height:96px;border-radius:var(--r);border:2.5px solid var(--line);background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2px;font-weight:800;font-size:14.5px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;padding:6px;line-height:1.3;text-align:center;}
+.tool svg{width:46px;height:46px;pointer-events:none;}
+.tool.done{border-color:var(--green-b);background:var(--green-l);}
+.tool:disabled{opacity:.5;}
+.tool-ghost{position:fixed;z-index:999;pointer-events:none;width:56px;height:56px;margin:-28px 0 0 -28px;filter:drop-shadow(0 6px 10px rgba(0,0,0,.35));}
+.scene.hot{box-shadow:0 0 0 4px var(--cyan);}
+.brain{display:flex;gap:12px;align-items:center;background:#fff;border:2px solid var(--line);border-radius:var(--r);padding:10px 12px;min-height:84px;}
+.brain svg{width:64px;height:52px;flex:none;}
+.brain.go{border-color:var(--yellow);background:var(--yellow-l);animation:pop .4s ease both;}
+.brain b{font-size:19px;}
+
+/* ---------- stage 5 ---------- */
+.scen{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-top:10px;}
+.scen .zone{min-height:96px;}
+.scen .zone .zt{font-weight:800;font-size:15.5px;}
+.habit{background:var(--soft);border:1.5px solid var(--line);border-radius:var(--r);padding:14px;}
+.habit .hq{font-size:19px;font-weight:900;margin:0 0 10px;}
+.sec-h{font-size:19px;font-weight:900;margin:22px 0 8px;}
+.sec-h:first-child{margin-top:0;}
+.sumgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;}
+@media (max-width:820px){.sumgrid{grid-template-columns:minmax(0,1fr);}}
+.mini{display:flex;gap:10px;align-items:center;}
+
+@media (max-width:560px){.scene{aspect-ratio:1/1.02;}.mk{width:38px;height:38px;margin:-19px 0 0 -19px;font-size:17px;border-width:2.5px;}
+ .tag span{font-size:12.5px;padding:5px 8px;top:-12px;}}
+.scene[data-mode=touch] .hint3d{display:none;}
+
+.slot{display:grid;gap:12px;min-width:0;align-content:start;}
+@media (max-width:560px){.scen .zone{min-height:74px;}}
+
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <span class="ref">📘 <b>الفصلُ ٤: الحسُّ عندَ الإنسانِ</b> · الدرسُ ٢: تركيبُ الجلدِ ووظائفُه · <span>كتابُ النشاطِ ص ٣٣–٣٦</span></span>
+    <h1>رحلةٌ داخلَ الجلدِ<small>طبقاتُ الجلدِ وما تُخفيه</small></h1>
+    <ol class="dots" id="dots" aria-label="مراحلُ النشاطِ"></ol>
+  </header>
+
+  <main id="main">
+    <!-- ============ 1 EXPLORE ============ -->
+    <section class="stage" data-stage="0" aria-labelledby="s0h">
+      <div class="stage-h"><span class="kind">أستكشفُ</span><h2 id="s0h">قطعةُ جلدٍ تحتَ المُكبِّرِ</h2></div>
+      <div class="stage-b">
+        <p class="task">دوِّرِ القطعةَ بإصبعِك، ثمَّ اضغطِ الدوائرَ المرقّمةَ الثمانيَ لتكتشفَ ما في الجلدِ.</p>
+        <div class="grid2">
+          <div class="slot" data-slot="0">
+            <div class="viewer" id="viewer">
+              <div class="scene" id="scene" data-mode="explore" tabindex="0" role="group"
+                   aria-label="نموذجٌ ثلاثيُّ الأبعادِ لقطعةِ جلدٍ مقطوعةٍ. اسحبْ لتدويرِه، أو استعملْ مفاتيحَ الأسهمِ.">
+                <div class="block" id="block"></div>
+                <div id="pins"></div>
+                <span class="hint3d" aria-hidden="true">↔ اسحبْ لتدويرِ القطعةِ</span>
+              </div>
+              <div class="row ctl">
+                <button class="btn cyan sm ctlSep" id="sepBtn" type="button" aria-pressed="false">⬆ افصلِ البشرةَ</button>
+                <button class="btn ghost sm" id="viewBtn" type="button">↺ المنظرُ الأوّلُ</button>
+              </div>
+            </div>
+          </div>
+          <div class="side-col">
+            <div class="panel info" id="info" aria-live="polite">
+              <p class="nm"><span class="num">؟</span>اضغطْ دائرةً مرقّمةً</p>
+              <p style="margin:0">ستظهرُ هنا معلوماتٌ من الكتابِ عن الجزءِ الذي تختارُه.</p>
+            </div>
+            <div class="panel">
+              <div class="row" style="justify-content:space-between"><b>اكتشفتَ</b><span class="badge" id="foundN">٠ / ٨</span></div>
+              <div class="meter" style="margin-top:6px"><i id="foundM" style="width:0"></i></div>
+              <ul class="found" id="foundList"></ul>
+            </div>
+            <p class="book" style="margin:0">الجلدُ هو الغطاءُ الخارجيُّ للجسمِ، ومن أهمِّ أعضائِه وأكبرِها: مساحتُه عندَ الشخصِ البالغِ نحوُ ١٫٧ م² ووزنُه نحوُ ٣ كغم.</p>
+            <div class="fb" id="fb0"></div>
+          </div>
+        </div>
+        <p class="extra">القطعةُ مكبّرةٌ كثيراً، والألوانُ (الأحمرُ والأزرقُ والأصفرُ) لتمييزِ الأجزاءِ فقط.</p>
+      </div>
+    </section>
+
+    <!-- ============ 2 SORT ============ -->
+    <section class="stage" data-stage="1" aria-labelledby="s1h">
+      <div class="stage-h"><span class="kind">أُصنِّفُ</span><h2 id="s1h">أينَ يقعُ؟</h2></div>
+      <div class="stage-b">
+        <p class="task">اسحبْ كلَّ بطاقةٍ إلى الطبقةِ التي يقعُ فيها (أو اضغطِ البطاقةَ ثمَّ اضغطِ الطبقةَ). يضيءُ الجزءُ في النموذجِ عندما تصيبُ.</p>
+        <div class="grid2">
+          <div class="slot" data-slot="1"></div>
+          <div class="side-col">
+            <div class="chips" id="pool1" aria-label="بطاقاتُ الأجزاءِ"></div>
+            <div class="zones2">
+              <div class="zone z-epi" data-z="epi" aria-label="منطقةُ البشرةِ"><div class="zt">البشرةُ<small>الطبقةُ الخارجيةُ التي نراها</small></div></div>
+              <div class="zone z-der" data-z="der" aria-label="منطقةُ الأدمةِ"><div class="zt">الأدمةُ<small>تقعُ تحتَ البشرةِ</small></div></div>
+            </div>
+            <div class="fb" id="fb1"></div>
+            <p class="book" id="book1" hidden>الشعرُ والأظفارُ أعضاءٌ ملحقةٌ بالجلدِ. الأظفارُ أجزاءٌ صلبةٌ تكوّنُها البشرةُ وتنتهي جذورُها في الأدمةِ، وتحمي أطرافَ الأصابعِ.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 3 HOT DAY ============ -->
+    <section class="stage" data-stage="2" aria-labelledby="s2h">
+      <div class="stage-h"><span class="kind">أتوقّعُ وأجرّبُ</span><h2 id="s2h">يومٌ حارٌّ</h2></div>
+      <div class="stage-b">
+        <p class="task">توقّعْ أوّلاً، ثمَّ حرّكِ المؤشّرَ حتّى «حارٌّ» وراقبِ الغددَ العرقيةَ وسطحَ الجلدِ ومقياسَ الحرارةِ.</p>
+        <div class="grid2">
+          <div class="slot" data-slot="2">
+            <div class="panel" id="predBox">
+              <h3>توقّعْ: في يومٍ حارٍّ، ماذا يفعلُ الجلدُ؟</h3>
+              <div class="choices" id="pred">
+                <button class="choice" type="button" data-v="sweat">تفرزُ الغددُ العرقيةُ العرقَ</button>
+                <button class="choice" type="button" data-v="close">تُغلَقُ المساماتُ</button>
+                <button class="choice" type="button" data-v="none">لا يحدثُ شيءٌ في الجلدِ</button>
+              </div>
+            </div>
+          </div>
+          <div class="side-col">
+            <div class="panel locked" id="simBox">
+              <div class="airlbl" id="airLbl">الجوُّ: معتدلٌ 🌤️</div>
+              <input type="range" id="air" min="0" max="100" value="0" aria-label="حرارةُ الجوِّ" disabled>
+              <div class="slider-lbl"><span>معتدلٌ</span><span>حارٌّ ☀️</span></div>
+              <div class="heatbox" style="margin-top:10px">
+                <svg class="thermo" viewBox="0 0 64 190" role="img" aria-label="مقياسُ حرارةِ الجسمِ">
+                  <rect x="22" y="8" width="20" height="150" rx="10" fill="#fff" stroke="#200058" stroke-width="3"/>
+                  <rect id="tFill" x="27" y="80" width="10" height="90" rx="5" fill="#e8425a"/>
+                  <circle cx="32" cy="168" r="17" fill="#e8425a" stroke="#200058" stroke-width="3"/>
+                  <line x1="12" y1="91" x2="52" y2="91" stroke="#12a06a" stroke-width="3" stroke-dasharray="4 3"/>
+                                  </svg>
+                <div>
+                  <div class="tstat" id="tStat">حرارةُ الجسمِ: طبيعيةٌ<small>الخطُّ الأخضرُ المتقطّعُ = الحرارةُ الطبيعيةُ</small></div>
+                </div>
+              </div>
+              <ol class="flow" id="flow" style="margin-top:10px">
+                <li><span class="st">١</span>تفرزُ الغددُ العرقيةُ العرقَ</li>
+                <li><span class="st">٢</span>يخرجُ العرقُ من المساماتِ</li>
+                <li><span class="st">٣</span>تنخفضُ حرارةُ الجسمِ</li>
+              </ol>
+            </div>
+            <div class="fb" id="fb2"></div>
+            <p class="book" id="book2" hidden>إفرازُ العرقِ في الأيامِ الحارةِ يخفّضُ حرارةَ الجسمِ (<b>تنظيمُ الحرارةِ</b>). والعرقُ يخلّصُ الجسمَ من الماءِ والأملاحِ؛ فالتعرّقُ نوعٌ من <b>الإخراجِ</b>.</p>
+          </div>
+        </div>
+        <p class="extra">سرعةُ ظهورِ العرقِ وحجمُ القطراتِ وحركةُ مقياسِ الحرارةِ مُبالَغٌ فيها ومُبسَّطةٌ لتوضيحِ الفكرةِ.</p>
+      </div>
+    </section>
+
+    <!-- ============ 4 TOUCH ============ -->
+    <section class="stage" data-stage="3" aria-labelledby="s3h">
+      <div class="stage-h"><span class="kind">أجرّبُ</span><h2 id="s3h">الجلدُ عضوُ اللمسِ</h2></div>
+      <div class="stage-b">
+        <p class="task">اسحبْ شيئاً إلى سطحِ الجلدِ (أو اضغطْه) وراقبْ نهاياتِ الأعصابِ. جرّبِ الأشياءَ الثلاثةَ.</p>
+        <div class="grid2">
+          <div class="slot" data-slot="3"><div class="tools" id="tools"></div></div>
+          <div class="side-col">
+            <ol class="flow" id="flow4">
+              <li><span class="st">١</span>يلمسُ الشيءُ البشرةَ</li>
+              <li><span class="st">٢</span>تتأثّرُ نهاياتُ الأعصابِ في الأدمةِ</li>
+              <li><span class="st">٣</span>تنتقلُ المعلوماتُ إلى الدماغِ</li>
+              <li><span class="st">٤</span>يفسّرُ الدماغُ ما شعرْتَ به</li>
+            </ol>
+            <div class="brain" id="brain" aria-live="polite">
+              <svg viewBox="0 0 64 52" aria-hidden="true"><path d="M20 8C8 8 4 18 8 24C2 30 6 42 16 42C20 48 30 48 32 42C34 48 46 48 48 42C58 42 62 30 56 24C60 18 56 8 44 8C40 2 26 2 20 8Z" fill="#f7b8c8" stroke="#c22b43" stroke-width="2"/><path d="M32 8V44M18 18C22 22 18 26 22 30M46 18C42 22 46 26 42 30M14 32C18 34 22 32 24 36M50 32C46 34 42 32 40 36" stroke="#c22b43" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>
+              <div id="brainTxt">الدماغُ ينتظرُ المعلوماتِ…</div>
+            </div>
+            <div class="panel" id="q3" hidden>
+              <h3>في أيِّ طبقةٍ توجدُ نهاياتُ الأعصابِ الحسيةُ؟</h3>
+              <div class="choices">
+                <button class="choice" type="button" data-v="epi">البشرةُ</button>
+                <button class="choice" type="button" data-v="der">الأدمةُ</button>
+              </div>
+            </div>
+            <div class="fb" id="fb3"></div>
+          </div>
+        </div>
+        <p class="extra">الضوءُ المتحرّكُ على العصبِ والسهمُ نحوَ الدماغِ رسمٌ لتوضيحِ انتقالِ المعلوماتِ، وليسا شكلَها الحقيقيَّ.</p>
+      </div>
+    </section>
+
+    <!-- ============ 5 FUNCTIONS & HABITS ============ -->
+    <section class="stage" data-stage="4" aria-labelledby="s4h">
+      <div class="stage-h"><span class="kind">أطبّقُ</span><h2 id="s4h">وظائفُ وعاداتٌ</h2></div>
+      <div class="stage-b">
+        <h3 class="sec-h">أ) وظائفُ الجلدِ الستُّ</h3>
+        <p class="task">اسحبْ كلَّ وظيفةٍ إلى الموقفِ الذي يدلُّ عليها (أو اضغطِ الوظيفةَ ثمَّ الموقفَ).</p>
+        <div class="chips" id="pool5" aria-label="وظائفُ الجلدِ"></div>
+        <div class="scen" id="scen"></div>
+        <div class="fb" id="fb5"></div>
+
+        <h3 class="sec-h">ب) عاداتٌ صحيةٌ لجلدٍ سليمٍ</h3>
+        <p class="task">اخترِ السببَ المناسبَ لكلِّ عادةٍ.</p>
+        <div class="habit" id="habit">
+          <div class="row" style="justify-content:space-between"><span class="badge" id="habN"></span></div>
+          <p class="hq" id="habQ"></p>
+          <div class="choices" id="habC"></div>
+          <div class="fb" id="fb6"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 6 SUMMARY ============ -->
+    <section class="stage" data-stage="5" aria-labelledby="s5h">
+      <div class="stage-h"><span class="kind">خلاصةٌ</span><h2 id="s5h">ماذا تعلّمْتُ؟</h2></div>
+      <div class="stage-b">
+        <div class="sumgrid">
+          <ul class="sum">
+            <li>🧱 للجلدِ طبقتانِ: <b>البشرةُ</b> (الخارجيةُ، عليها المساماتُ، وتحفظُ السوائلَ الحيويةَ داخلَ الجسمِ) و<b>الأدمةُ</b> تحتَها.</li>
+            <li>🔍 في الأدمةِ: الأوعيةُ الدمويةُ، ونهاياتُ الأعصابِ الحسيةِ، والغددُ الدهنيةُ والعرقيةُ، وجذورُ الشعرِ.</li>
+            <li>💧 الغددُ الدهنيةُ تفرزُ دهوناً ترطّبُ البشرةَ، والغددُ العرقيةُ تفرزُ العرقَ الذي يخرجُ من المساماتِ.</li>
+            <li>✋ الشعرُ والأظفارُ أعضاءٌ ملحقةٌ؛ الأظفارُ تحمي أطرافَ الأصابعِ.</li>
+          </ul>
+          <ul class="sum">
+            <li>🛡️ وظائفُ الجلدِ: الحمايةُ، الإحساسُ، الإخراجُ، تنظيمُ الحرارةِ، الشكلُ المميّزُ، التعرّفُ على الأشخاصِ.</li>
+            <li>☀️ في اليومِ الحارِّ يُفرَزُ العرقُ فتنخفضُ حرارةُ الجسمِ، ويخلّصُ العرقُ الجسمَ من الماءِ والأملاحِ.</li>
+            <li>🧠 تنقلُ نهاياتُ الأعصابِ المعلوماتِ إلى الدماغِ ليفسّرَها: ملمسٌ، برودةٌ، ألمٌ.</li>
+            <li>🚿 أعتني بجلدي: أستحمُّ يومياً، أتجنّبُ الشمسَ طويلاً، أحذرُ الأدواتِ الحادّةَ والساخنةَ، وأشربُ ماءً كافياً.</li>
+          </ul>
+        </div>
+        <div class="row" style="margin-top:16px;justify-content:center">
+          <button class="btn green" id="againBtn" type="button">🔁 عُدْ إلى النموذجِ</button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<nav class="navbar" aria-label="التنقلُ بينَ المراحلِ">
+  <div class="in">
+    <button class="btn ghost" id="prevBtn" type="button">→ السابقُ</button>
+    <div class="where" id="where" aria-live="polite"></div>
+    <button class="btn" id="nextBtn" type="button">التالي ←</button>
+  </div>
+</nav>
+
+<script>
+/* ================= KIT (shared helpers) ================= */
+const Kit = (() => {
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const $ = (s, r=document) => r.querySelector(s);
+  const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+  const AR = '٠١٢٣٤٥٦٧٨٩';
+  const ar = n => String(n).replace(/[0-9]/g, d => AR[d]).replace('-', '−');
+  const shuffle = a => { a = a.slice(); for (let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; };
+  const el = (tag, attrs={}, html) => { const e=document.createElement(tag);
+    for (const k in attrs){ if(k==='class') e.className=attrs[k]; else if(k.startsWith('on')) e.addEventListener(k.slice(2),attrs[k]); else e.setAttribute(k,attrs[k]); }
+    if (html!=null) e.innerHTML=html; return e; };
+
+  /* ---- feedback: Kit.say(box, 'ok'|'bad'|'info'|'warn', html) ---- */
+  const ICON = {ok:'✅', bad:'🤔', info:'💡', warn:'⚠️'};
+  function say(box, type, html){
+    if (typeof box==='string') box=$(box);
+    box.className='fb show '+type; box.setAttribute('role','status'); box.setAttribute('aria-live','polite');
+    box.innerHTML='<span class="ic" aria-hidden="true">'+ICON[type]+'</span><div>'+html+'</div>';
+  }
+  function hush(box){ if (typeof box==='string') box=$(box); box.className='fb'; box.innerHTML=''; }
+
+  /* ---- stages + nav. canLeave(i) may return false or a message string to block "next". ---- */
+  let stages=[], cur=0, names=[], hooks={};
+  function setupStages(stageNames, opts={}){
+    names=stageNames; hooks=opts; stages=$$('.stage');
+    const dots=$('#dots'); dots.innerHTML='';
+    names.forEach((n,i)=>{ const li=el('li',{title:n,'aria-label':'المرحلة '+ar(i+1)+': '+n},ar(i+1)); dots.appendChild(li); });
+    $('#prevBtn').onclick=()=>go(cur-1); $('#nextBtn').onclick=()=>go(cur+1);
+    go(0, true);
+  }
+  function go(i, first){
+    if (i<0||i>=stages.length) return;
+    if (!first && i>cur && hooks.canLeave){ const r=hooks.canLeave(cur); if (r!==true && r!==undefined){ toast(r||'أكملِ المهمةَ أولاً'); return; } }
+    stages.forEach((s,k)=>s.classList.toggle('on',k===i));
+    $$('#dots li').forEach((d,k)=>{ d.classList.toggle('on',k===i); d.classList.toggle('done',k<i); });
+    cur=i; $('#where').textContent=ar(i+1)+' / '+ar(stages.length)+' · '+names[i];
+    $('#prevBtn').disabled=i===0; $('#nextBtn').style.visibility=i===stages.length-1?'hidden':'visible';
+    if(!first) window.scrollTo({top:0,behavior:reduced?'auto':'smooth'});
+    hooks.onEnter && hooks.onEnter(i);
+  }
+  let toastT;
+  function toast(msg){
+    let t=$('#kitToast'); if(!t){ t=el('div',{id:'kitToast',role:'alert'}); Object.assign(t.style,{position:'fixed',bottom:'86px',left:'50%',
+      transform:'translateX(-50%)',background:'#200058',color:'#fff',padding:'12px 20px',borderRadius:'999px',fontWeight:'800',
+      zIndex:1000,boxShadow:'0 10px 30px rgba(0,0,0,.25)',maxWidth:'90vw',textAlign:'center'}); document.body.appendChild(t); }
+    t.textContent=msg; t.style.display='block'; clearTimeout(toastT); toastT=setTimeout(()=>t.style.display='none',2600);
+  }
+
+  /* ---- drag & drop with tap-to-place + keyboard.
+     Kit.dnd({ chips:[chipEls], zones:[zoneEls], accept:(chip,zone)=>bool|string, onDrop:(chip,zone,ok)=>{} , lockCorrect:true })
+     chips need data-id. zone gets the chip appended when accepted (or always, if place:'always'). ---- */
+  function dnd(cfg){
+    let sel=null;
+    const zones=cfg.zones;
+    const clear=()=>{ if(sel){sel.classList.remove('sel'); sel.setAttribute('aria-pressed','false');} sel=null; };
+    function drop(chip, zone){
+      const ok = cfg.accept ? cfg.accept(chip, zone) : true;
+      if (ok===true || cfg.place==='always'){ zone.appendChild(chip); }
+      if (ok===true){ chip.classList.remove('bad'); if(cfg.lockCorrect!==false){ chip.classList.add('ok'); chip.dataset.locked='1'; chip.setAttribute('tabindex','-1'); chip.setAttribute('aria-disabled','true'); } }
+      else { chip.classList.remove('bad'); void chip.offsetWidth; chip.classList.add('bad'); }
+      cfg.onDrop && cfg.onDrop(chip, zone, ok===true, ok);
+    }
+    zones.forEach(z=>{
+      z.setAttribute('tabindex', z.getAttribute('tabindex')||'0'); z.setAttribute('role','button');
+      const act=()=>{ if(sel){ const c=sel; clear(); drop(c,z);} };
+      z.addEventListener('click', e=>{ if(e.target.closest('.chip') && !sel) return; act(); });
+      z.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); act(); } });
+    });
+    cfg.chips.forEach(chip=>{
+      chip.setAttribute('tabindex','0'); chip.setAttribute('role','button'); chip.setAttribute('aria-pressed','false');
+      chip.addEventListener('keydown', e=>{ if(chip.dataset.locked) return; if(e.key==='Enter'||e.key===' '){ e.preventDefault(); const was=sel===chip; clear(); if(!was){sel=chip;chip.classList.add('sel');chip.setAttribute('aria-pressed','true');} } });
+      let start=null, ghost=null, moved=false, overZ=null;
+      chip.addEventListener('pointerdown', e=>{
+        if (chip.dataset.locked || e.button>0) return;
+        start={x:e.clientX,y:e.clientY}; moved=false; chip.setPointerCapture(e.pointerId);
+      });
+      chip.addEventListener('pointermove', e=>{
+        if(!start) return;
+        if(!moved && Math.hypot(e.clientX-start.x,e.clientY-start.y)>7){
+          moved=true; clear(); ghost=chip.cloneNode(true); ghost.classList.add('ghost'); ghost.classList.remove('sel','bad');
+          document.body.appendChild(ghost); chip.classList.add('dragging');
+        }
+        if(moved){
+          ghost.style.left=(e.clientX-ghost.offsetWidth/2)+'px'; ghost.style.top=(e.clientY-ghost.offsetHeight/2)+'px';
+          const under=document.elementFromPoint(e.clientX,e.clientY); const z=under&&under.closest('.zone');
+          const zz = z && zones.includes(z) ? z : null;
+          if(zz!==overZ){ overZ&&overZ.classList.remove('hot'); overZ=zz; overZ&&overZ.classList.add('hot'); }
+        }
+      });
+      const end=e=>{
+        if(!start) return; start=null;
+        if(moved){ ghost.remove(); ghost=null; chip.classList.remove('dragging'); if(overZ){ overZ.classList.remove('hot'); drop(chip,overZ); overZ=null; } }
+        else if(e.type==='pointerup'){ const was=sel===chip; clear(); if(!was){ sel=chip; chip.classList.add('sel'); chip.setAttribute('aria-pressed','true'); } }
+      };
+      chip.addEventListener('pointerup', end); chip.addEventListener('pointercancel', end);
+    });
+    return { clear, reset(home){ cfg.chips.forEach(c=>{ c.classList.remove('ok','bad','sel'); delete c.dataset.locked; c.setAttribute('tabindex','0'); c.removeAttribute('aria-disabled'); home.appendChild(c); }); } };
+  }
+
+  /* ---- 3D orbit view: Kit.orbit(container, draw(ctx, cam, w, h, t), {yaw,pitch,zoom,auto}) ----
+     cam.project(x,y,z) -> {x,y,s,z}  (s = perspective scale, z = depth: larger = closer to viewer) */
+  function orbit(box, draw, o={}){
+    const cv=document.createElement('canvas'); box.prepend(cv);
+    const ctx=cv.getContext('2d');
+    const cam={yaw:o.yaw??0.6, pitch:o.pitch??0.35, zoom:o.zoom??1, dist:o.dist??900, auto:o.auto??true, vy:0, vp:0};
+    let W=0,H=0,dpr=1, drag=null, last=performance.now(), userTouched=false;
+    function size(){ const r=box.getBoundingClientRect(); dpr=Math.min(2,devicePixelRatio||1); W=r.width; H=r.height; cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
+    new ResizeObserver(size).observe(box); size();
+    cam.project=(x,y,z)=>{
+      const cy=Math.cos(cam.yaw), sy=Math.sin(cam.yaw), cp=Math.cos(cam.pitch), sp=Math.sin(cam.pitch);
+      let X=x*cy - z*sy, Z=x*sy + z*cy;           // yaw around Y
+      let Y=y*cp - Z*sp; Z=y*sp + Z*cp;            // pitch around X
+      const unit=Math.min(W,H)/520*cam.zoom;
+      const s=cam.dist/(cam.dist - Z);
+      return {x:W/2 + X*s*unit, y:H/2 - Y*s*unit, s:s*unit, z:Z};
+    };
+    box.addEventListener('pointerdown',e=>{ drag={x:e.clientX,y:e.clientY}; userTouched=true; box.setPointerCapture(e.pointerId); box.style.cursor='grabbing'; });
+    box.addEventListener('pointermove',e=>{ if(!drag) return; const dx=e.clientX-drag.x, dy=e.clientY-drag.y; drag={x:e.clientX,y:e.clientY};
+      cam.vy=-dx*0.008; cam.vp=dy*0.006; cam.yaw+=cam.vy; cam.pitch=Math.max(-1.3,Math.min(1.3,cam.pitch+cam.vp)); });
+    const up=()=>{ drag=null; box.style.cursor='grab'; };
+    box.addEventListener('pointerup',up); box.addEventListener('pointercancel',up);
+    box.addEventListener('wheel',e=>{ e.preventDefault(); cam.zoom=Math.max(.6,Math.min(2.2,cam.zoom*(e.deltaY<0?1.08:.92))); },{passive:false});
+    box.tabIndex=0; box.setAttribute('role','img');
+    box.addEventListener('keydown',e=>{ const k=e.key; if(k==='ArrowLeft'){cam.yaw+=.15;} else if(k==='ArrowRight'){cam.yaw-=.15;}
+      else if(k==='ArrowUp'){cam.pitch=Math.max(-1.3,cam.pitch-.12);} else if(k==='ArrowDown'){cam.pitch=Math.min(1.3,cam.pitch+.12);}
+      else if(k==='+'||k==='='){cam.zoom=Math.min(2.2,cam.zoom*1.1);} else if(k==='-'){cam.zoom=Math.max(.6,cam.zoom*.9);} else return; e.preventDefault(); userTouched=true; });
+    function frame(now){
+      const dt=Math.min(50,now-last); last=now;
+      if(!drag){ cam.vy*=0.93; cam.vp*=0.9; cam.yaw+=cam.vy; cam.pitch=Math.max(-1.3,Math.min(1.3,cam.pitch+cam.vp));
+        if(cam.auto && !reduced && Math.abs(cam.vy)<0.002) cam.yaw+=dt*0.00018*(userTouched?0.4:1); }
+      ctx.clearRect(0,0,W,H); draw(ctx,cam,W,H,reduced?0:now,dt);
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+    return cam;
+  }
+  /* shaded sphere */
+  function ball(ctx,x,y,r,color,label,labelColor){
+    if(r<=0.5) return;
+    const g=ctx.createRadialGradient(x-r*.35,y-r*.4,r*.15,x,y,r);
+    g.addColorStop(0,'#ffffff'); g.addColorStop(.25,color); g.addColorStop(1,shade(color,-0.45));
+    ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+    if(label && r>8){ ctx.fillStyle=labelColor||'#fff'; ctx.font='900 '+Math.round(r*1.05)+'px '+getComputedStyle(document.body).fontFamily;
+      ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(label,x,y+r*.05); }
+  }
+  function shade(hex,p){ const n=parseInt(hex.slice(1),16); let r=n>>16,g=n>>8&255,b=n&255;
+    const f=v=>Math.max(0,Math.min(255,Math.round(p<0?v*(1+p):v+(255-v)*p))); return 'rgb('+f(r)+','+f(g)+','+f(b)+')'; }
+
+  /* small celebration */
+  function celebrate(){
+    if(reduced) return;
+    const c=document.createElement('canvas'); c.className='confetti'; document.body.appendChild(c);
+    const x=c.getContext('2d'); c.width=innerWidth; c.height=innerHeight;
+    const cols=['#00c3fe','#12a06a','#ffd15c','#7b5cff','#e8425a'];
+    const P=Array.from({length:90},()=>({x:innerWidth/2+(Math.random()-.5)*200,y:innerHeight*.35,vx:(Math.random()-.5)*9,vy:-Math.random()*9-3,
+      s:5+Math.random()*6,c:cols[Math.random()*5|0],r:Math.random()*6}));
+    let t=0; (function f(){ t++; x.clearRect(0,0,c.width,c.height);
+      P.forEach(p=>{ p.vy+=.28; p.x+=p.vx; p.y+=p.vy; p.r+=.15; x.save(); x.translate(p.x,p.y); x.rotate(p.r); x.fillStyle=p.c; x.fillRect(-p.s/2,-p.s/4,p.s,p.s/2); x.restore(); });
+      if(t<110) requestAnimationFrame(f); else c.remove(); })();
+  }
+
+  return {$, $$, ar, el, shuffle, say, hush, setupStages, go, toast, dnd, orbit, ball, shade, celebrate, reduced, get cur(){return cur;}};
+})();
+</script>
+<script>
+/* ================= ACTIVITY JS ================= */
+const {$, $$, ar} = Kit;
+const R = Kit.reduced;
+const sleep = ms => new Promise(r => setTimeout(r, R ? Math.min(ms, 120) : ms));
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+/* ---------- geometry (px, before scaling): width 300, depth 180, epidermis 36, dermis 150 ---------- */
+const PORES = [[215,177],[190,80],[60,120],[130,146],[250,40],[40,30],[275,128],[150,22],[100,62],[232,112],[22,160]];
+const HAIRS = [[90,177,34,6],[40,74,30,-9],[170,112,32,10],[262,78,28,-7],[120,30,30,5],[285,160,26,12]];
+
+function face(cls, w, h, tf, svg, anchors=''){
+  return `<div class="face ${cls}" style="width:${w}px;height:${h}px;left:${-w/2}px;top:${-h/2}px;transform:${tf}">${svg}${anchors}</div>`;
+}
+const anc = (k, x, y) => `<i class="anc" data-k="${k}" style="left:${x}px;top:${y}px"></i>`;
+const dbl = (d, w1, c1, w2, c2) => `<path d="${d}" stroke="${c1}" stroke-width="${w1}"/><path d="${d}" stroke="${c2}" stroke-width="${w2}"/>`;
+
+function svgEpiTop(){
+  let s = `<svg viewBox="0 0 300 180" preserveAspectRatio="none" aria-hidden="true"><defs><radialGradient id="gT" cx=".5" cy=".7" r=".85"><stop offset="0" stop-color="#f9d4b5"/><stop offset="1" stop-color="#e9ad87"/></radialGradient></defs>
+  <rect width="300" height="180" fill="url(#gT)"/><g stroke="#c98763" stroke-opacity=".35" fill="none" stroke-width="1">`;
+  for (let i = -180; i < 300; i += 27) s += `<path d="M${i} 0L${i+180} 180"/>`;
+  for (let i = 0; i < 480; i += 33) s += `<path d="M${i} 0L${i-180} 180"/>`;
+  s += `</g><g class="s-pore">` + PORES.map(([x,y]) => `<ellipse cx="${x}" cy="${y}" rx="3.2" ry="2.3"/>`).join('') + `</g>`;
+  s += `<g class="s-hair" fill="#5a3a22">` + HAIRS.map(([x,y]) => `<ellipse cx="${x}" cy="${y}" rx="3.6" ry="2.6"/>`).join('') + `</g>`;
+  s += `<rect x="1" y="1" width="298" height="178" fill="none" stroke="#b9714f" stroke-width="2"/></svg>`;
+  return s;
+}
+function svgEpiFront(){
+  return `<svg viewBox="0 0 300 36" preserveAspectRatio="none" aria-hidden="true"><defs>
+  <linearGradient id="gE" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f8cba8"/><stop offset="1" stop-color="#e0976f"/></linearGradient>
+  <pattern id="pC" width="14" height="9" patternUnits="userSpaceOnUse"><rect x="1" y="1" width="12" height="7" rx="3.5" fill="#fff" fill-opacity=".14" stroke="#a9623f" stroke-opacity=".35"/></pattern></defs>
+  <rect width="300" height="36" fill="url(#gE)"/><rect width="300" height="36" fill="url(#pC)"/>
+  <g class="s-hair"><path d="M83 0V36H97V0Z" fill="#efba97" stroke="#a9623f" stroke-width=".8"/><rect x="87" y="0" width="6" height="36" fill="#3b2516"/></g>
+  <g class="s-sweat" fill="none">${dbl('M215 36V5', 6.5, '#0a8fc0', 3.4, '#c9eeff')}</g>
+  <g class="s-pore"><path d="M207 0Q215 9 223 0Z" fill="#8a4f38"/></g>
+  <g class="drops"><circle class="dE" cx="215" cy="36" r="2.4"/><circle class="dE" cx="215" cy="36" r="2.4"/><circle class="dE" cx="215" cy="36" r="2.4"/></g>
+  <path d="M0 1H300M0 35.2H300" stroke="#a9623f" stroke-width="1.6"/></svg>`;
+}
+function svgEpiSide(){
+  return `<svg viewBox="0 0 180 36" preserveAspectRatio="none" aria-hidden="true"><rect width="180" height="36" fill="url(#gE)"/><rect width="180" height="36" fill="url(#pC)"/><path d="M0 1H180M0 35.2H180" stroke="#a9623f" stroke-width="1.6"/></svg>`;
+}
+const FIBERS = `<g stroke="#dc9e8b" stroke-opacity=".5" fill="none" stroke-width="1.2"><path d="M0 20C40 14 70 30 120 22S200 12 300 24"/><path d="M0 55C50 48 90 64 140 56S230 46 300 58"/><path d="M0 84C40 78 100 92 150 84S250 78 300 88"/></g>`;
+function svgDerFront(){
+  let loops = '';
+  [30, 140, 283].forEach(x => {
+    loops += `<path d="M${x} 131C${x-4} 112 ${x-2} 100 ${x+5} 100" stroke="#e8425a" stroke-width="2.8"/><path d="M${x+5} 100C${x+12} 100 ${x+14} 120 ${x+10} 142" stroke="#3d63e0" stroke-width="2.8"/>`;
+  });
+  const n1 = ['M255 150L255 42L245 20L239 6','M245 20L252 10','M255 42L268 22L273 7','M268 22L262 12'];
+  const n2 = ['M165 150C165 120 168 90 165 62L155 34L150 18','M165 62L176 34L180 20','M155 34L162 24'];
+  const nerve = [...n1, ...n2].map(d => `<path d="${d}" stroke="#8a6500" stroke-width="5"/>`).join('') + [...n1, ...n2].map(d => `<path d="${d}" stroke="#ffd23a" stroke-width="2.8"/>`).join('');
+  const sweatD = 'M215 0V86C192 88 194 112 211 112C229 112 234 94 220 94C202 94 202 120 220 120C238 120 241 100 230 98';
+  return `<svg viewBox="0 0 300 150" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="gD" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbdcd0"/><stop offset="1" stop-color="#eebaa8"/></linearGradient></defs>
+  <rect width="300" height="150" fill="url(#gD)"/>${FIBERS}
+  <g class="s-vessels" fill="none" stroke-linecap="round"><path d="M0 132C60 124 100 140 150 130S240 124 300 132" stroke="#e8425a" stroke-width="6"/><path d="M0 143C70 148 120 136 180 143S260 148 300 143" stroke="#3d63e0" stroke-width="6"/>${loops}</g>
+  <g class="s-root"><path d="M82 0V98Q80 122 90 123Q100 122 98 98V0Z" fill="#eab08e" stroke="#a9623f" stroke-width="1"/><rect x="87" y="0" width="6" height="104" fill="#3b2516"/><ellipse cx="90" cy="110" rx="8.5" ry="8" fill="#5a3a22"/><ellipse cx="90" cy="116" rx="3.6" ry="3" fill="#e8425a"/></g>
+  <g class="s-sebum"><path d="M97 42L104 43" stroke="#c9971c" stroke-width="3"/><g fill="#ffe08a" stroke="#c9971c" stroke-width="1.3"><circle cx="109" cy="34" r="7.5"/><circle cx="118" cy="43" r="8"/><circle cx="109" cy="52" r="7.5"/></g><g fill="#f0b92e"><circle cx="108" cy="33" r="1.6"/><circle cx="118" cy="44" r="1.8"/><circle cx="109" cy="52" r="1.6"/><circle cx="112" cy="42" r="1.3"/></g></g>
+  <g class="s-sweat" fill="none" stroke-linecap="round" stroke-linejoin="round">${dbl(sweatD, 6.5, '#0a8fc0', 3.4, '#c9eeff')}</g>
+  <g class="drops"><circle class="dD" cx="215" cy="86" r="2.4"/><circle class="dD" cx="215" cy="86" r="2.4"/><circle class="dD" cx="215" cy="86" r="2.4"/></g>
+  <g class="s-nerve" fill="none" stroke-linecap="round" stroke-linejoin="round">${nerve}</g>
+  <path id="sig" class="sig" d="M239 6L245 20L255 42L255 150" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+  <path d="M0 .8H300" stroke="#a9623f" stroke-width="1.6"/></svg>`;
+}
+function svgDerSide(left){
+  const red = left ? 'M0 130C60 138 120 126 180 132' : 'M0 132C60 126 120 138 180 130';
+  const blue = left ? 'M0 144C60 138 120 148 180 143' : 'M0 143C60 148 120 138 180 144';
+  const nv = left ? 'M0 60C50 70 120 52 180 66' : 'M0 66C60 52 130 70 180 60';
+  return `<svg viewBox="0 0 180 150" preserveAspectRatio="none" aria-hidden="true"><rect width="180" height="150" fill="url(#gD)"/>${FIBERS}
+  <g class="s-vessels" fill="none" stroke-linecap="round"><path d="${red}" stroke="#e8425a" stroke-width="6"/><path d="${blue}" stroke="#3d63e0" stroke-width="6"/></g>
+  <g class="s-nerve" fill="none" stroke-linecap="round"><path d="${nv}" stroke="#8a6500" stroke-width="5"/><path d="${nv}" stroke="#ffd23a" stroke-width="2.8"/></g>
+  <path d="M0 .8H180" stroke="#a9623f" stroke-width="1.6"/></svg>`;
+}
+function svgDerTop(){
+  let s = `<svg viewBox="0 0 300 180" preserveAspectRatio="none" aria-hidden="true"><rect width="300" height="180" fill="#f6cfc0"/>
+  <g class="s-vessels" fill="none" stroke-width="2.4" stroke-linecap="round"><path d="M20 100C40 90 50 110 70 100" stroke="#e8425a"/><path d="M180 40C200 30 210 50 230 40" stroke="#3d63e0"/><path d="M120 120C140 130 150 110 170 122" stroke="#e8425a"/><path d="M200 150C215 140 230 160 245 150" stroke="#3d63e0"/></g>
+  <g class="s-nerve" fill="#ffd23a" stroke="#8a6500" stroke-width="1"><circle cx="239" cy="172" r="3"/><circle cx="273" cy="172" r="3"/><circle cx="150" cy="168" r="3"/><circle cx="180" cy="170" r="3"/><circle cx="80" cy="40" r="3"/></g>`;
+  s += `<g class="s-sweat" fill="#c9eeff" stroke="#0a8fc0" stroke-width="1.6">` + PORES.map(([x,y]) => `<circle cx="${x}" cy="${y}" r="2.8"/>`).join('') + `</g>`;
+  s += `<g class="s-root" fill="#3b2516" stroke="#eab08e" stroke-width="2.5">` + HAIRS.map(([x,y]) => `<circle cx="${x}" cy="${y}" r="5"/>`).join('') + `</g>`;
+  s += `<rect x="1" y="1" width="298" height="178" fill="none" stroke="#a9623f" stroke-width="2"/></svg>`;
+  return s;
+}
+function buildBlock(){
+  const stands = HAIRS.map(([x,y,h,t]) => `<div class="stand hair" style="--x:${x-150}px;--z:${y-90}px;--t:${t}deg;height:${h}px;top:${-h}px"></div>`).join('')
+    + PORES.map(([x,y]) => `<div class="stand bead" style="--x:${x-150}px;--z:${y-90}px"></div>`).join('');
+  const epi = `<div class="grp epi" id="epiG">`
+    + face('etop', 300, 180, 'translateY(-93px) rotateX(90deg)', svgEpiTop(), anc('pore',190,80) + anc('touch',252,170))
+    + face('efront', 300, 36, 'translateY(-75px) translateZ(90px)', svgEpiFront(), anc('epi',45,18) + anc('tagEpi',6,18))
+    + face('side', 180, 36, 'translateY(-75px) rotateY(90deg) translateZ(150px)', svgEpiSide())
+    + face('side', 180, 36, 'translateY(-75px) rotateY(-90deg) translateZ(150px)', svgEpiSide())
+    + stands + `</div>`;
+  const der = `<div class="grp der" id="derG">`
+    + face('dtop', 300, 180, 'translateY(-57px) rotateX(90deg)', svgDerTop())
+    + face('dfront', 300, 150, 'translateY(18px) translateZ(90px)', svgDerFront(),
+        anc('der',40,62) + anc('hair',66,112) + anc('sebum',137,30) + anc('sweat',186,108) + anc('vessels',130,140) + anc('nerve',283,45) + anc('tagDer',6,62) + anc('exit',255,150))
+    + face('side', 180, 150, 'translateY(18px) rotateY(90deg) translateZ(150px)', svgDerSide(false))
+    + face('side', 180, 150, 'translateY(18px) rotateY(-90deg) translateZ(150px)', svgDerSide(true))
+    + `</div>`;
+  $('#block').innerHTML = der + epi;
+}
+buildBlock();
+
+/* ---------- parts info (book facts) ---------- */
+const PARTS = [
+  {k:'epi', n:'البشرةُ', where:'الطبقةُ الخارجيةُ', txt:'الطبقةُ الخارجيةُ من الجلدِ التي نراها. تحفظُ السوائلَ الحيويةَ داخلَ الجسمِ، وتنتشرُ عليها فتحاتٌ صغيرةٌ تُسمّى المساماتِ.', look:'الشريطُ الرقيقُ في الأعلى.'},
+  {k:'pore', n:'المساماتُ', where:'على البشرةِ', txt:'فتحاتٌ صغيرةٌ تنتشرُ على البشرةِ.', look:'النقاطُ الصغيرةُ الداكنةُ على سطحِ القطعةِ.'},
+  {k:'der', n:'الأدمةُ', where:'تحتَ البشرةِ', txt:'تقعُ تحتَ البشرةِ، وتحتوي الأوعيةَ الدمويةَ ونهاياتِ الأعصابِ الحسيةِ، وتنتشرُ فيها الغددُ الدهنيةُ والشعرُ والغددُ العرقيةُ.', look:'الطبقةُ السميكةُ تحتَ البشرةِ. اضغطْ «افصلِ البشرةَ» لترى سطحَها.'},
+  {k:'hair', n:'الشعرةُ', where:'جذرُها في الأدمةِ', txt:'جذورُ الشعرِ مغروسةٌ في الأدمةِ. الشعرُ والأظفارُ أعضاءٌ ملحقةٌ بالجلدِ.', look:'الشعرةُ تبرزُ فوقَ السطحِ، وجذرُها في الأسفلِ.'},
+  {k:'sebum', n:'الغدةُ الدهنيةُ', where:'في الأدمةِ', txt:'تفرزُ الدهونَ التي ترطّبُ البشرةَ. تقعُ في الأدمةِ بجانبِ جذرِ الشعرةِ.', look:'الكتلةُ الصفراءُ بجانبِ الشعرةِ.'},
+  {k:'sweat', n:'الغدةُ العرقيةُ', where:'في الأدمةِ', txt:'تفرزُ العرقَ. يخلّصُ العرقُ الجسمَ من الماءِ والأملاحِ ويساعدُ في تنظيمِ حرارتِه.', look:'الكتلةُ الملتفّةُ الزرقاءُ، وفوقَها ممرٌّ يصلُ إلى مسامةٍ.'},
+  {k:'vessels', n:'الأوعيةُ الدمويةُ', where:'في الأدمةِ', txt:'تحتوي الأدمةُ الأوعيةَ الدمويةَ.', look:'الخطوطُ الحمراءُ والزرقاءُ في أسفلِ الأدمةِ.'},
+  {k:'nerve', n:'نهاياتُ الأعصابِ الحسيةِ', where:'في الأدمةِ', txt:'ترتبطُ بها خلايا حسيةٌ تنقلُ المعلوماتِ إلى الدماغِ ليفسّرَها، مثلَ الألمِ والبرودةِ والملمسِ. لذلك الجلدُ عضوُ اللمسِ.', look:'الخطوطُ الصفراءُ المتفرّعةُ.'}
+];
+
+/* ---------- viewer: rotation, scale, pins ---------- */
+const scene = $('#scene'), block = $('#block'), epiG = $('#epiG'), viewer = $('#viewer'), pins = $('#pins');
+let yaw = -28, pitch = 24, sc = 1, sep = false;
+function applyT(){
+  block.style.transform = `translateY(${(sep ? 30 : 10) * sc}px) scale3d(${sc},${sc},${sc}) rotateX(${-pitch}deg) rotateY(${yaw}deg)`;
+  block.style.setProperty('--ny', (-yaw).toFixed(2));
+}
+function fit(){ const r = scene.getBoundingClientRect(); if (!r.width) return; sc = Math.min(r.width / (r.width < 500 ? 370 : 430), r.height / 405); applyT(); }
+new ResizeObserver(fit).observe(scene); fit();
+let drag = null;
+scene.addEventListener('pointerdown', e => {
+  if (e.target.closest('button')) return;
+  drag = {x:e.clientX, y:e.clientY}; scene.setPointerCapture(e.pointerId); scene.classList.add('grab');
+});
+scene.addEventListener('pointermove', e => {
+  if (!drag) return;
+  yaw = clamp(yaw + (e.clientX - drag.x) * 0.35, -60, 60);
+  pitch = clamp(pitch - (e.clientY - drag.y) * 0.3, 8, 64);
+  drag = {x:e.clientX, y:e.clientY}; applyT();
+});
+const endDrag = () => { drag = null; scene.classList.remove('grab'); };
+scene.addEventListener('pointerup', endDrag); scene.addEventListener('pointercancel', endDrag);
+scene.addEventListener('keydown', e => {
+  const k = e.key;
+  if (k === 'ArrowLeft') yaw = clamp(yaw - 6, -60, 60); else if (k === 'ArrowRight') yaw = clamp(yaw + 6, -60, 60);
+  else if (k === 'ArrowUp') pitch = clamp(pitch + 5, 8, 64); else if (k === 'ArrowDown') pitch = clamp(pitch - 5, 8, 64);
+  else return; e.preventDefault(); applyT();
+});
+function setSep(v){
+  sep = v; epiG.style.transform = v ? 'translateY(-78px)' : '';
+  const b = $('#sepBtn'); b.setAttribute('aria-pressed', v); b.textContent = v ? '⬇ أعِدِ البشرةَ' : '⬆ افصلِ البشرةَ'; applyT();
+}
+$('#sepBtn').onclick = () => setSep(!sep);
+$('#viewBtn').onclick = () => { yaw = -28; pitch = 24; setSep(false); };
+
+// pins (markers, tags, effects) follow anchors inside the 3D faces
+const ANC = {}; $$('.anc').forEach(a => ANC[a.dataset.k] = a);
+PARTS.forEach((p, i) => {
+  pins.insertAdjacentHTML('beforeend', `<button class="pin mk" type="button" data-pin="${p.k}" aria-label="${ar(i+1)}: اكتشفِ الجزءَ رقمَ ${ar(i+1)}">${ar(i+1)}</button>`);
+});
+pins.insertAdjacentHTML('beforeend', `<div class="pin tag tg-epi" data-pin="tagEpi" aria-hidden="true"><span>البشرةُ</span></div>
+  <div class="pin tag tg-der" data-pin="tagDer" aria-hidden="true"><span>الأدمةُ</span></div>
+  <div class="pin exitTag" id="exitTag" data-pin="exit" aria-hidden="true"><span>↓ إلى الدماغِ</span></div>
+  <div class="pin ping" id="ping" data-pin="touch" aria-hidden="true"><i></i></div>
+  <div class="pin dropper" id="dropper" data-pin="touch" aria-hidden="true"></div>`);
+const pinEls = $$('[data-pin]', pins);
+(function track(){
+  if (scene.offsetParent) {
+    const r = scene.getBoundingClientRect();
+    pinEls.forEach(m => {
+      const b = ANC[m.dataset.pin].getBoundingClientRect();
+      m.style.transform = `translate(${(b.left + b.width/2 - r.left).toFixed(1)}px,${(b.top + b.height/2 - r.top).toFixed(1)}px)`;
+    });
+  }
+  requestAnimationFrame(track);
+})();
+function setHL(list){ block.className = 'block ' + list.map(k => 'hl-' + k).join(' '); }
+
+/* ================= STAGE 1: explore ================= */
+const found = new Set();
+$('#foundList').innerHTML = PARTS.map((p, i) => `<li data-k="${p.k}"><b>${ar(i+1)}</b> ؟؟</li>`).join('');
+function pick(k){
+  const i = PARTS.findIndex(p => p.k === k), p = PARTS[i];
+  setHL([k]);
+  $$('.mk', pins).forEach(m => m.classList.toggle('cur', m.dataset.pin === k));
+  const m = $(`.mk[data-pin="${k}"]`, pins); m.classList.add('seen'); m.setAttribute('aria-label', `${ar(i+1)}: ${p.n}`);
+  $('#info').innerHTML = `<p class="nm"><span class="num">${ar(i+1)}</span>${p.n}</p><p class="book" style="margin:4px 0">${p.txt}</p>
+    <p class="where">📍 ${p.where}</p><p class="look">👀 ${p.look}</p>`;
+  if (!found.has(k)) {
+    found.add(k);
+    const li = $(`#foundList li[data-k="${k}"]`); li.innerHTML = `<b>${ar(i+1)}</b> ${p.n}`; li.classList.add('ok');
+    $('#foundN').textContent = `${ar(found.size)} / ${ar(8)}`; $('#foundM').style.width = (found.size / 8 * 100) + '%';
+    if (found.size === 8) { Kit.say('#fb0', 'ok', 'أحسنْتَ! اكتشفْتَ الأجزاءَ الثمانيةَ. لاحظْ: البشرةُ رقيقةٌ في الأعلى، ومعظمُ الأجزاءِ في الأدمةِ تحتَها. اضغطْ «التالي».'); Kit.celebrate(); }
+  }
+}
+$$('.mk', pins).forEach(m => m.addEventListener('click', () => pick(m.dataset.pin)));
+
+/* ================= STAGE 2: sort into layers ================= */
+const SORT = [
+  {k:'pore', n:'المساماتُ', c:'#8a4f38', ans:'epi', why:'المساماتُ فتحاتٌ صغيرةٌ تنتشرُ على <b>البشرةِ</b>، الطبقةِ الخارجيةِ التي نراها. انظرْ إلى سطحِ القطعةِ.'},
+  {k:'vessels', n:'الأوعيةُ الدمويةُ', c:'#e8425a', ans:'der', why:'الكتابُ يقولُ: <b>الأدمةُ</b> تحتوي الأوعيةَ الدمويةَ. ابحثْ عن الخطوطِ الحمراءِ والزرقاءِ في الطبقةِ السميكةِ.'},
+  {k:'nerve', n:'نهاياتُ الأعصابِ', c:'#ffd23a', ans:'der', why:'نهاياتُ الأعصابِ الحسيةِ في <b>الأدمةِ</b> تحتَ البشرةِ، مع أنّنا نشعرُ عندما يُلمَسُ سطحُ الجلدِ.'},
+  {k:'sebum', n:'الغددُ الدهنيةُ', c:'#ffe08a', ans:'der', why:'الدهونُ ترطّبُ البشرةَ، لكنَّ الغددَ الدهنيةَ نفسَها في <b>الأدمةِ</b> بجانبِ جذرِ الشعرةِ.'},
+  {k:'sweat', n:'الغددُ العرقيةُ', c:'#5cc8ff', ans:'der', why:'العرقُ يخرجُ من المساماتِ في البشرةِ، لكنَّ الغدةَ العرقيةَ (الكتلةَ الملتفّةَ) في <b>الأدمةِ</b>.'},
+  {k:'root', n:'جذرُ الشعرةِ', c:'#5a3a22', ans:'der', why:'الشعرةُ تبرزُ فوقَ السطحِ، لكنَّ جذورَ الشعرِ مغروسةٌ في <b>الأدمةِ</b>.'}
+];
+const pool1 = $('#pool1'), zones1 = $$('.zones2 .zone'), wrong1 = {}, placed1 = new Set();
+Kit.shuffle(SORT).forEach(s => pool1.insertAdjacentHTML('beforeend', `<span class="chip" data-id="${s.k}"><span class="dot" style="background:${s.c}" aria-hidden="true"></span>${s.n}</span>`));
+function placedOk(chip, s){
+  placed1.add(s.k); hl1();
+  const z = s.ans === 'epi' ? 'البشرةِ' : 'الأدمةِ';
+  if (placed1.size === 6) {
+    Kit.say('#fb1', 'ok', '✓ ممتاز! المساماتُ وحدَها على البشرةِ، وكلُّ الأجزاءِ الأخرى في الأدمةِ: الأوعيةُ الدمويةُ ونهاياتُ الأعصابِ والغددُ الدهنيةُ والعرقيةُ وجذورُ الشعرِ.');
+    $('#book1').hidden = false; Kit.celebrate();
+  } else Kit.say('#fb1', 'ok', `✓ صحيح: ${s.n} في ${z}. انظرْ كيفَ أضاءَ في النموذجِ.`);
+}
+function hl1(){ setHL([...placed1]); }
+const dnd1 = Kit.dnd({
+  chips: $$('.chip', pool1), zones: zones1,
+  accept: (chip, zone) => SORT.find(s => s.k === chip.dataset.id).ans === zone.dataset.z,
+  onDrop: (chip, zone, ok) => {
+    const s = SORT.find(x => x.k === chip.dataset.id);
+    if (ok) return placedOk(chip, s);
+    wrong1[s.k] = (wrong1[s.k] || 0) + 1;
+    Kit.say('#fb1', 'bad', `حاولْ مرةً أخرى — ${s.why}` + (wrong1[s.k] >= 2 ? `<div class="row" style="margin-top:8px"><button class="btn sm" type="button" id="show1">أرني الحلَّ</button></div>` : ''));
+    const b = $('#show1'); if (b) b.onclick = () => {
+      const z = zones1.find(z => z.dataset.z === s.ans); z.appendChild(chip);
+      chip.classList.remove('bad', 'sel'); chip.classList.add('ok'); chip.dataset.locked = '1'; chip.setAttribute('tabindex', '-1'); chip.setAttribute('aria-disabled', 'true');
+      dnd1.clear(); placedOk(chip, s);
+    };
+  }
+});
+
+/* ================= STAGE 3: hot day ================= */
+let predicted = null, air = 0, T = .5, sw = 0, peak = .5, lastT = .5, simDone = false, flowOn = [false, false, false];
+const PRED = {sweat:'تفرزُ الغددُ العرقيةُ العرقَ', close:'تُغلَقُ المساماتُ', none:'لا يحدثُ شيءٌ في الجلدِ'};
+$$('#pred .choice').forEach(b => b.addEventListener('click', () => {
+  if (predicted) return;
+  predicted = b.dataset.v; $$('#pred .choice').forEach(x => x.setAttribute('aria-pressed', x === b));
+  $('#simBox').classList.remove('locked'); $('#air').disabled = false;
+  Kit.say('#fb2', 'info', 'سجّلْنا توقّعَك. الآنَ حرّكِ المؤشّرَ حتّى «حارٌّ» وراقبْ ماذا يحدثُ.');
+}));
+$('#air').addEventListener('input', e => {
+  air = e.target.value / 100;
+  $('#airLbl').textContent = air < .35 ? 'الجوُّ: معتدلٌ 🌤️' : air < .75 ? 'الجوُّ: دافئٌ ⛅' : 'الجوُّ: حارٌّ ☀️';
+  scene.style.setProperty('--warm', (air * .9).toFixed(2));
+});
+const tFill = $('#tFill');
+function simStep(dt){
+  const k = R ? 4 : 1;
+  const heat = Math.max(0, (air - .4) / .6);
+  const Tt = .5 + .42 * heat - .38 * sw;
+  T += (Tt - T) * Math.min(1, dt * .6 * k);
+  const target = heat > 0 && (T > .57 || sw > .05) ? heat : 0;
+  sw += (target - sw) * Math.min(1, dt * .4 * k);
+  if (heat > 0) peak = Math.max(peak, T); else peak = T;
+  scene.classList.toggle('sweating', sw > .1);
+  block.style.setProperty('--sw', sw.toFixed(3));
+  // thermometer: T .5 -> line at y=83 ; fill from y(T) to 160
+  const y = 158 - (T - .1) / .9 * 150;
+  tFill.setAttribute('y', y.toFixed(1)); tFill.setAttribute('height', (170 - y).toFixed(1));
+  const d = T - lastT; lastT = T;
+  const st = T > .545 && d > .0004 ? 'ترتفعُ ⬆' : T > .53 && d < -.0004 ? 'تنخفضُ ⬇' : T > .56 ? 'مرتفعةٌ' : 'طبيعيةٌ';
+  const ts = $('#tStat').firstChild; if (ts.textContent !== 'حرارةُ الجسمِ: ' + st) ts.textContent = 'حرارةُ الجسمِ: ' + st;
+  const on = [sw > .1, sw > .25, flowOn[2] || (sw > .5 && T < peak - .05)];
+  on.forEach((v, i) => { if (v && !flowOn[i]) { flowOn[i] = true; $$('#flow li')[i].classList.add('on'); } });
+  if (flowOn[2] && !simDone) {
+    simDone = true; $('#book2').hidden = false;
+    const p = predicted === 'sweat' ? 'توقّعُك كانَ صحيحاً! ' : `توقّعْتَ «${PRED[predicted]}»، لكنَّ التجربةَ أظهرَتْ غيرَ ذلك: `;
+    Kit.say('#fb2', 'ok', p + 'في الجوِّ الحارِّ تفرزُ الغددُ العرقيةُ (في الأدمةِ) العرقَ، فيخرجُ من المساماتِ (في البشرةِ)، ثمَّ تنخفضُ حرارةُ الجسمِ. هذه وظيفةُ <b>تنظيمِ الحرارةِ</b>.');
+  }
+}
+
+/* ================= STAGE 4: touch ================= */
+const TOOLS = [
+  {k:'feather', n:'ريشةٌ', s:'ملمسٌ', d:'ملمسٌ ناعمٌ — ريشةٌ', svg:'<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M40 4C22 6 10 20 12 38C28 36 40 24 40 4Z" fill="#efeaff" stroke="#7b5cff" stroke-width="2"/><path d="M14 36L36 10M20 30L30 28M24 24L34 20M17 33L22 22" stroke="#7b5cff" stroke-width="1.6" stroke-linecap="round"/><path d="M6 46L14 36" stroke="#7b5cff" stroke-width="2.6" stroke-linecap="round"/></svg>'},
+  {k:'ice', n:'قطعةُ ثلجٍ (شيءٌ باردٌ)', s:'برودةٌ', d:'برودةٌ — شيءٌ باردٌ', svg:'<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="8" y="10" width="32" height="32" rx="8" fill="#c9eeff" stroke="#0a8fc0" stroke-width="2.5"/><path d="M14 17H24M14 17V27" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/><path d="M24 2V8M19 4L24 8L29 4" stroke="#0a8fc0" stroke-width="2" stroke-linecap="round" fill="none"/></svg>'},
+  {k:'pin', n:'دبّوسٌ', s:'ألمٌ', d:'ألمٌ — وخزةُ دبّوسٍ', svg:'<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 22V46" stroke="#5f5a85" stroke-width="2.6" stroke-linecap="round"/><circle cx="24" cy="13" r="10" fill="#e8425a" stroke="#c22b43" stroke-width="2"/><circle cx="20.5" cy="9.5" r="3" fill="#fff" opacity=".65"/></svg>'}
+];
+const tried = new Set(); let busy = false, q3ok = false, q3wrong = 0;
+const toolsBox = $('#tools');
+TOOLS.forEach(t => toolsBox.insertAdjacentHTML('beforeend', `<button class="tool" type="button" data-k="${t.k}" aria-label="المسْ الجلدَ بـ${t.n}">${t.svg}<span>${t.n}</span></button>`));
+$$('.tool', toolsBox).forEach(btn => {
+  const t = TOOLS.find(x => x.k === btn.dataset.k);
+  let st = null, ghost = null, moved = false;
+  btn.addEventListener('pointerdown', e => { if (busy) return; st = {x:e.clientX, y:e.clientY}; moved = false; btn.setPointerCapture(e.pointerId); });
+  btn.addEventListener('pointermove', e => {
+    if (!st) return;
+    if (!moved && Math.hypot(e.clientX - st.x, e.clientY - st.y) > 8) { moved = true; ghost = Kit.el('div', {class:'tool-ghost'}, t.svg); document.body.appendChild(ghost); }
+    if (moved) {
+      ghost.style.left = e.clientX + 'px'; ghost.style.top = e.clientY + 'px';
+      const r = scene.getBoundingClientRect(); scene.classList.toggle('hot', e.clientX > r.left && e.clientX < r.right && e.clientY > r.top && e.clientY < r.bottom);
+    }
+  });
+  const end = e => {
+    if (!st) return; st = null;
+    if (moved) { ghost.remove(); ghost = null; const hot = scene.classList.contains('hot'); scene.classList.remove('hot');
+      if (hot) touch(t); else Kit.toast('أفلِتِ الشيءَ فوقَ قطعةِ الجلدِ'); }
+  };
+  btn.addEventListener('pointerup', end); btn.addEventListener('pointercancel', () => { st = null; if (ghost) { ghost.remove(); ghost = null; } scene.classList.remove('hot'); });
+  btn.addEventListener('click', e => { if (moved) { moved = false; return; } touch(t); });
+});
+const sigPath = $('#sig'); const sigLen = sigPath.getTotalLength();
+async function touch(t){
+  if (busy) return; busy = true;
+  $$('.tool', toolsBox).forEach(b => b.disabled = true);
+  $$('#flow4 li').forEach(li => li.classList.remove('on'));
+  const brain = $('#brain'); brain.classList.remove('go'); $('#brainTxt').textContent = 'الدماغُ ينتظرُ المعلوماتِ…';
+  $('#exitTag').classList.remove('go'); setHL([]);
+  const dr = $('#dropper'); dr.innerHTML = t.svg; dr.classList.remove('fall'); void dr.offsetWidth; dr.classList.add('fall');
+  await sleep(650);
+  const pg = $('#ping'); pg.classList.remove('go'); void pg.offsetWidth; pg.classList.add('go');
+  $$('#flow4 li')[0].classList.add('on'); await sleep(450);
+  setHL(['nerve']); $$('#flow4 li')[1].classList.add('on'); await sleep(450);
+  $$('#flow4 li')[2].classList.add('on');
+  if (!R && sigPath.animate) {
+    const a = sigPath.animate([{strokeDasharray:`22 ${sigLen+60}`, strokeDashoffset:22, opacity:1}, {strokeDasharray:`22 ${sigLen+60}`, strokeDashoffset:-sigLen, opacity:1}], {duration:1100, easing:'ease-in'});
+    await a.finished.catch(() => {});
+  } else await sleep(100);
+  $('#exitTag').classList.add('go');
+  $$('#flow4 li')[3].classList.add('on'); brain.classList.add('go');
+  $('#brainTxt').innerHTML = `الدماغُ يفسّرُ: <b>${t.s}</b><br><small>${t.d}</small>`;
+  tried.add(t.k); $(`.tool[data-k="${t.k}"]`).classList.add('done');
+  Kit.say('#fb3', 'ok', `تنقلُ نهاياتُ الأعصابِ المعلوماتِ إلى الدماغِ ليفسّرَها: <b>${t.s}</b>.` + (tried.size < 3 ? ` جرّبْ شيئاً آخرَ (${ar(tried.size)} من ${ar(3)}).` : ' جرّبْتَ الأشياءَ الثلاثةَ — أجبْ عن السؤالِ.'));
+  if (tried.size === 3) $('#q3').hidden = false;
+  dr.classList.remove('fall'); dr.innerHTML = '';
+  $$('.tool', toolsBox).forEach(b => b.disabled = false); busy = false;
+}
+$$('#q3 .choice').forEach(b => b.addEventListener('click', () => {
+  if (q3ok) return;
+  if (b.dataset.v === 'der') {
+    q3ok = true; b.classList.add('ok');
+    Kit.say('#fb3', 'ok', '✓ صحيح: نهاياتُ الأعصابِ الحسيةِ في <b>الأدمةِ</b>. نلمسُ البشرةَ، والمعلوماتُ تصلُ إلى نهاياتِ الأعصابِ تحتَها ثمَّ إلى الدماغِ. هذه وظيفةُ <b>الإحساسِ</b>.');
+  } else {
+    q3wrong++; b.classList.add('bad');
+    Kit.say('#fb3', 'bad', 'حاولْ مرةً أخرى — صحيحٌ أنَّ الشيءَ يلمسُ البشرةَ، لكنْ انظرْ أينَ تقعُ الخطوطُ الصفراءُ في النموذجِ: في الطبقةِ السميكةِ تحتَ البشرةِ.');
+  }
+}));
+
+/* ================= STAGE 5: functions + habits ================= */
+const FN = [
+  {k:'protect', n:'الحمايةُ', sc:'🛡️ يغطّي الجلدُ أعضاءَ جسمِك الداخليةَ ويحميها.', why:'الجلدُ غطاءٌ يحمي الأجزاءَ الداخليةَ — هذه <b>الحمايةُ</b>.'},
+  {k:'sense', n:'الإحساسُ', sc:'🧊 تلمسُ قطعةَ ثلجٍ فتشعرُ ببرودتِها.', why:'الشعورُ بالبرودةِ يأتي من نهاياتِ الأعصابِ — هذا <b>الإحساسُ</b>.'},
+  {k:'excrete', n:'الإخراجُ', sc:'💧 يخرجُ مع العرقِ ماءٌ وأملاحٌ لا يحتاجُها الجسمُ.', why:'التخلّصُ من موادَّ لا يحتاجُها الجسمُ بالتعرّقِ هو <b>الإخراجُ</b>.'},
+  {k:'temp', n:'تنظيمُ الحرارةِ', sc:'☀️ تتعرّقُ في يومٍ حارٍّ فتنخفضُ حرارةُ جسمِك.', why:'انخفاضُ حرارةِ الجسمِ بالعرقِ هو <b>تنظيمُ الحرارةِ</b>.'},
+  {k:'shape', n:'الشكلُ المميّزُ', sc:'🧍 يمنحُ الجلدُ جسمَك شكلَه المميّزَ.', why:'هذا يتعلّقُ بشكلِ الجسمِ — <b>الشكلُ المميّزُ</b>.'},
+  {k:'id', n:'التعرّفُ على الأشخاصِ', sc:'📱 بصمةُ إصبعِك تفتحُ هاتفَك، ولا يملكُ أحدٌ غيرُك بصمتَك.', why:'بصماتُ الأصابعِ خاصةٌ بكلِّ شخصٍ — <b>التعرّفُ على الأشخاصِ</b>.'}
+];
+const pool5 = $('#pool5'), scen = $('#scen'), wrong5 = {}, placed5 = new Set();
+Kit.shuffle(FN).forEach(f => scen.insertAdjacentHTML('beforeend', `<div class="zone" data-z="${f.k}" aria-label="موقفٌ: ${f.sc.replace(/^\S+\s/, '')}"><div class="zt">${f.sc}</div></div>`));
+Kit.shuffle(FN).forEach(f => pool5.insertAdjacentHTML('beforeend', `<span class="chip" data-id="${f.k}">${f.n}</span>`));
+function fnOk(f){
+  placed5.add(f.k);
+  if (placed5.size === 6) { Kit.say('#fb5', 'ok', '✓ رائع! عرفْتَ وظائفَ الجلدِ الستَّ: الحمايةُ، الإحساسُ، الإخراجُ، تنظيمُ الحرارةِ، الشكلُ المميّزُ، التعرّفُ على الأشخاصِ.'); checkS5(); }
+  else Kit.say('#fb5', 'ok', '✓ صحيح: ' + f.why);
+}
+const dnd5 = Kit.dnd({
+  chips: $$('.chip', pool5), zones: $$('.zone', scen),
+  accept: (chip, zone) => chip.dataset.id === zone.dataset.z,
+  onDrop: (chip, zone, ok) => {
+    if (ok) return fnOk(FN.find(f => f.k === chip.dataset.id));
+    const f = FN.find(x => x.k === zone.dataset.z), g = FN.find(x => x.k === chip.dataset.id);
+    wrong5[f.k] = (wrong5[f.k] || 0) + 1;
+    Kit.say('#fb5', 'bad', `حاولْ مرةً أخرى — «${g.n}» لا تناسبُ هذا الموقفَ. فكّرْ: ماذا يفعلُ الجلدُ هنا؟` + (wrong5[f.k] >= 2 ? `<div class="row" style="margin-top:8px"><button class="btn sm" type="button" id="show5">أرني الحلَّ</button></div>` : ''));
+    const b = $('#show5'); if (b) b.onclick = () => {
+      const c = $(`.chip[data-id="${f.k}"]`, pool5);
+      zone.appendChild(c); c.classList.remove('bad', 'sel'); c.classList.add('ok'); c.dataset.locked = '1'; c.setAttribute('tabindex', '-1'); c.setAttribute('aria-disabled', 'true');
+      dnd5.clear(); fnOk(f);
+    };
+  }
+});
+const HAB = [
+  {h:'🚿 الاستحمامُ يومياً', r:'يزيلُ الأوساخَ وخلايا البشرةِ الميتةَ'},
+  {h:'⛱️ تجنّبُ الوقوفِ في الشمسِ مدّةً طويلةً', r:'حرارةُ الشمسِ تحرقُ الجلدَ'},
+  {h:'✂️ الحذرُ من السكاكينِ والمقصّاتِ والأشياءِ الساخنةِ', r:'لنتجنّبَ الجروحَ والحروقَ'},
+  {h:'🥤 شربُ كميةٍ كافيةٍ من الماءِ', r:'يحمي البشرةَ من الجفافِ'}
+];
+let hi = 0, hw = 0, habDone = false;
+function showHabit(){
+  const h = HAB[hi]; hw = 0; Kit.hush('#fb6');
+  $('#habN').textContent = `العادةُ ${ar(hi+1)} من ${ar(HAB.length)}`; $('#habQ').textContent = h.h;
+  $('#habC').innerHTML = Kit.shuffle(HAB).map(x => `<button class="choice" type="button" data-r="${HAB.indexOf(x)}">${x.r}</button>`).join('');
+  $$('#habC .choice').forEach(b => b.onclick = () => answerHabit(b));
+}
+function answerHabit(b){
+  if (b.disabled) return;
+  const j = +b.dataset.r, h = HAB[hi];
+  if (j === hi) {
+    b.classList.add('ok'); $$('#habC .choice').forEach(x => x.disabled = true);
+    const last = hi === HAB.length - 1;
+    Kit.say('#fb6', 'ok', `✓ صحيح: ${h.h.replace(/^\S+\s/, '')} لأنّه ${h.r}.` + `<div class="row" style="margin-top:8px"><button class="btn sm green" type="button" id="habNext">${last ? 'انتهيْتُ ✓' : 'العادةُ التاليةُ ←'}</button></div>`);
+    $('#habNext').onclick = () => { if (last) { habDone = true; $('#habNext').remove(); checkS5(); } else { hi++; showHabit(); } };
+  } else {
+    hw++; b.classList.add('bad'); b.disabled = true;
+    Kit.say('#fb6', 'bad', `حاولْ مرةً أخرى — «${HAB[j].r}» هو سببُ عادةٍ أخرى: ${HAB[j].h.replace(/^\S+\s/, '')}.` + (hw >= 2 ? `<div class="row" style="margin-top:8px"><button class="btn sm" type="button" id="show6">أرني الحلَّ</button></div>` : ''));
+    const s = $('#show6'); if (s) s.onclick = () => answerHabit($(`#habC .choice[data-r="${hi}"]`));
+  }
+}
+showHabit();
+function checkS5(){ if (placed5.size === 6 && habDone) { Kit.say('#fb6', 'ok', '🎉 أحسنْتَ! أنهيْتَ الوظائفَ والعاداتِ. اضغطْ «التالي» للخلاصةِ.'); Kit.celebrate(); } }
+
+/* ================= stages ================= */
+const MODES = ['explore', 'sort', 'heat', 'touch'];
+let raf = null, lastNow = 0;
+function loop(now){ const dt = Math.min(.1, (now - lastNow) / 1000 || 0); lastNow = now; if (Kit.cur === 2) simStep(dt); raf = requestAnimationFrame(loop); }
+raf = requestAnimationFrame(loop);
+Kit.setupStages(['أستكشفُ', 'أينَ يقعُ؟', 'يومٌ حارٌّ', 'اللمسُ', 'وظائفُ وعاداتٌ', 'خلاصةٌ'], {
+  canLeave(i){
+    if (i === 0 && found.size < 8) return `اكتشفِ الأجزاءَ الثمانيةَ أولاً (اكتشفْتَ ${ar(found.size)})`;
+    if (i === 1 && placed1.size < 6) return 'ضعْ كلَّ البطاقاتِ في طبقتِها أولاً';
+    if (i === 2 && !simDone) return 'توقّعْ ثمَّ اجعلِ الجوَّ حارّاً حتّى تنخفضَ حرارةُ الجسمِ';
+    if (i === 3 && (tried.size < 3 || !q3ok)) return 'جرّبِ الأشياءَ الثلاثةَ وأجبْ عن السؤالِ';
+    if (i === 4 && !(placed5.size === 6 && habDone)) return 'أكملِ الوظائفَ والعاداتِ أولاً';
+    return true;
+  },
+  onEnter(i){
+    if (i < 4) {
+      $(`.slot[data-slot="${i}"]`).appendChild(viewer);
+      scene.dataset.mode = MODES[i];
+      if (i >= 2) setSep(false);
+      scene.style.setProperty('--warm', i === 2 ? (air * .9).toFixed(2) : 0);
+      if (i !== 2) { scene.classList.remove('sweating'); block.style.setProperty('--sw', 0); }
+      if (i === 0) { const c = $('.mk.cur', pins); setHL(c ? [c.dataset.pin] : []); }
+      else if (i === 1) hl1();
+      else if (i === 2) setHL(['sweat']);
+      else setHL([]);
+      requestAnimationFrame(fit);
+    }
+    if (i === 5) Kit.celebrate();
+  }
+});
+$('#againBtn').onclick = () => Kit.go(0);
+
+</script>
+</body>
+</html>
