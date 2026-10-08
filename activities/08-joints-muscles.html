@@ -5,1142 +5,745 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>كيف أتحرّك؟</title>
 <style>
-/* ================= DESIGN TOKENS (from the book's brand) ================= */
 :root{
-  --navy:#200058; --navy-2:#3a1f7a; --ink:#200058; --muted:#5f5a85;
+  --navy:#200058; --muted:#5f5a85; --ink:#200058;
   --cyan:#00c3fe; --cyan-d:#0a8fc0; --cyan-l:#e3f8ff; --cyan-b:#b8ebff;
   --green:#12a06a; --green-d:#0b7a50; --green-l:#e4f6ee; --green-b:#9cd9bd;
   --red:#e8425a; --red-d:#c22b43; --red-l:#fde8ec; --red-b:#f5b3bf;
   --yellow:#ffd15c; --orange:#f6a723; --yellow-l:#fff6dc;
   --purple:#7b5cff; --purple-l:#efeaff;
-  --bg:#f1f0fb; --bg-2:#e3f8ff; --card:#ffffff; --line:#e0ddf0; --soft:#faf9fe;
-  --r-s:12px; --r:18px; --r-l:26px;
-  --sh:0 6px 18px rgba(32,0,88,.08); --sh-l:0 18px 50px rgba(32,0,88,.14);
-  --font: "Segoe UI","Noto Sans Arabic","Noto Naskh Arabic","Geeza Pro","Arial",Tahoma,system-ui,sans-serif;
-  --tap:48px;
+  --bg:#f1f0fb; --bg-2:#e3f8ff; --card:#fff; --line:#e0ddf0; --soft:#faf9fe;
+  --sh:0 6px 18px rgba(32,0,88,.08); --sh-l:0 18px 50px rgba(32,0,88,.16);
+  --font:"Segoe UI","Noto Sans Arabic","Noto Naskh Arabic","Geeza Pro","Arial",Tahoma,system-ui,sans-serif;
+  --nav-h:68px;
 }
 *{box-sizing:border-box;}
 html{-webkit-text-size-adjust:100%;}
-body{margin:0;min-height:100vh;font-family:var(--font);color:var(--ink);
-  background:linear-gradient(180deg,var(--bg) 0%,var(--bg-2) 100%) fixed;line-height:1.7;}
-button,input,select,textarea{font-family:inherit;color:inherit;}
-img,svg,canvas{max-width:100%;}
+body{margin:0;min-height:100vh;font-family:var(--font);color:var(--ink);line-height:1.65;
+  background:linear-gradient(180deg,var(--bg) 0%,var(--bg-2) 100%) fixed;}
+button,input{font-family:inherit;color:inherit;}
 :focus-visible{outline:3px solid var(--cyan);outline-offset:3px;border-radius:8px;}
-.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
 
-/* ================= SHELL ================= */
-.app{max-width:1120px;margin:0 auto;padding:14px 16px 110px;}
-.topbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--card);border:1.5px solid var(--line);
-  border-radius:var(--r);box-shadow:var(--sh);padding:10px 14px;}
-.ref{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13.5px;font-weight:700;color:var(--cyan-d);
-  background:var(--cyan-l);border:1.5px solid var(--cyan-b);border-radius:999px;padding:6px 14px;}
-.ref b{color:var(--navy);}
-.topbar h1{flex:1;min-width:200px;margin:0;font-size:clamp(19px,2.6vw,26px);font-weight:900;line-height:1.3;}
-.topbar h1 small{display:block;font-size:13px;font-weight:600;color:var(--muted);}
-.dots{display:flex;gap:6px;align-items:center;list-style:none;margin:0;padding:0;}
-.dots li{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:14px;
-  background:var(--soft);border:2px solid var(--line);color:var(--muted);transition:all .25s;}
-.dots li.on{background:var(--navy);border-color:var(--navy);color:#fff;transform:scale(1.08);}
-.dots li.done{background:var(--green);border-color:var(--green);color:#fff;}
+/* ---------- header: title + 3 scene pills ---------- */
+.hdr{max-width:1180px;margin:0 auto;padding:12px 16px 0;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.hdr h1{margin:0;font-size:clamp(19px,2.6vw,25px);font-weight:900;line-height:1.3;flex:1;min-width:180px;}
+.ref{font-size:12.5px;font-weight:700;color:var(--cyan-d);background:var(--cyan-l);border:1.5px solid var(--cyan-b);border-radius:999px;padding:4px 12px;white-space:nowrap;}
+.pills{display:flex;gap:6px;list-style:none;margin:0;padding:0;}
+.pills li{display:flex;align-items:center;gap:6px;height:38px;padding:0 12px;border-radius:999px;font-weight:800;font-size:14px;
+  background:#fff;border:2px solid var(--line);color:var(--muted);transition:all .25s;white-space:nowrap;}
+.pills li b{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--soft);font-size:13px;}
+.pills li.on{border-color:var(--navy);color:var(--navy);box-shadow:0 0 0 3px rgba(32,0,88,.08);}
+.pills li.on b{background:var(--navy);color:#fff;}
+.pills li.done{border-color:var(--green-b);color:var(--green-d);}
+.pills li.done b{background:var(--green);color:#fff;}
 
-.stage{display:none;margin-top:16px;background:var(--card);border-radius:var(--r-l);box-shadow:var(--sh-l);overflow:hidden;
-  animation:rise .4s ease both;}
-.stage.on{display:block;}
-.stage-h{background:var(--navy);color:#fff;padding:14px 22px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
-.stage-h .kind{font-size:13px;font-weight:800;background:rgba(255,255,255,.14);border-radius:999px;padding:4px 12px;}
-.stage-h h2{margin:0;font-size:clamp(18px,2.4vw,23px);font-weight:900;}
-.stage-b{padding:20px 22px 24px;}
-.lead{font-size:17px;margin:0 0 14px;}
-.task{display:flex;gap:10px;align-items:flex-start;background:var(--yellow-l);border:1.5px solid #f3dc97;border-radius:var(--r-s);
-  padding:10px 14px;font-weight:700;margin:0 0 14px;}
-.task::before{content:"👆";font-size:20px;line-height:1.4;}
-.book{font-size:15px;background:var(--purple-l);border-inline-start:5px solid var(--purple);border-radius:var(--r-s);padding:10px 14px;margin:10px 0;}
-.book::before{content:"📘 من الكتاب: ";font-weight:800;color:var(--purple);}
-.extra{font-size:13.5px;color:var(--muted);background:var(--soft);border:1.5px dashed var(--line);border-radius:var(--r-s);padding:8px 12px;margin:10px 0;}
-.extra::before{content:"ℹ️ توضيح للنشاط وليس من الكتاب: ";font-weight:800;}
-.grid2{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:20px;align-items:start;}
-@media (max-width:820px){.grid2{grid-template-columns:minmax(0,1fr);}}
-.panel{background:var(--soft);border:1.5px solid var(--line);border-radius:var(--r);padding:14px;}
-.panel h3{margin:0 0 8px;font-size:17px;font-weight:900;}
+/* ---------- scene layout ---------- */
+.wrap{max-width:1180px;margin:0 auto;padding:12px 16px calc(var(--nav-h) + 18px);}
+.scene{display:none;}
+.scene.on{display:block;animation:rise .35s ease both;}
+.layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,1fr);gap:16px;align-items:start;}
+.viewport{position:relative;border-radius:24px;overflow:hidden;background:#fff;box-shadow:var(--sh-l);min-height:420px;}
+.viewport.dark{background:radial-gradient(ellipse at 50% 38%,#33197a 0%,#170040 72%);}
+.v3d{position:relative;width:100%;aspect-ratio:4/3;touch-action:none;cursor:grab;}
+.v3d canvas{display:block;width:100%;height:100%;}
+.v3d .rot{position:absolute;bottom:10px;inset-inline-start:10px;font-size:12.5px;font-weight:800;color:#e8e3ff;background:rgba(255,255,255,.12);
+  border-radius:999px;padding:4px 12px;pointer-events:none;}
+.viewport:not(.dark) .v3d .rot{color:var(--muted);background:rgba(32,0,88,.06);}
+.vtools{position:absolute;top:10px;inset-inline-end:10px;display:flex;gap:6px;z-index:3;flex-wrap:wrap;justify-content:flex-end;}
 
-/* ================= CONTROLS ================= */
-.btn{min-height:var(--tap);min-width:var(--tap);display:inline-flex;align-items:center;justify-content:center;gap:8px;
-  padding:0 20px;border-radius:999px;border:2px solid transparent;font-size:16px;font-weight:800;cursor:pointer;
-  background:var(--navy);color:#fff;transition:transform .12s,background .2s,box-shadow .2s;touch-action:manipulation;
-  -webkit-tap-highlight-color:transparent;user-select:none;}
-.btn:active{transform:scale(.96);}
-.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;}
-.btn.cyan{background:var(--cyan);color:var(--navy);}
-.btn.green{background:var(--green);}
-.btn.red{background:var(--red);}
+/* ---------- the guide card (one place to look) ---------- */
+.guide{background:#fff;border-radius:24px;box-shadow:var(--sh-l);padding:16px 16px 14px;position:sticky;top:12px;}
+.g-trail{display:flex;gap:6px;align-items:center;margin-bottom:10px;}
+.g-trail i{flex:1;height:8px;border-radius:99px;background:#ece9f8;transition:background .3s;}
+.g-trail i.done{background:var(--green);} .g-trail i.cur{background:var(--cyan);}
+.g-count{font-size:13px;font-weight:800;color:var(--muted);margin-bottom:4px;}
+.g-step{display:flex;gap:12px;align-items:flex-start;}
+.g-num{flex:none;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--navy);color:#fff;font-weight:900;font-size:20px;}
+.g-text{margin:0;font-size:clamp(18px,2.1vw,21px);font-weight:900;line-height:1.45;padding-top:6px;}
+.g-body{margin-top:12px;}
+.g-body:empty{display:none;}
+.g-book{margin-top:12px;border-top:1.5px dashed var(--line);padding-top:8px;}
+.g-book summary{cursor:pointer;font-weight:800;font-size:14px;color:var(--purple);list-style:none;min-height:36px;display:flex;align-items:center;gap:6px;}
+.g-book summary::-webkit-details-marker{display:none;}
+.g-book p{margin:6px 0 0;font-size:15px;background:var(--purple-l);border-radius:12px;padding:8px 12px;}
+.g-book .extra{background:var(--soft);color:var(--muted);font-size:13.5px;border:1.5px dashed var(--line);}
+.g-book .extra::before{content:"ℹ️ توضيحٌ للنشاطِ وليس من الكتابِ: ";font-weight:800;}
+.g-done{text-align:center;padding:8px 0 2px;}
+.g-done .big{font-size:44px;line-height:1;animation:pop .5s ease both;}
+.g-done h3{margin:6px 0 4px;font-size:21px;font-weight:900;}
+.g-done ul{list-style:none;padding:0;margin:10px 0 0;display:grid;gap:6px;text-align:start;}
+.g-done li{background:var(--green-l);border:1.5px solid var(--green-b);border-radius:12px;padding:7px 12px;font-weight:700;font-size:15px;}
+
+/* ---------- controls ---------- */
+.btn{min-height:48px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0 20px;border-radius:999px;border:2px solid transparent;
+  font-size:16px;font-weight:800;cursor:pointer;background:var(--navy);color:#fff;transition:transform .12s,background .2s,box-shadow .2s;touch-action:manipulation;user-select:none;}
+.btn:active{transform:scale(.96);} .btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn.cyan{background:var(--cyan);color:var(--navy);} .btn.green{background:var(--green);} .btn.red{background:var(--red);}
 .btn.ghost{background:#fff;color:var(--navy);border-color:var(--line);}
 .btn.ghost[aria-pressed="true"]{background:var(--navy);color:#fff;border-color:var(--navy);}
 .btn.sm{min-height:40px;font-size:14.5px;padding:0 14px;}
-.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
-.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;}
-.choice{min-height:56px;text-align:start;padding:10px 14px;border-radius:var(--r-s);border:2px solid var(--line);background:#fff;
-  font-size:16px;font-weight:700;cursor:pointer;transition:all .15s;}
+.btn.glow{animation:glow 1.4s ease-in-out infinite;}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.choices{display:grid;gap:8px;}
+.choice{min-height:52px;text-align:start;padding:8px 14px;border-radius:14px;border:2px solid var(--line);background:#fff;font-size:16.5px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:10px;}
 .choice:hover{border-color:var(--cyan);}
-.choice[aria-pressed="true"]{border-color:var(--navy);background:var(--purple-l);}
-.choice.ok{border-color:var(--green);background:var(--green-l);}
-.choice.bad{border-color:var(--red);background:var(--red-l);}
+.choice.ok{border-color:var(--green);background:var(--green-l);} .choice.bad{border-color:var(--red);background:var(--red-l);animation:shake .4s;}
+.counter{display:flex;align-items:center;gap:10px;justify-content:space-between;background:var(--soft);border:1.5px solid var(--line);border-radius:16px;padding:6px 8px 6px 12px;}
+.counter .n{font-size:24px;font-weight:900;min-width:34px;text-align:center;}
 input[type=range]{width:100%;height:44px;accent-color:var(--cyan-d);cursor:pointer;}
-.slider-lbl{display:flex;justify-content:space-between;font-size:13.5px;font-weight:700;color:var(--muted);}
-
-/* chips + drop zones (Kit.dnd) */
-.chips{display:flex;flex-wrap:wrap;gap:8px;min-height:56px;padding:8px;border-radius:var(--r-s);background:var(--soft);
-  border:1.5px dashed var(--line);}
-.chip{min-height:46px;display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;background:#fff;
-  border:2px solid var(--cyan-b);font-weight:800;font-size:15.5px;cursor:grab;touch-action:none;user-select:none;
-  -webkit-user-select:none;box-shadow:0 2px 0 var(--cyan-b);transition:transform .12s,box-shadow .12s,border-color .2s;}
-.chip.sel{border-color:var(--navy);box-shadow:0 0 0 4px rgba(0,195,254,.35);transform:translateY(-2px);}
-.chip.dragging{opacity:.35;}
-.chip.ghost{position:fixed;z-index:999;pointer-events:none;opacity:.95;transform:rotate(-3deg) scale(1.05);box-shadow:var(--sh-l);}
-.chip.ok{border-color:var(--green);background:var(--green-l);box-shadow:0 2px 0 var(--green-b);cursor:default;}
-.chip.bad{border-color:var(--red);background:var(--red-l);animation:shake .4s;}
-.zone{min-height:64px;border:2.5px dashed var(--cyan-b);border-radius:var(--r-s);padding:8px;background:#fff;
-  transition:background .15s,border-color .15s;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;}
+.chips{display:flex;flex-wrap:wrap;gap:8px;}
+.chip{min-height:46px;display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;background:#fff;border:2px solid var(--cyan-b);
+  font-weight:800;font-size:15.5px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;box-shadow:0 3px 0 var(--cyan-b);}
+.chip.sel{border-color:var(--navy);box-shadow:0 0 0 4px rgba(0,195,254,.35);}
+.chip.dragging{opacity:.35;} .chip.ghost{position:fixed;z-index:999;pointer-events:none;transform:rotate(-3deg) scale(1.05);box-shadow:var(--sh-l);}
+.chip.ok{border-color:var(--green);background:var(--green-l);box-shadow:0 3px 0 var(--green-b);cursor:default;} .chip.bad{border-color:var(--red);background:var(--red-l);animation:shake .4s;}
+.zone{min-height:62px;border:2.5px dashed var(--cyan-b);border-radius:16px;padding:8px;background:#fff;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;transition:background .15s,border-color .15s;}
 .zone.hot{background:var(--cyan-l);border-color:var(--cyan);border-style:solid;}
-.zone .zt{width:100%;font-weight:900;font-size:15px;color:var(--navy);}
+.zone .zt{width:100%;font-weight:900;font-size:15px;}
+.tag{display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:14px;border-radius:999px;padding:3px 12px;background:var(--soft);border:1.5px solid var(--line);}
+.tag.ok{background:var(--green-l);border-color:var(--green-b);color:var(--green-d);} .tag.bad{background:var(--red-l);border-color:var(--red-b);color:var(--red-d);}
 
-/* feedback */
-.fb{display:none;margin-top:12px;border-radius:var(--r-s);padding:12px 14px 12px 14px;font-size:16px;font-weight:600;
-  border:2px solid;animation:rise .25s ease both;}
-.fb.show{display:flex;gap:10px;align-items:flex-start;}
-.fb .ic{font-size:22px;line-height:1.3;flex:none;}
+/* feedback (inside the guide card) */
+.fb{display:none;margin-top:10px;border-radius:14px;padding:10px 12px;font-size:15.5px;font-weight:700;border:2px solid;animation:rise .25s ease both;}
+.fb.show{display:flex;gap:8px;align-items:flex-start;}
+.fb .ic{font-size:20px;line-height:1.3;flex:none;}
 .fb.ok{background:var(--green-l);border-color:var(--green-b);color:#064b31;}
 .fb.bad{background:var(--red-l);border-color:var(--red-b);color:#7a1426;}
 .fb.info{background:var(--cyan-l);border-color:var(--cyan-b);color:#06456a;}
 .fb.warn{background:var(--yellow-l);border-color:#f3dc97;color:#5a4200;}
 
-/* meters & badges */
-.meter{height:16px;border-radius:999px;background:#ece9f8;overflow:hidden;}
-.meter>i{display:block;height:100%;border-radius:999px;background:var(--cyan);transition:width .4s;}
-.badge{display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:14px;border-radius:999px;padding:4px 12px;
-  background:var(--soft);border:1.5px solid var(--line);}
-.badge.ok{background:var(--green-l);border-color:var(--green-b);color:var(--green-d);}
-.badge.bad{background:var(--red-l);border-color:var(--red-b);color:var(--red-d);}
-.missions{list-style:none;margin:0;padding:0;display:grid;gap:8px;}
-.missions li{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-s);background:#fff;
-  border:2px solid var(--line);font-weight:700;}
-.missions li .st{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--soft);
-  border:2px solid var(--line);flex:none;font-size:15px;}
-.missions li.cur{border-color:var(--cyan);}
-.missions li.done{border-color:var(--green-b);background:var(--green-l);}
-.missions li.done .st{background:var(--green);border-color:var(--green);color:#fff;}
+/* spotlight ring + pointing hand */
+#spot{position:fixed;z-index:60;pointer-events:none;border-radius:50%;border:4px solid var(--yellow);box-shadow:0 0 0 6px rgba(255,209,92,.35),0 0 24px rgba(255,209,92,.8);
+  display:none;animation:ring 1.3s ease-in-out infinite;transition:left .25s,top .25s,width .25s,height .25s;}
+#spot.box{border-radius:18px;}
+#hand{position:fixed;z-index:61;pointer-events:none;font-size:34px;display:none;filter:drop-shadow(0 3px 4px rgba(0,0,0,.3));animation:tapme 1.3s ease-in-out infinite;transition:left .25s,top .25s;}
 
-/* 3D canvas wrapper (Kit.orbit) */
-.view3d{position:relative;border-radius:var(--r);background:radial-gradient(ellipse at 50% 40%,#2d1670 0%,#160038 75%);
-  overflow:hidden;touch-action:none;cursor:grab;aspect-ratio:4/3;width:100%;}
-.view3d canvas{display:block;width:100%;height:100%;}
-.view3d .hint3d{position:absolute;bottom:10px;inset-inline-start:10px;font-size:13px;font-weight:700;color:#d9d2ff;
-  background:rgba(255,255,255,.1);border-radius:999px;padding:4px 12px;pointer-events:none;}
-
-/* nav footer */
-.navbar{position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);
-  border-top:1.5px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));}
-.navbar .in{max-width:1120px;margin:0 auto;display:flex;gap:10px;align-items:center;justify-content:space-between;}
-.navbar .where{font-weight:800;color:var(--muted);font-size:14.5px;text-align:center;flex:1;}
-
-/* summary card */
-.sum{display:grid;gap:10px;}
-.sum li{background:var(--green-l);border:1.5px solid var(--green-b);border-radius:var(--r-s);padding:10px 14px;font-weight:700;list-style:none;}
-.sum{padding:0;margin:0;}
+/* nav */
+.navbar{position:fixed;bottom:0;left:0;right:0;z-index:50;height:var(--nav-h);background:rgba(255,255,255,.95);backdrop-filter:blur(8px);border-top:1.5px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));}
+.navbar .in{max-width:1180px;margin:0 auto;display:flex;gap:10px;align-items:center;justify-content:space-between;height:100%;}
+.navbar .where{font-weight:800;color:var(--muted);font-size:14px;text-align:center;flex:1;}
 
 .confetti{position:fixed;inset:0;pointer-events:none;z-index:998;}
-@keyframes rise{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+@keyframes rise{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
 @keyframes shake{0%,100%{transform:none;}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
-@keyframes pop{0%{transform:scale(.6);opacity:0;}70%{transform:scale(1.08);}100%{transform:scale(1);opacity:1;}}
-@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;scroll-behavior:auto !important;}}
-@media (max-width:560px){.stage-b{padding:16px 14px 20px;}.stage-h{padding:12px 14px;}.dots li{width:28px;height:28px;font-size:12.5px;}.btn{padding:0 16px;}}
+@keyframes pop{0%{transform:scale(.5);opacity:0;}70%{transform:scale(1.12);}100%{transform:scale(1);opacity:1;}}
+@keyframes ring{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.12);opacity:.75;}}
+@keyframes tapme{0%,100%{transform:translate(0,0);}50%{transform:translate(-4px,-8px);}}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(0,195,254,.6);}50%{box-shadow:0 0 0 10px rgba(0,195,254,0);}}
+
+/* phone: one screen, no overlap — header, model (top), guide (fills the rest, scrolls inside), nav */
+@media (max-width:820px){
+  body{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden;}
+  .hdr{padding:8px 10px 0;gap:8px;flex:none;} .hdr h1{font-size:18px;min-width:0;} .ref{display:none;}
+  .pills li{height:34px;padding:0 9px;font-size:13px;} .pills li span{display:none;}
+  .wrap{flex:1;min-height:0;width:100%;padding:8px 8px calc(var(--nav-h) + 8px);}
+  .scene.on{height:100%;}
+  .layout{display:flex;flex-direction:column;height:100%;gap:8px;align-items:stretch;}
+  .viewport{flex:0 0 auto;min-height:0;border-radius:18px;}
+  .v3d{aspect-ratio:auto;height:36vh;height:36dvh;min-height:200px;}
+  .guide{position:static;flex:1 1 0;min-height:140px;overflow:auto;border-radius:18px;padding:12px;}
+  .g-num{width:38px;height:38px;font-size:18px;border-radius:12px;} .g-text{font-size:17.5px;padding-top:4px;}
+  .g-count{display:none;}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;}}
 </style>
 <style>
-/* ================= ACTIVITY-SPECIFIC CSS ================= */
-.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px;}
-.tabs .btn{flex:1 1 150px;flex-direction:column;gap:0;line-height:1.3;padding:6px 12px;min-height:56px;}
-.tabs .btn small{font-size:12.5px;font-weight:700;opacity:.85;}
-.ctrl{display:grid;gap:12px;}
-.padbox{display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
-.pad{position:relative;width:170px;height:170px;flex:none;border-radius:50%;background:
-  radial-gradient(circle,#fff 0 34%,var(--cyan-l) 35% 100%);border:3px solid var(--cyan-b);touch-action:none;cursor:pointer;}
-.pad::before,.pad::after{content:"";position:absolute;background:var(--cyan-b);}
-.pad::before{left:50%;top:8px;bottom:8px;width:2px;margin-left:-1px;}
-.pad::after{top:50%;left:8px;right:8px;height:2px;margin-top:-1px;}
-.knob{position:absolute;width:48px;height:48px;margin:-24px 0 0 -24px;border-radius:50%;z-index:2;
-  background:radial-gradient(circle at 35% 35%,#fff,var(--cyan) 45%,var(--cyan-d));border:3px solid var(--navy);box-shadow:var(--sh);}
-.pad.locked .knob{background:radial-gradient(circle at 35% 35%,#fff,#c9c3e6 50%,#8e86b8);}
-.padtxt{flex:1;min-width:150px;font-size:15px;font-weight:700;color:var(--muted);margin:0;}
-.view3d{aspect-ratio:1/1;max-height:560px;}
-.lock3d{position:absolute;top:10px;inset-inline-end:10px;font-size:13px;font-weight:800;color:#fff;background:rgba(255,255,255,.14);
-  border-radius:999px;padding:4px 12px;pointer-events:none;}
-.step[hidden]{display:none !important;}
-.step{border-top:1.5px dashed var(--line);padding-top:12px;margin-top:12px;}
-.step:first-child{border-top:0;margin-top:0;padding-top:0;}
-.step h3{margin:0 0 8px;font-size:16.5px;font-weight:900;}
-.zones3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px;}
-@media (max-width:560px){.zones3{grid-template-columns:minmax(0,1fr);}}
-.zones2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px;}
-@media (max-width:420px){.zones2{grid-template-columns:minmax(0,1fr);}}
-.svgbox{background:#fff;border:1.5px solid var(--line);border-radius:var(--r);padding:6px;}
-.svgbox svg{display:block;width:100%;height:auto;touch-action:none;}
-.readout{display:grid;gap:8px;margin-top:10px;}
-.readout .rl{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-weight:800;font-size:15px;}
-.meter.red>i{background:var(--red);}
-.meter.purple>i{background:var(--purple);}
-.state{display:inline-block;border-radius:999px;padding:2px 12px;font-size:14px;font-weight:800;background:var(--soft);border:1.5px solid var(--line);}
-.state.short{background:var(--red-l);border-color:var(--red-b);color:var(--red-d);}
-.state.long{background:var(--cyan-l);border-color:var(--cyan-b);color:var(--cyan-d);}
-.svgtxt{font-family:var(--font);font-weight:800;paint-order:stroke;stroke:#fff;stroke-width:5px;stroke-linejoin:round;}
-.cmds{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
-.cmds .btn{border-radius:var(--r-s);padding:6px 10px;flex-direction:column;gap:0;line-height:1.3;}
-.cmds .btn small{font-size:12px;opacity:.9;}
-@media (max-width:420px){.cmds .btn{font-size:15px;}}
-.body-svg .limb{transition:transform .6s ease;transform-box:view-box;}
-.heart{transition:transform .12s ease;transform-box:fill-box;transform-origin:center;}
-.heart.beat{transform:scale(1.28);}
-.sleeping .scene-bg{fill:#2c2470;}
-.zzz{display:none;}
-.sleeping .zzz{display:block;}
-.sleeping .eyes-open{display:none;}
-.eyes-closed{display:none;}
-.sleeping .eyes-closed{display:block;}
-.hrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;background:#fff;border:2px solid var(--line);
-  border-radius:var(--r-s);padding:8px 12px;font-weight:700;}
-.hrow.ok{border-color:var(--green-b);background:var(--green-l);}
-.hrow .row{gap:6px;}
-.hrow .why{grid-column:1/-1;font-size:14.5px;color:var(--green-d);}
-@media (max-width:480px){.hrow{grid-template-columns:minmax(0,1fr);}}
-.mini{display:grid;gap:8px;}
-.mini .q{font-weight:800;margin:6px 0 4px;}
-.shape-row .choices{grid-template-columns:repeat(3,minmax(0,1fr));}
-.shape-row .choice{min-height:48px;text-align:center;}
-#bodyBox svg{max-height:440px;margin:0 auto;}
-#bodyBox{text-align:center;}
-.bignum{font-size:22px;font-weight:900;color:var(--red-d);}
-
+/* ===== ACTIVITY CSS ===== */
+.bar{display:flex;align-items:center;gap:10px;padding:8px 14px;background:#fff;border-top:1.5px solid var(--line);}
+.bar label{font-weight:800;font-size:14.5px;white-space:nowrap;}
+.bar input{flex:1;min-width:0;}
+.bar output{font-weight:900;font-size:15px;min-width:76px;text-align:center;background:var(--cyan-l);border-radius:999px;padding:3px 10px;color:var(--cyan-d);}
+.jsel{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
+.jsel .btn{flex-direction:column;gap:0;padding:4px 6px;min-height:56px;font-size:14.5px;line-height:1.3;border-radius:16px;}
+.jsel .btn small{font-size:11.5px;font-weight:700;opacity:.8;}
+.pad{display:flex;gap:6px;align-items:center;margin-top:8px;flex-wrap:wrap;}
+.pad .btn{min-width:48px;padding:0;font-size:18px;}
+.pad .hint{font-size:13px;font-weight:700;color:var(--muted);flex:1;min-width:120px;}
+.cnt{display:inline-block;margin-top:8px;font-weight:900;font-size:14.5px;background:var(--cyan-l);color:var(--cyan-d);border-radius:999px;padding:3px 12px;}
+.cmds{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.cmds .btn{padding:0 10px;font-size:15.5px;}
+.zones2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
+.zones3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:8px;}
+.zones3 .zt,.zones2 .zt{font-size:14px;}
+@media (max-width:820px){
+  #view1,#view2{height:29vh;height:29dvh;min-height:170px;}
+  .bar{padding:4px 10px;gap:6px;} .bar label{font-size:12.5px;} .bar output{min-width:60px;font-size:13px;padding:2px 8px;}
+  .jsel .btn{min-height:50px;font-size:13px;} .jsel .btn small{font-size:10.5px;}
+  .pad{margin-top:6px;} .pad .btn{min-height:44px;min-width:44px;}
+  .chip{min-height:44px;font-size:14.5px;padding:4px 12px;}
+  .zone{min-height:54px;}
+}
 </style>
 </head>
 <body>
-<div class="app">
-  <header class="topbar">
-    <span class="ref">📘 <b>الفصلُ ٣</b> · الدرسُ ٢: الجهازُ الهيكليُّ · الدرسُ ٣: الجهازُ العضليُّ · <span>كتابُ النشاطِ ص ٢٣–٢٩</span></span>
-    <h1>«كيفَ أتحرّكُ؟»<small>المفاصلُ والعضلاتُ تعملُ معاً</small></h1>
-    <ol class="dots" id="dots" aria-label="مراحلُ النشاطِ"></ol>
-  </header>
+<header class="hdr">
+  <h1>🦴 كيفَ أتحرّكُ؟</h1>
+  <span class="ref">📘 الفصلُ ٣ · الدرسانِ ٢–٣: الجهازُ الهيكليُّ والعضليُّ · كتابُ النشاطِ ص ٢٣–٢٩</span>
+  <ol class="pills" id="pills" aria-label="أجزاءُ النشاطِ"></ol>
+</header>
 
-  <main id="main">
-    <!-- ===== STAGE 0: joints lab (3D) ===== -->
-    <section class="stage" data-stage="0" aria-labelledby="s0h">
-      <div class="stage-h"><span class="kind">أستكشفُ</span><h2 id="s0h">مختبرُ المفاصلِ</h2></div>
-      <div class="stage-b">
-        <p class="book">المفصلُ: تركيبٌ عظميٌّ يربطُ عظمينِ مع بعضِهما ويسمحُ للعظامِ بحريةِ الحركةِ.</p>
-        <p class="extra">الكتابُ يسمّي أشكالَ المفاصلِ (كرويٌّ، اسطوانيٌّ، ثابتٌ) ولا يصفُ اتجاهاتِ حركتِها. حركةُ المفصلِ الاسطوانيِّ في مستوىً واحدٍ هنا تمثيلٌ للنشاطِ.</p>
-        <div class="tabs" role="tablist" aria-label="أنواعُ المفاصلِ">
-          <button class="btn ghost" type="button" role="tab" data-j="ball" aria-pressed="true">⚪ مفصلٌ كرويٌّ<small>مثالٌ: الكتفُ، الوركُ</small></button>
-          <button class="btn ghost" type="button" role="tab" data-j="hinge" aria-pressed="false">🔩 مفصلٌ اسطوانيٌّ<small>مثالٌ: مفصلُ الساعدِ</small></button>
-          <button class="btn ghost" type="button" role="tab" data-j="fixed" aria-pressed="false">🔒 مفصلٌ ثابتٌ<small>مثالٌ: عظامُ الجمجمةِ</small></button>
-        </div>
-        <div class="grid2">
-          <div>
-            <div class="view3d" id="v3d" aria-label="نموذجٌ ثلاثيُّ الأبعادِ للمفصلِ. اسحبْ لتدويرِه.">
-              <span class="hint3d">↻ اسحبِ المشهدَ لتدويرِه</span>
-              <span class="lock3d" id="jname">مفصلُ الوركِ</span>
-            </div>
-          </div>
-          <div class="ctrl">
-            <p class="task" id="jtask">حرّكِ المقبضَ في اتجاهاتٍ مختلفةٍ وراقبْ عظمَ الفخذِ.</p>
-            <div class="padbox">
-              <div class="pad" id="pad" tabindex="0" role="slider" aria-label="مقبضُ تحريكِ العظمِ: اسحبْه أو استعملِ الأسهمَ" aria-valuetext="في الوسطِ"><span class="knob" id="knob"></span></div>
-              <p class="padtxt">🎮 اسحبِ المقبضَ (أو استعملِ الأسهمَ) لتحريكِ العظمِ.</p>
-            </div>
-            <div class="row">
-              <button class="btn ghost" type="button" id="cartBtn" aria-pressed="false">🧊 أزِلِ الغضروفَ</button>
-            </div>
-            <ul class="missions" id="jm">
-              <li data-m="ball"><span class="st">١</span>الكرويُّ: حرّكْه في ٤ اتجاهاتٍ مختلفةٍ</li>
-              <li data-m="hinge"><span class="st">٢</span>الاسطوانيُّ: اثنِه ومُدَّه، ثمّ جرّبْ تحريكَه جانباً</li>
-              <li data-m="fixed"><span class="st">٣</span>الثابتُ: حاولْ تحريكَ عظامِ الجمجمةِ</li>
-              <li data-m="cart"><span class="st">٤</span>أزِلِ الغضروفَ وحرّكِ العظمَ، ثمّ أعِدْه</li>
-            </ul>
-            <div class="fb" id="jfb"></div>
-          </div>
-        </div>
-      </div>
-    </section>
+<div class="wrap">
+  <section class="scene" data-scene="0">
+    <div class="layout">
+      <div class="viewport dark"><div class="v3d" id="view0"></div></div>
+      <aside class="guide"></aside>
+    </div>
+  </section>
 
-    <!-- ===== STAGE 1: classify joints ===== -->
-    <section class="stage" data-stage="1" aria-labelledby="s1h">
-      <div class="stage-h"><span class="kind">أُصنّفُ</span><h2 id="s1h">أُصنّفُ المفاصلَ</h2></div>
-      <div class="stage-b">
-        <p class="task">اسحبْ كلَّ مفصلٍ إلى نوعِه (أو اضغطْه ثمّ اضغطِ الصندوقَ).</p>
-        <div class="chips" id="jchips"></div>
-        <div class="zones3">
-          <div class="zone" data-z="ball"><span class="zt">⚪ كرويٌّ</span></div>
-          <div class="zone" data-z="hinge"><span class="zt">🔩 اسطوانيٌّ</span></div>
-          <div class="zone" data-z="fixed"><span class="zt">🔒 ثابتٌ</span></div>
-        </div>
-        <div class="fb" id="sfb"></div>
-        <p class="book">مفصلُ الوركِ: رأسُ عظمِ الفخذِ المحدّبُ يدخلُ في نهايةِ الحوضِ المقعّرةِ فيتحرّكُ عظمُ الفخذِ بحريةٍ.</p>
+  <section class="scene" data-scene="1">
+    <div class="layout">
+      <div class="viewport"><div class="v3d" id="view1"></div>
+        <div class="bar"><label for="ang">📐 الزاويةُ بينَ الشريحتينِ</label><input type="range" id="ang" min="30" max="180" value="90" step="1"><output id="angOut">٩٠°</output></div>
       </div>
-    </section>
+      <aside class="guide"></aside>
+    </div>
+  </section>
 
-    <!-- ===== STAGE 2: book model ===== -->
-    <section class="stage" data-stage="2" aria-labelledby="s2h">
-      <div class="stage-h"><span class="kind">أُجرّبُ</span><h2 id="s2h">أنموذجُ العضلةِ</h2></div>
-      <div class="stage-b">
-        <p class="lead">شريحتانِ خشبيتانِ تربطُهما قطعةُ ربطٍ، وفي كلٍّ منهما مسمارٌ قربَ طرفِها، وبينَ المسمارينِ شريطٌ مطاطيٌّ.</p>
-        <div class="grid2">
-          <div>
-            <div class="svgbox">
-              <svg id="msvg" viewBox="0 0 560 380" role="img" aria-label="أنموذجُ الشريحتينِ والشريطِ المطاطيِّ">
-                <defs>
-                  <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e9b877"/><stop offset=".5" stop-color="#d79c55"/><stop offset="1" stop-color="#b97b3a"/></linearGradient>
-                  <radialGradient id="metal" cx=".35" cy=".35" r=".7"><stop offset="0" stop-color="#ffffff"/><stop offset=".5" stop-color="#b7bcc8"/><stop offset="1" stop-color="#6c7182"/></radialGradient>
-                </defs>
-                <path id="mArc" fill="rgba(0,195,254,.12)" stroke="#0a8fc0" stroke-width="2" stroke-dasharray="5 5"/>
-                <g id="stripA"></g>
-                <g id="stripB"></g>
-                <circle id="hingeC" r="27" fill="url(#metal)" stroke="#4b5060" stroke-width="2"/>
-                <g id="screws"></g>
-                <path id="bandOut" fill="none" stroke="#7b5cff" stroke-linecap="round" stroke-linejoin="round" display="none"/>
-                <line id="bandIn" stroke="#e8425a" stroke-linecap="round"/>
-                <g id="nails"></g>
-                <text id="angTxt" class="svgtxt" font-size="20" fill="#0a8fc0" text-anchor="middle"></text>
-                <circle id="mHandle" r="26" fill="rgba(0,195,254,.25)" stroke="#0a8fc0" stroke-width="3" stroke-dasharray="4 4" style="cursor:grab" tabindex="0" role="slider" aria-label="اسحبْ طرفَ الشريحةِ لتغييرِ الزاويةِ"/>
-              </svg>
-            </div>
-            <label class="sr" for="mSlider">الزاويةُ بينَ الشريحتينِ</label>
-            <input type="range" id="mSlider" min="30" max="180" value="90" disabled>
-            <div class="slider-lbl"><span>متقاربتانِ (٣٠°)</span><span>متباعدتانِ (١٨٠°)</span></div>
-            <div class="readout">
-              <div class="rl"><span>🔴 الشريطُ الداخليُّ</span><span class="state" id="stIn">—</span></div>
-              <div class="meter red"><i id="mIn" style="width:50%"></i></div>
-              <div id="outRead" hidden>
-                <div class="rl"><span>🟣 الشريطُ الخارجيُّ</span><span class="state" id="stOut">—</span></div>
-                <div class="meter purple"><i id="mOut" style="width:50%"></i></div>
-              </div>
-            </div>
-          </div>
-          <div class="panel">
-            <div class="step" id="st1">
-              <h3>١. توقّعْ أوّلاً</h3>
-              <p class="task">إذا باعدتَ بينَ الشريحتينِ ببطءٍ، ماذا يحدثُ للشريطِ المطاطيِّ؟</p>
-              <div class="choices" id="q1"></div>
-              <div class="fb" id="f1"></div>
-            </div>
-            <div class="step" id="st2" hidden>
-              <h3>٢. قرِّبِ الشريحتينِ</h3>
-              <p class="task">قرِّبِ الشريحتينِ (أقلَّ من ٥٠°) وقارنْ شكلَ الشريطِ.</p>
-              <div class="fb" id="f2a"></div>
-              <div id="q2wrap" hidden>
-                <p class="q"><b>عندما قصُرَ الشريطُ، كيفَ أصبحتِ الشريحتانِ (العظمانِ)؟</b></p>
-                <div class="choices" id="q2"></div>
-                <div class="fb" id="f2"></div>
-              </div>
-            </div>
-            <div class="step" id="st3" hidden>
-              <h3>٣. أستكشفُ أكثرَ</h3>
-              <p class="task">أضِفْ شريطاً ثانياً على الخارجِ، ثمّ قرِّبْ وباعِدْ وراقبِ الشريطينِ.</p>
-              <button class="btn cyan" type="button" id="outBtn" aria-pressed="false">➕ أضِفْ شريطاً ثانياً على الخارجِ</button>
-              <div class="fb" id="f3a"></div>
-              <div id="q3wrap" hidden>
-                <p class="q"><b>عندما يقصرُ الشريطُ الداخليُّ، ماذا يحدثُ للشريطِ الخارجيِّ؟</b></p>
-                <div class="choices" id="q3"></div>
-                <div class="fb" id="f3"></div>
-              </div>
-            </div>
-          </div>
-        </div>
+  <section class="scene" data-scene="2">
+    <div class="layout">
+      <div class="viewport dark"><div class="v3d" id="view2"></div>
+        <div class="bar"><label for="bend">💪 ثنيُ الذراعِ</label><input type="range" id="bend" min="0" max="100" value="0" step="1"><output id="bendOut">ممدودةٌ</output></div>
       </div>
-    </section>
-
-    <!-- ===== STAGE 3: model -> arm ===== -->
-    <section class="stage" data-stage="3" aria-labelledby="s3h">
-      <div class="stage-h"><span class="kind">أُطبّقُ</span><h2 id="s3h">من الأنموذجِ إلى الذراعِ</h2></div>
-      <div class="stage-b">
-        <p class="task">ماذا يمثّلُ كلُّ جزءٍ في الأنموذجِ؟ اسحبْه إلى ما يقابلُه في الجسمِ.</p>
-        <div class="chips" id="mapchips"></div>
-        <div class="zones3">
-          <div class="zone" data-z="bone"><span class="zt">🦴 عظمانِ</span></div>
-          <div class="zone" data-z="joint"><span class="zt">⚙️ مفصلٌ</span></div>
-          <div class="zone" data-z="muscle"><span class="zt">💪 عضلةٌ</span></div>
-        </div>
-        <div class="fb" id="mapfb"></div>
-        <div id="bodyQ" hidden>
-          <p class="q"><b>أيُّ أجزاءِ الجسمِ يشبهُ الأنموذجَ؟</b></p>
-          <div class="choices" id="q4"></div>
-          <div class="fb" id="f4"></div>
-        </div>
-        <div id="armPart" hidden>
-          <div class="grid2" style="margin-top:16px">
-            <div class="svgbox">
-              <svg id="asvg" viewBox="0 0 420 450" role="img" aria-label="ذراعٌ: عظمُ العضدِ والساعدُ والمفصلُ والعضلةُ والأوتارُ">
-                <defs>
-                  <radialGradient id="mus" cx=".4" cy=".35" r=".75"><stop offset="0" stop-color="#ff9aa9"/><stop offset=".6" stop-color="#e8425a"/><stop offset="1" stop-color="#a51f36"/></radialGradient>
-                </defs>
-                <g id="armG"></g>
-              </svg>
-            </div>
-            <div class="ctrl">
-              <p class="task">حرّكِ المنزلقَ: اثنِ الذراعَ تماماً، ثمّ مُدَّها تماماً. راقبِ العضلةَ.</p>
-              <label class="sr" for="aSlider">ثنيُ الذراعِ</label>
-              <input type="range" id="aSlider" min="0" max="100" value="0">
-              <div class="slider-lbl"><span>ممدودةٌ</span><span>مثنيّةٌ</span></div>
-              <div class="state" id="armState" style="font-size:16px;padding:6px 14px;text-align:center">—</div>
-              <ul class="missions" id="am">
-                <li data-m="bend"><span class="st">١</span>اثنِ الذراعَ تماماً</li>
-                <li data-m="str"><span class="st">٢</span>مُدَّ الذراعَ تماماً</li>
-              </ul>
-              <div class="fb" id="afb"></div>
-              <p class="book">يؤدّي انقباضُ العضلاتِ وانبساطُها إلى حركةِ العظامِ. العضلاتُ الإراديةُ ترتبطُ بالعظامِ بالأوتارِ.</p>
-              <p class="book">الجهازُ الهيكليُّ + الجهازُ العضليُّ = الجهازُ الحركيُّ.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== STAGE 4: voluntary / involuntary ===== -->
-    <section class="stage" data-stage="4" aria-labelledby="s4h">
-      <div class="stage-h"><span class="kind">أتحدّى</span><h2 id="s4h">إراديةٌ أم لاإراديةٌ؟</h2></div>
-      <div class="stage-b">
-        <div class="grid2">
-          <div class="svgbox" id="bodyBox">
-            <svg class="body-svg" id="bsvg" viewBox="0 0 300 420" role="img" aria-label="جسمُ طفلٍ: الذراعُ والساقُ والقلبُ والمعدةُ">
-              <rect class="scene-bg" x="0" y="0" width="300" height="420" rx="16" fill="#f4f2ff"/>
-              <!-- static arm -->
-              <rect x="82" y="108" width="22" height="122" rx="11" fill="#f2c9a0" stroke="#c48a5a" stroke-width="2"/>
-              <!-- moving arm -->
-              <g class="limb" id="limbArm" style="transform-origin:207px 112px">
-                <rect x="196" y="108" width="22" height="122" rx="11" fill="#f2c9a0" stroke="#c48a5a" stroke-width="2"/>
-              </g>
-              <!-- legs -->
-              <rect x="112" y="255" width="30" height="140" rx="14" fill="#3b4f9e" stroke="#26336b" stroke-width="2"/>
-              <g class="limb" id="limbLeg" style="transform-origin:173px 258px">
-                <rect x="158" y="255" width="30" height="140" rx="14" fill="#3b4f9e" stroke="#26336b" stroke-width="2"/>
-              </g>
-              <!-- torso -->
-              <rect x="100" y="100" width="100" height="165" rx="26" fill="#5bc8f0" stroke="#0a8fc0" stroke-width="2"/>
-              <!-- head -->
-              <circle cx="150" cy="62" r="36" fill="#f2c9a0" stroke="#c48a5a" stroke-width="2"/>
-              <g class="eyes-open"><circle cx="137" cy="58" r="4.5" fill="#200058"/><circle cx="163" cy="58" r="4.5" fill="#200058"/></g>
-              <g class="eyes-closed" stroke="#200058" stroke-width="3" stroke-linecap="round"><path d="M131 59 q6 4 12 0"/><path d="M157 59 q6 4 12 0"/></g>
-              <path d="M140 76 q10 7 20 0" fill="none" stroke="#200058" stroke-width="3" stroke-linecap="round"/>
-              <text class="zzz svgtxt" x="196" y="40" font-size="24" fill="#7b5cff" stroke="none">Z z z</text>
-              <!-- heart -->
-              <g transform="translate(168 140)"><path class="heart" id="heart" d="M0 8 C0 -2 -16 -5 -16 6 C-16 14 -4 20 0 26 C4 20 16 14 16 6 C16 -5 0 -2 0 8Z" fill="#e8425a" stroke="#a51f36" stroke-width="2"/></g>
-              <text class="svgtxt" x="168" y="182" font-size="13" fill="#a51f36" text-anchor="middle">القلبُ</text>
-              <!-- stomach -->
-              <path d="M118 200 q-8 30 18 38 q26 6 30 -16 q2 -14 -14 -14 q-12 0 -14 -10 z" fill="#f6a723" stroke="#b9770e" stroke-width="2"/>
-              <text class="svgtxt" x="140" y="256" font-size="13" fill="#7a4d00" text-anchor="middle">المعدةُ</text>
-              <text class="svgtxt" x="240" y="250" font-size="13" fill="#5f5a85" text-anchor="middle" id="armLbl">الذراعُ</text>
-              <text class="svgtxt" x="232" y="345" font-size="13" fill="#5f5a85" text-anchor="middle">الساقُ</text>
-                          </svg>
-            <div class="bignum" id="beatTxt" aria-live="off">💓 نبضاتُ القلبِ: ٠</div>
-          </div>
-          <div class="ctrl">
-            <p class="task">أعطِ الأوامرَ للجسمِ. أيُّها ينفّذُ أمرَك؟</p>
-            <div class="cmds">
-              <button class="btn" type="button" data-c="arm">🙋 ارفعْ ذراعَك<small>عضلاتُ الذراعِ</small></button>
-              <button class="btn" type="button" data-c="leg">🦵 حرّكْ ساقَك<small>عضلاتُ الساقِ</small></button>
-              <button class="btn red" type="button" data-c="heart">✋ أوقفْ قلبَك<small>عضلةُ القلبِ</small></button>
-              <button class="btn" type="button" data-c="stomach" style="background:#b9770e">🍽️ حرّكْ معدتَك<small>عضلاتُ المعدةِ</small></button>
-            </div>
-            <button class="btn ghost" type="button" id="sleepBtn" aria-pressed="false">😴 الطفلُ ينامُ</button>
-            <div class="fb" id="cfb"></div>
-            <div id="sleepQ" hidden>
-              <p class="q"><b>هل تتوقّفُ العضلاتُ عن العملِ في أثناءِ النومِ؟</b></p>
-              <div class="choices" id="q5"></div>
-              <div class="fb" id="f5"></div>
-            </div>
-          </div>
-        </div>
-        <div id="vSort" hidden style="margin-top:16px">
-          <p class="task">صنِّفِ العضلاتِ: اسحبْ كلَّ بطاقةٍ إلى مكانِها.</p>
-          <div class="chips" id="vchips"></div>
-          <div class="zones2">
-            <div class="zone" data-z="vol"><span class="zt">🙋 عضلاتٌ إراديةٌ (نتحكّمُ فيها)</span></div>
-            <div class="zone" data-z="inv"><span class="zt">💓 عضلاتٌ لاإراديةٌ (لا نتحكّمُ فيها)</span></div>
-          </div>
-          <div class="fb" id="vfb"></div>
-          <div class="mini" id="shapes" hidden>
-            <p class="q">🔎 تحدٍّ إضافيٌّ: ما شكلُ العضلاتِ الإراديةِ في كلِّ مكانٍ؟</p>
-            <div class="shape-row" data-k="0"><p class="q">عضلاتُ الساقينِ</p><div class="choices"></div></div>
-            <div class="shape-row" data-k="1"><p class="q">العضلاتُ حولَ العمودِ الفقريِّ</p><div class="choices"></div></div>
-            <div class="shape-row" data-k="2"><p class="q">عضلاتُ البطنِ</p><div class="choices"></div></div>
-            <div class="fb" id="shfb"></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== STAGE 5: summary ===== -->
-    <section class="stage" data-stage="5" aria-labelledby="s5h">
-      <div class="stage-h"><span class="kind">خلاصةٌ</span><h2 id="s5h">ماذا تعلّمتُ؟</h2></div>
-      <div class="stage-b">
-        <ul class="sum">
-          <li>🦴 المفصلُ يربطُ عظمينِ ويسمحُ لهما بالحركةِ: كرويٌّ (الكتفُ، الوركُ)، اسطوانيٌّ (الساعدُ)، ثابتٌ (الجمجمةُ).</li>
-          <li>🧊 الغضروفُ تركيبٌ مرنٌ يغطّي نهايةَ كلِّ عظمٍ ويمنعُ احتكاكَ العظمينِ.</li>
-          <li>💪 العضلةُ نسيجٌ عضليٌّ قويٌّ يحرّكُ العظامَ؛ انقباضُها وانبساطُها يحرّكانِ العظامَ.</li>
-          <li>🔗 العضلاتُ الإراديةُ ترتبطُ بالعظامِ بالأوتارِ ونتحكّمُ فيها؛ أمّا اللاإراديةُ (القلبُ، المعدةُ) فلا نتحكّمُ فيها.</li>
-          <li>🏃 الجهازُ الهيكليُّ + الجهازُ العضليُّ = الجهازُ الحركيُّ، وفي الجسمِ نحوُ ٦٤٠ عضلةً.</li>
-        </ul>
-        <h3 style="margin:18px 0 8px">🩺 أحافظُ على عضلاتي: مفيدٌ أم ضارٌّ؟</h3>
-        <div class="mini" id="health"></div>
-        <div class="fb" id="hfb"></div>
-      </div>
-    </section>
-  </main>
+      <aside class="guide"></aside>
+    </div>
+  </section>
 </div>
 
-<nav class="navbar" aria-label="التنقلُ بينَ المراحلِ">
+<nav class="navbar" aria-label="التنقلُ">
   <div class="in">
     <button class="btn ghost" id="prevBtn" type="button">→ السابقُ</button>
-    <div class="where" id="where" aria-live="polite"></div>
+    <div class="where" id="where"></div>
     <button class="btn" id="nextBtn" type="button">التالي ←</button>
   </div>
 </nav>
+<div id="spot" aria-hidden="true"></div><div id="hand" aria-hidden="true">👆</div>
 
 <script>
-/* ================= KIT (shared helpers) ================= */
+/* =====================================================================
+   KIT v2
+   Scenes & guided steps:
+     Kit.scene(i, { title:'أستكشفُ', book:'<p>…</p><p class="extra">…</p>', summary:['…'], steps:[ STEP, … ] })
+     STEP = { text:'اضغطْ على النواةِ', target: '#sel' | element | ()=>({x,y,r}) (client coords) | null,
+              body: html string | (el)=>{} , enter(){}, check(){ return true when done }, after:'feedback html shown when done' }
+     Kit.start()            begin
+     Kit.ping()             re-check current step now (call after any state change)
+     Kit.next()             force-advance current step
+     Kit.say(html,type)     feedback in the current guide card ('ok'|'bad'|'info'|'warn')
+     Kit.tries(key)         counts wrong tries; returns the count (use to reveal "أرني الحلَّ" after 2)
+   3D:
+     const V = Kit.view3d(el, { draw(R,t){…}, onPick(id,hit){…}, yaw, pitch, zoom, auto:false, dist })
+       R.sphere([x,y,z], r, '#hex', {id, label, labelColor, alpha})
+       R.cyl([x,y,z],[x,y,z], r, '#hex', {id, alpha})          (rod / bond / bone)
+       R.mesh(mesh, {pos,rot,scale}, {id, color:'#hex'|fn(c,n), alpha, doubleSided})
+       R.line(a,b,'#hex',width,{dash,glow})   R.poly([p…],'#hex',width,{closed,dash,glow})   R.text(p,'نص',{color,size,bg})
+       R.shadow([x,y,z], rx, rz)
+       V.screen([x,y,z]) -> client {x,y}   V.cam (yaw,pitch,zoom)   V.redraw()
+     Kit.mesh.ellipsoid({rx,ry,rz,seg,ring, bump:(u,v)=>k})  Kit.mesh.surface(fn(u,v)->[x,y,z], uSeg, vSeg, {closedU})
+     Kit.mesh.box(w,h,d)   Kit.mesh.lathe(profile[[r,y]…], seg)
+   Misc: Kit.ar(n) Arabic digits · Kit.dnd({chips,zones,accept,onDrop}) · Kit.celebrate() · Kit.toast(msg) · Kit.reduced
+   ===================================================================== */
 const Kit = (() => {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const $ = (s, r=document) => r.querySelector(s);
-  const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
-  const AR = '٠١٢٣٤٥٦٧٨٩';
-  const ar = n => String(n).replace(/[0-9]/g, d => AR[d]).replace('-', '−');
-  const shuffle = a => { a = a.slice(); for (let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; };
-  const el = (tag, attrs={}, html) => { const e=document.createElement(tag);
-    for (const k in attrs){ if(k==='class') e.className=attrs[k]; else if(k.startsWith('on')) e.addEventListener(k.slice(2),attrs[k]); else e.setAttribute(k,attrs[k]); }
-    if (html!=null) e.innerHTML=html; return e; };
+  const $ = (s, r=document) => r.querySelector(s), $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+  const AR='٠١٢٣٤٥٦٧٨٩', ar = n => String(n).replace(/[0-9]/g, d => AR[d]);
+  const shuffle = a => { a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; };
 
-  /* ---- feedback: Kit.say(box, 'ok'|'bad'|'info'|'warn', html) ---- */
-  const ICON = {ok:'✅', bad:'🤔', info:'💡', warn:'⚠️'};
-  function say(box, type, html){
-    if (typeof box==='string') box=$(box);
-    box.className='fb show '+type; box.setAttribute('role','status'); box.setAttribute('aria-live','polite');
-    box.innerHTML='<span class="ic" aria-hidden="true">'+ICON[type]+'</span><div>'+html+'</div>';
+  /* ---------------- scenes + guided steps ---------------- */
+  const S=[]; let cur=0, step=0, timer=null, advancing=false; const tryCount={};
+  function scene(i,cfg){ S[i]=Object.assign({done:false},cfg); }
+  function start(){
+    const pills=$('#pills'); pills.innerHTML='';
+    S.forEach((s,i)=>{ const li=document.createElement('li'); li.innerHTML='<b>'+ar(i+1)+'</b><span>'+s.title+'</span>'; li.title=s.title; pills.appendChild(li); });
+    $('#prevBtn').onclick=()=>goScene(cur-1); $('#nextBtn').onclick=()=>goScene(cur+1);
+    addEventListener('resize',placeSpot); addEventListener('scroll',placeSpot,{passive:true});
+    (function spotLoop(){ placeSpot(); requestAnimationFrame(spotLoop); })();
+    goScene(0,true);
   }
-  function hush(box){ if (typeof box==='string') box=$(box); box.className='fb'; box.innerHTML=''; }
+  function goScene(i,first){
+    if(i<0||i>=S.length) return;
+    if(!first && i>cur && !S[cur].done){ toast('أكملْ خطواتِ هذا الجزءِ أولاً 👆'); return; }
+    cur=i; $$('.scene').forEach((el,k)=>el.classList.toggle('on',k===i));
+    $$('#pills li').forEach((li,k)=>{ li.classList.toggle('on',k===i); li.classList.toggle('done',S[k].done&&k!==i); });
+    $('#prevBtn').disabled=i===0; $('#nextBtn').style.visibility=i===S.length-1?'hidden':'visible';
+    $('#where').textContent='الجزءُ '+ar(i+1)+' من '+ar(S.length);
+    if(!first) scrollTo({top:0,behavior:reduced?'auto':'smooth'});
+    S[i].enter&&S[i].enter();
+    if(S[i].done) showDone(); else goStep(0);
+    updateNext();
+  }
+  function card(){ return $$('.scene')[cur].querySelector('.guide'); }
+  function goStep(k){
+    step=k; advancing=false; const s=S[cur], st=s.steps[k], g=card();
+    const trail=s.steps.map((_,j)=>'<i class="'+(j<k?'done':j===k?'cur':'')+'"></i>').join('');
+    g.innerHTML='<div class="g-trail">'+trail+'</div><div class="g-count">الخطوةُ '+ar(k+1)+' من '+ar(s.steps.length)+'</div>'+
+      '<div class="g-step"><span class="g-num">'+ar(k+1)+'</span><p class="g-text">'+st.text+'</p></div><div class="g-body"></div><div class="fb"></div>'+
+      (s.book?'<details class="g-book"><summary>📘 من الكتابِ</summary>'+s.book+'</details>':'');
+    const body=g.querySelector('.g-body');
+    if(typeof st.body==='string') body.innerHTML=st.body; else if(typeof st.body==='function') st.body(body);
+    st.enter&&st.enter();
+    clearInterval(timer); timer=setInterval(ping,300);
+  }
+  function ping(){
+    const s=S[cur]; if(!s||s.done||advancing) return; const st=s.steps[step];
+    if(st && st.check && st.check()) next();
+  }
+  function next(){
+    const s=S[cur]; if(advancing||s.done) return; advancing=true; const st=s.steps[step];
+    if(st.after) say(st.after,'ok'); else say('أحسنتَ!','ok');
+    const wait=st.after?Math.max(1600,Math.min(4200,st.after.length*45)):800;
+    setTimeout(()=>{ if(step<s.steps.length-1) goStep(step+1); else { s.done=true; clearInterval(timer); showDone(); updateNext(); celebrate(); } }, reduced?Math.min(wait,900):wait);
+  }
+  function showDone(){
+    const s=S[cur], g=card(), last=cur===S.length-1;
+    g.innerHTML='<div class="g-trail">'+s.steps.map(()=>'<i class="done"></i>').join('')+'</div><div class="g-done"><div class="big">'+(last?'🏆':'✅')+'</div>'+
+      '<h3>'+(last?'أنهيتَ النشاطَ!':'أنهيتَ هذا الجزءَ')+'</h3>'+(s.summary?'<ul>'+s.summary.map(x=>'<li>✓ '+x+'</li>').join('')+'</ul>':'')+
+      (last?'<p style="margin:12px 0 0"><button class="btn ghost sm" type="button" onclick="location.reload()">↻ ابدأْ من جديدٍ</button></p>':'')+'</div>'+
+      (s.book?'<details class="g-book"><summary>📘 من الكتابِ</summary>'+s.book+'</details>':'');
+    s.onDone&&s.onDone();
+  }
+  function updateNext(){ const b=$('#nextBtn'); b.classList.toggle('glow',!!S[cur].done && cur<S.length-1); $$('#pills li')[cur].classList.toggle('done',false); }
+  function say(html,type='info'){
+    const box=card().querySelector('.fb'); if(!box) return;
+    const ic={ok:'✅',bad:'🤔',info:'💡',warn:'⚠️'}[type];
+    box.className='fb show '+type; box.setAttribute('role','status'); box.innerHTML='<span class="ic" aria-hidden="true">'+ic+'</span><div>'+html+'</div>';
+  }
+  function tries(key){ tryCount[key]=(tryCount[key]||0)+1; return tryCount[key]; }
 
-  /* ---- stages + nav. canLeave(i) may return false or a message string to block "next". ---- */
-  let stages=[], cur=0, names=[], hooks={};
-  function setupStages(stageNames, opts={}){
-    names=stageNames; hooks=opts; stages=$$('.stage');
-    const dots=$('#dots'); dots.innerHTML='';
-    names.forEach((n,i)=>{ const li=el('li',{title:n,'aria-label':'المرحلة '+ar(i+1)+': '+n},ar(i+1)); dots.appendChild(li); });
-    $('#prevBtn').onclick=()=>go(cur-1); $('#nextBtn').onclick=()=>go(cur+1);
-    go(0, true);
+  /* spotlight */
+  function placeSpot(){
+    const sp=$('#spot'), hd=$('#hand'); const s=S[cur]; const st=s&&!s.done&&s.steps[step];
+    let t=st&&st.target, r=null;
+    if(typeof t==='function'){ try{ r=t(); }catch(e){ r=null; } }
+    else if(typeof t==='string'){ const el=$$(t,$$('.scene')[cur]).find(e=>e.offsetParent!==null); if(el){ const b=el.getBoundingClientRect(); r={x:b.left+b.width/2,y:b.top+b.height/2,w:b.width+14,h:b.height+14,box:true}; } }
+    else if(t instanceof Element){ const b=t.getBoundingClientRect(); r={x:b.left+b.width/2,y:b.top+b.height/2,w:b.width+14,h:b.height+14,box:true}; }
+    if(!r||advancing){ sp.style.display='none'; hd.style.display='none'; return; }
+    const w=r.w||(r.r||26)*2, h=r.h||(r.r||26)*2;
+    sp.className=r.box?'box':''; sp.style.display='block'; sp.style.left=(r.x-w/2)+'px'; sp.style.top=(r.y-h/2)+'px'; sp.style.width=w+'px'; sp.style.height=h+'px';
+    hd.style.display='block'; hd.style.left=(r.x+w/2-14)+'px'; hd.style.top=(r.y+h/2-10)+'px';
   }
-  function go(i, first){
-    if (i<0||i>=stages.length) return;
-    if (!first && i>cur && hooks.canLeave){ const r=hooks.canLeave(cur); if (r!==true && r!==undefined){ toast(r||'أكملِ المهمةَ أولاً'); return; } }
-    stages.forEach((s,k)=>s.classList.toggle('on',k===i));
-    $$('#dots li').forEach((d,k)=>{ d.classList.toggle('on',k===i); d.classList.toggle('done',k<i); });
-    cur=i; $('#where').textContent=ar(i+1)+' / '+ar(stages.length)+' · '+names[i];
-    $('#prevBtn').disabled=i===0; $('#nextBtn').style.visibility=i===stages.length-1?'hidden':'visible';
-    if(!first) window.scrollTo({top:0,behavior:reduced?'auto':'smooth'});
-    hooks.onEnter && hooks.onEnter(i);
-  }
+
   let toastT;
   function toast(msg){
-    let t=$('#kitToast'); if(!t){ t=el('div',{id:'kitToast',role:'alert'}); Object.assign(t.style,{position:'fixed',bottom:'86px',left:'50%',
-      transform:'translateX(-50%)',background:'#200058',color:'#fff',padding:'12px 20px',borderRadius:'999px',fontWeight:'800',
-      zIndex:1000,boxShadow:'0 10px 30px rgba(0,0,0,.25)',maxWidth:'90vw',textAlign:'center'}); document.body.appendChild(t); }
-    t.textContent=msg; t.style.display='block'; clearTimeout(toastT); toastT=setTimeout(()=>t.style.display='none',2600);
+    let t=$('#kitToast'); if(!t){ t=document.createElement('div'); t.id='kitToast'; t.setAttribute('role','alert');
+      Object.assign(t.style,{position:'fixed',top:'14px',left:'50%',transform:'translateX(-50%)',background:'#200058',color:'#fff',padding:'12px 20px',borderRadius:'999px',fontWeight:'800',zIndex:1000,boxShadow:'0 10px 30px rgba(0,0,0,.25)',maxWidth:'90vw',textAlign:'center'}); document.body.appendChild(t); }
+    t.textContent=msg; t.style.display='block'; clearTimeout(toastT); toastT=setTimeout(()=>t.style.display='none',2400);
   }
 
-  /* ---- drag & drop with tap-to-place + keyboard.
-     Kit.dnd({ chips:[chipEls], zones:[zoneEls], accept:(chip,zone)=>bool|string, onDrop:(chip,zone,ok)=>{} , lockCorrect:true })
-     chips need data-id. zone gets the chip appended when accepted (or always, if place:'always'). ---- */
+  /* ---------------- drag & drop (drag, tap-then-tap, keyboard) ---------------- */
   function dnd(cfg){
-    let sel=null;
-    const zones=cfg.zones;
-    const clear=()=>{ if(sel){sel.classList.remove('sel'); sel.setAttribute('aria-pressed','false');} sel=null; };
-    function drop(chip, zone){
-      const ok = cfg.accept ? cfg.accept(chip, zone) : true;
-      if (ok===true || cfg.place==='always'){ zone.appendChild(chip); }
-      if (ok===true){ chip.classList.remove('bad'); if(cfg.lockCorrect!==false){ chip.classList.add('ok'); chip.dataset.locked='1'; chip.setAttribute('tabindex','-1'); chip.setAttribute('aria-disabled','true'); } }
+    let sel=null; const zones=cfg.zones;
+    const clear=()=>{ if(sel){ sel.classList.remove('sel'); sel.setAttribute('aria-pressed','false'); } sel=null; };
+    function drop(chip,zone){
+      const ok=cfg.accept?cfg.accept(chip,zone):true;
+      if(ok===true){ zone.appendChild(chip); chip.classList.remove('bad'); chip.classList.add('ok'); chip.dataset.locked='1'; chip.setAttribute('tabindex','-1'); }
       else { chip.classList.remove('bad'); void chip.offsetWidth; chip.classList.add('bad'); }
-      cfg.onDrop && cfg.onDrop(chip, zone, ok===true, ok);
+      cfg.onDrop&&cfg.onDrop(chip,zone,ok===true); ping();
     }
-    zones.forEach(z=>{
-      z.setAttribute('tabindex', z.getAttribute('tabindex')||'0'); z.setAttribute('role','button');
-      const act=()=>{ if(sel){ const c=sel; clear(); drop(c,z);} };
-      z.addEventListener('click', e=>{ if(e.target.closest('.chip') && !sel) return; act(); });
-      z.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); act(); } });
-    });
+    zones.forEach(z=>{ z.tabIndex=0; z.setAttribute('role','button');
+      const act=()=>{ if(sel){ const c=sel; clear(); drop(c,z); } };
+      z.addEventListener('click',e=>{ if(e.target.closest('.chip')&&!sel) return; act(); });
+      z.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); act(); } }); });
     cfg.chips.forEach(chip=>{
-      chip.setAttribute('tabindex','0'); chip.setAttribute('role','button'); chip.setAttribute('aria-pressed','false');
-      chip.addEventListener('keydown', e=>{ if(chip.dataset.locked) return; if(e.key==='Enter'||e.key===' '){ e.preventDefault(); const was=sel===chip; clear(); if(!was){sel=chip;chip.classList.add('sel');chip.setAttribute('aria-pressed','true');} } });
-      let start=null, ghost=null, moved=false, overZ=null;
-      chip.addEventListener('pointerdown', e=>{
-        if (chip.dataset.locked || e.button>0) return;
-        start={x:e.clientX,y:e.clientY}; moved=false; chip.setPointerCapture(e.pointerId);
-      });
-      chip.addEventListener('pointermove', e=>{
-        if(!start) return;
-        if(!moved && Math.hypot(e.clientX-start.x,e.clientY-start.y)>7){
-          moved=true; clear(); ghost=chip.cloneNode(true); ghost.classList.add('ghost'); ghost.classList.remove('sel','bad');
-          document.body.appendChild(ghost); chip.classList.add('dragging');
-        }
-        if(moved){
-          ghost.style.left=(e.clientX-ghost.offsetWidth/2)+'px'; ghost.style.top=(e.clientY-ghost.offsetHeight/2)+'px';
-          const under=document.elementFromPoint(e.clientX,e.clientY); const z=under&&under.closest('.zone');
-          const zz = z && zones.includes(z) ? z : null;
-          if(zz!==overZ){ overZ&&overZ.classList.remove('hot'); overZ=zz; overZ&&overZ.classList.add('hot'); }
-        }
-      });
-      const end=e=>{
-        if(!start) return; start=null;
-        if(moved){ ghost.remove(); ghost=null; chip.classList.remove('dragging'); if(overZ){ overZ.classList.remove('hot'); drop(chip,overZ); overZ=null; } }
-        else if(e.type==='pointerup'){ const was=sel===chip; clear(); if(!was){ sel=chip; chip.classList.add('sel'); chip.setAttribute('aria-pressed','true'); } }
-      };
-      chip.addEventListener('pointerup', end); chip.addEventListener('pointercancel', end);
+      chip.tabIndex=0; chip.setAttribute('role','button'); chip.setAttribute('aria-pressed','false');
+      const pick=()=>{ const was=sel===chip; clear(); if(!was){ sel=chip; chip.classList.add('sel'); chip.setAttribute('aria-pressed','true'); } };
+      chip.addEventListener('keydown',e=>{ if(chip.dataset.locked) return; if(e.key==='Enter'||e.key===' '){ e.preventDefault(); pick(); } });
+      let st=null, ghost=null, moved=false, over=null;
+      chip.addEventListener('pointerdown',e=>{ if(chip.dataset.locked||e.button>0) return; st={x:e.clientX,y:e.clientY}; moved=false; chip.setPointerCapture(e.pointerId); });
+      chip.addEventListener('pointermove',e=>{ if(!st) return;
+        if(!moved&&Math.hypot(e.clientX-st.x,e.clientY-st.y)>7){ moved=true; clear(); ghost=chip.cloneNode(true); ghost.classList.add('ghost'); document.body.appendChild(ghost); chip.classList.add('dragging'); }
+        if(moved){ ghost.style.left=(e.clientX-ghost.offsetWidth/2)+'px'; ghost.style.top=(e.clientY-ghost.offsetHeight/2)+'px';
+          const u=document.elementFromPoint(e.clientX,e.clientY), z=u&&u.closest('.zone'), zz=z&&zones.includes(z)?z:null;
+          if(zz!==over){ over&&over.classList.remove('hot'); over=zz; over&&over.classList.add('hot'); } } });
+      const end=e=>{ if(!st) return; st=null;
+        if(moved){ ghost.remove(); chip.classList.remove('dragging'); if(over){ over.classList.remove('hot'); drop(chip,over); over=null; } }
+        else if(e.type==='pointerup') pick(); };
+      chip.addEventListener('pointerup',end); chip.addEventListener('pointercancel',end);
     });
-    return { clear, reset(home){ cfg.chips.forEach(c=>{ c.classList.remove('ok','bad','sel'); delete c.dataset.locked; c.setAttribute('tabindex','0'); c.removeAttribute('aria-disabled'); home.appendChild(c); }); } };
+    return {clear};
   }
 
-  /* ---- 3D orbit view: Kit.orbit(container, draw(ctx, cam, w, h, t), {yaw,pitch,zoom,auto}) ----
-     cam.project(x,y,z) -> {x,y,s,z}  (s = perspective scale, z = depth: larger = closer to viewer) */
-  function orbit(box, draw, o={}){
-    const cv=document.createElement('canvas'); box.prepend(cv);
-    const ctx=cv.getContext('2d');
-    const cam={yaw:o.yaw??0.6, pitch:o.pitch??0.35, zoom:o.zoom??1, dist:o.dist??900, auto:o.auto??true, vy:0, vp:0};
-    let W=0,H=0,dpr=1, drag=null, last=performance.now(), userTouched=false;
-    function size(){ const r=box.getBoundingClientRect(); dpr=Math.min(2,devicePixelRatio||1); W=r.width; H=r.height; cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
+  /* ---------------- tiny 3D engine (canvas 2D, painter's algorithm, lambert light) ---------------- */
+  const sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]], cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+  const norm=a=>{ const l=Math.hypot(a[0],a[1],a[2])||1; return [a[0]/l,a[1]/l,a[2]/l]; }, dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+  function hexRgb(h){ if(h[0]!=='#') { const m=h.match(/\d+/g); return m?m.slice(0,3).map(Number):[128,128,128]; } const n=parseInt(h.length===4?h.slice(1).split('').map(c=>c+c).join(''):h.slice(1),16); return [n>>16,n>>8&255,n&255]; }
+  const rgb=(c,k,a)=>'rgba('+Math.min(255,c[0]*k|0)+','+Math.min(255,c[1]*k|0)+','+Math.min(255,c[2]*k|0)+','+(a==null?1:a)+')';
+  function rotXYZ(p,r){ if(!r) return p; let [x,y,z]=p;
+    if(r[0]){ const c=Math.cos(r[0]),s=Math.sin(r[0]); [y,z]=[y*c-z*s,y*s+z*c]; }
+    if(r[1]){ const c=Math.cos(r[1]),s=Math.sin(r[1]); [x,z]=[x*c+z*s,-x*s+z*c]; }
+    if(r[2]){ const c=Math.cos(r[2]),s=Math.sin(r[2]); [x,y]=[x*c-y*s,x*s+y*c]; } return [x,y,z]; }
+  function xf(p,t){ if(!t) return p; let q=p; const s=t.scale; if(s!=null) q=Array.isArray(s)?[q[0]*s[0],q[1]*s[1],q[2]*s[2]]:[q[0]*s,q[1]*s,q[2]*s];
+    q=rotXYZ(q,t.rot); if(t.pos) q=[q[0]+t.pos[0],q[1]+t.pos[1],q[2]+t.pos[2]]; return q; }
+
+  function view3d(box,o={}){
+    const cv=document.createElement('canvas'); box.prepend(cv); const ctx=cv.getContext('2d');
+    if(!box.querySelector('.rot')){ const h=document.createElement('div'); h.className='rot'; h.textContent='↻ اسحبْ لتدويرِ النموذجِ'; box.appendChild(h); }
+    const cam={yaw:o.yaw??0.5,pitch:o.pitch??0.3,zoom:o.zoom??1,dist:o.dist??1100,vy:0,vp:0,auto:!!o.auto};
+    let W=0,H=0,dpr=1,drag=null,picks=[],dirty=true;
+    const L=norm([-0.45,0.65,0.62]);
+    function size(){ const r=box.getBoundingClientRect(); dpr=Math.min(2,devicePixelRatio||1); W=r.width; H=r.height; cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); dirty=true; }
     new ResizeObserver(size).observe(box); size();
-    cam.project=(x,y,z)=>{
-      const cy=Math.cos(cam.yaw), sy=Math.sin(cam.yaw), cp=Math.cos(cam.pitch), sp=Math.sin(cam.pitch);
-      let X=x*cy - z*sy, Z=x*sy + z*cy;           // yaw around Y
-      let Y=y*cp - Z*sp; Z=y*sp + Z*cp;            // pitch around X
-      const unit=Math.min(W,H)/520*cam.zoom;
-      const s=cam.dist/(cam.dist - Z);
-      return {x:W/2 + X*s*unit, y:H/2 - Y*s*unit, s:s*unit, z:Z};
+    const toCam=p=>{ const cy=Math.cos(cam.yaw),sy=Math.sin(cam.yaw),cp=Math.cos(cam.pitch),sp=Math.sin(cam.pitch);
+      let X=p[0]*cy-p[2]*sy, Z=p[0]*sy+p[2]*cy; const Y=p[1]*cp-Z*sp; Z=p[1]*sp+Z*cp; return [X,Y,Z]; };
+    const proj=c=>{ const unit=Math.min(W,H)/520*cam.zoom, s=cam.dist/(cam.dist-c[2]); return {x:W/2+c[0]*s*unit,y:H/2-c[1]*s*unit,s:s*unit,z:c[2]}; };
+    const project=p=>proj(toCam(p));
+    let items=[];
+    const R={
+      sphere(p,r,col,op={}){ const q=project(p); items.push({k:'s',z:q.z,q,r:r*q.s,c:hexRgb(col),op}); },
+      cyl(a,b,r,col,op={}){ const A=project(a),B=project(b); items.push({k:'c',z:(A.z+B.z)/2,A,B,r:r*(A.s+B.s)/2,c:hexRgb(col),op}); },
+      line(a,b,col,w=2,op={}){ const A=project(a),B=project(b); items.push({k:'l',z:Math.max(A.z,B.z)+(op.front?1e4:0),pts:[A,B],col,w,op}); },
+      poly(ps,col,w=2,op={}){ const P=ps.map(project); const z=op.front?1e4:P.reduce((m,p)=>m+p.z,0)/P.length; items.push({k:'l',z,pts:P,col,w,op}); },
+      text(p,txt,op={}){ const q=project(p); items.push({k:'t',z:op.behind?q.z:1e5,q,txt,op}); },
+      shadow(p,rx,rz){ const pts=[]; for(let i=0;i<20;i++){ const a=i/20*Math.PI*2; pts.push(project([p[0]+Math.cos(a)*rx,p[1],p[2]+Math.sin(a)*rz])); } items.push({k:'sh',z:-1e5,pts}); },
+      mesh(m,t,op={}){ const V=m.v.map(v=>toCam(xf(v,t))), P=V.map(proj), c0=op.color||'#cccccc', fn=typeof c0==='function'?c0:null, base=fn?null:hexRgb(c0);
+        for(let i=0;i<m.f.length;i++){ const f=m.f[i], a=V[f[0]],b=V[f[1]],c=V[f[2]]; let n=norm(cross(sub(b,a),sub(c,a)));
+          if(n[2]<0){ if(!op.doubleSided) continue; n=[-n[0],-n[1],-n[2]]; }
+          const lam=0.42+0.68*Math.max(0,dot(n,L)), col=fn?hexRgb(fn(m.v[f[0]],i)):base;
+          items.push({k:'f',z:(a[2]+b[2]+c[2])/3,pts:[P[f[0]],P[f[1]],P[f[2]]],fill:rgb(col,lam,op.alpha),op}); } }
     };
-    box.addEventListener('pointerdown',e=>{ drag={x:e.clientX,y:e.clientY}; userTouched=true; box.setPointerCapture(e.pointerId); box.style.cursor='grabbing'; });
-    box.addEventListener('pointermove',e=>{ if(!drag) return; const dx=e.clientX-drag.x, dy=e.clientY-drag.y; drag={x:e.clientX,y:e.clientY};
-      cam.vy=-dx*0.008; cam.vp=dy*0.006; cam.yaw+=cam.vy; cam.pitch=Math.max(-1.3,Math.min(1.3,cam.pitch+cam.vp)); });
-    const up=()=>{ drag=null; box.style.cursor='grab'; };
-    box.addEventListener('pointerup',up); box.addEventListener('pointercancel',up);
-    box.addEventListener('wheel',e=>{ e.preventDefault(); cam.zoom=Math.max(.6,Math.min(2.2,cam.zoom*(e.deltaY<0?1.08:.92))); },{passive:false});
-    box.tabIndex=0; box.setAttribute('role','img');
-    box.addEventListener('keydown',e=>{ const k=e.key; if(k==='ArrowLeft'){cam.yaw+=.15;} else if(k==='ArrowRight'){cam.yaw-=.15;}
-      else if(k==='ArrowUp'){cam.pitch=Math.max(-1.3,cam.pitch-.12);} else if(k==='ArrowDown'){cam.pitch=Math.min(1.3,cam.pitch+.12);}
-      else if(k==='+'||k==='='){cam.zoom=Math.min(2.2,cam.zoom*1.1);} else if(k==='-'){cam.zoom=Math.max(.6,cam.zoom*.9);} else return; e.preventDefault(); userTouched=true; });
-    function frame(now){
-      const dt=Math.min(50,now-last); last=now;
-      if(!drag){ cam.vy*=0.93; cam.vp*=0.9; cam.yaw+=cam.vy; cam.pitch=Math.max(-1.3,Math.min(1.3,cam.pitch+cam.vp));
-        if(cam.auto && !reduced && Math.abs(cam.vy)<0.002) cam.yaw+=dt*0.00018*(userTouched?0.4:1); }
-      ctx.clearRect(0,0,W,H); draw(ctx,cam,W,H,reduced?0:now,dt);
-      requestAnimationFrame(frame);
+    function render(t){
+      ctx.clearRect(0,0,W,H); items=[]; picks=[]; o.draw&&o.draw(R,t);
+      items.sort((a,b)=>a.z-b.z);
+      for(const it of items){
+        const op=it.op||{}; ctx.globalAlpha=1;
+        if(it.k==='f'){ ctx.beginPath(); ctx.moveTo(it.pts[0].x,it.pts[0].y); ctx.lineTo(it.pts[1].x,it.pts[1].y); ctx.lineTo(it.pts[2].x,it.pts[2].y); ctx.closePath();
+          ctx.fillStyle=it.fill; ctx.fill(); ctx.strokeStyle=it.fill; ctx.lineWidth=.6; ctx.stroke(); if(op.id!=null) picks.push({id:op.id,tri:it.pts,z:it.z}); }
+        else if(it.k==='s'){ const {q,r,c}=it; if(r<.5) continue; if(op.alpha!=null) ctx.globalAlpha=op.alpha;
+          const g=ctx.createRadialGradient(q.x-r*.35,q.y-r*.4,r*.12,q.x,q.y,r); g.addColorStop(0,rgb(c,1.55)); g.addColorStop(.3,rgb(c,1)); g.addColorStop(1,rgb(c,.5));
+          ctx.beginPath(); ctx.arc(q.x,q.y,r,0,7); ctx.fillStyle=g; ctx.fill();
+          if(op.ring){ ctx.lineWidth=3; ctx.strokeStyle=op.ring; ctx.stroke(); }
+          if(op.label&&r>7){ ctx.fillStyle=op.labelColor||'#fff'; ctx.font='900 '+Math.round(Math.min(r*1.05,30))+'px '+getComputedStyle(document.body).fontFamily; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(op.label,q.x,q.y+r*.06); }
+          if(op.id!=null) picks.push({id:op.id,cx:q.x,cy:q.y,r:Math.max(r,14),z:q.z}); }
+        else if(it.k==='c'){ const {A,B,r,c}=it; if(op.alpha!=null) ctx.globalAlpha=op.alpha; const dx=B.x-A.x,dy=B.y-A.y,l=Math.hypot(dx,dy)||1,nx=-dy/l,ny=dx/l;
+          const g=ctx.createLinearGradient(A.x+nx*r,A.y+ny*r,A.x-nx*r,A.y-ny*r); g.addColorStop(0,rgb(c,.55)); g.addColorStop(.35,rgb(c,1.35)); g.addColorStop(1,rgb(c,.6));
+          ctx.beginPath(); ctx.moveTo(A.x+nx*r,A.y+ny*r); ctx.lineTo(B.x+nx*r,B.y+ny*r); ctx.lineTo(B.x-nx*r,B.y-ny*r); ctx.lineTo(A.x-nx*r,A.y-ny*r); ctx.closePath(); ctx.fillStyle=g; ctx.fill();
+          ctx.beginPath(); ctx.arc(A.x,A.y,r,0,7); ctx.arc(B.x,B.y,r,0,7); ctx.fillStyle=rgb(c,.85); ctx.fill();
+          if(op.id!=null) picks.push({id:op.id,seg:[A,B],r:Math.max(r,12),z:it.z}); }
+        else if(it.k==='l'){ ctx.beginPath(); it.pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)); if(op.closed) ctx.closePath();
+          ctx.setLineDash(op.dash||[]); ctx.lineCap='round'; ctx.lineJoin='round'; if(op.alpha!=null) ctx.globalAlpha=op.alpha;
+          if(op.glow){ ctx.shadowColor=it.col; ctx.shadowBlur=14; } ctx.strokeStyle=it.col; ctx.lineWidth=it.w; ctx.stroke(); ctx.shadowBlur=0; ctx.setLineDash([]); }
+        else if(it.k==='sh'){ ctx.beginPath(); it.pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)); ctx.closePath(); ctx.fillStyle='rgba(0,0,0,.22)'; ctx.filter='blur(6px)'; ctx.fill(); ctx.filter='none'; }
+        else if(it.k==='t'){ const {q,txt}=it, sz=op.size||15; ctx.font='800 '+sz+'px '+getComputedStyle(document.body).fontFamily; ctx.textAlign='center'; ctx.textBaseline='middle';
+          const w=ctx.measureText(txt).width+16, x=q.x+(op.dx||0), y=q.y+(op.dy||0);
+          if(op.bg!==false){ ctx.fillStyle=op.bg||'rgba(255,255,255,.95)'; ctx.beginPath(); ctx.roundRect?ctx.roundRect(x-w/2,y-sz*.8,w,sz*1.6,sz*.8):ctx.rect(x-w/2,y-sz*.8,w,sz*1.6); ctx.fill(); }
+          ctx.fillStyle=op.color||'#200058'; ctx.fillText(txt,x,y+1); }
+      }
+      ctx.globalAlpha=1;
     }
-    requestAnimationFrame(frame);
-    return cam;
-  }
-  /* shaded sphere */
-  function ball(ctx,x,y,r,color,label,labelColor){
-    if(r<=0.5) return;
-    const g=ctx.createRadialGradient(x-r*.35,y-r*.4,r*.15,x,y,r);
-    g.addColorStop(0,'#ffffff'); g.addColorStop(.25,color); g.addColorStop(1,shade(color,-0.45));
-    ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
-    if(label && r>8){ ctx.fillStyle=labelColor||'#fff'; ctx.font='900 '+Math.round(r*1.05)+'px '+getComputedStyle(document.body).fontFamily;
-      ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(label,x,y+r*.05); }
-  }
-  function shade(hex,p){ const n=parseInt(hex.slice(1),16); let r=n>>16,g=n>>8&255,b=n&255;
-    const f=v=>Math.max(0,Math.min(255,Math.round(p<0?v*(1+p):v+(255-v)*p))); return 'rgb('+f(r)+','+f(g)+','+f(b)+')'; }
-
-  /* small celebration */
-  function celebrate(){
-    if(reduced) return;
-    const c=document.createElement('canvas'); c.className='confetti'; document.body.appendChild(c);
-    const x=c.getContext('2d'); c.width=innerWidth; c.height=innerHeight;
-    const cols=['#00c3fe','#12a06a','#ffd15c','#7b5cff','#e8425a'];
-    const P=Array.from({length:90},()=>({x:innerWidth/2+(Math.random()-.5)*200,y:innerHeight*.35,vx:(Math.random()-.5)*9,vy:-Math.random()*9-3,
-      s:5+Math.random()*6,c:cols[Math.random()*5|0],r:Math.random()*6}));
-    let t=0; (function f(){ t++; x.clearRect(0,0,c.width,c.height);
-      P.forEach(p=>{ p.vy+=.28; p.x+=p.vx; p.y+=p.vy; p.r+=.15; x.save(); x.translate(p.x,p.y); x.rotate(p.r); x.fillStyle=p.c; x.fillRect(-p.s/2,-p.s/4,p.s,p.s/2); x.restore(); });
-      if(t<110) requestAnimationFrame(f); else c.remove(); })();
+    function hit(x,y){ let best=null;
+      for(const p of picks){ let ok=false;
+        if(p.tri){ const [a,b,c]=p.tri, d=(b.y-c.y)*(a.x-c.x)+(c.x-b.x)*(a.y-c.y); const l1=((b.y-c.y)*(x-c.x)+(c.x-b.x)*(y-c.y))/d, l2=((c.y-a.y)*(x-c.x)+(a.x-c.x)*(y-c.y))/d; ok=l1>=0&&l2>=0&&l1+l2<=1; }
+        else if(p.seg){ const [A,B]=p.seg, dx=B.x-A.x, dy=B.y-A.y, l2=dx*dx+dy*dy||1, t=Math.max(0,Math.min(1,((x-A.x)*dx+(y-A.y)*dy)/l2)); ok=Math.hypot(x-(A.x+t*dx),y-(A.y+t*dy))<=p.r; }
+        else ok=Math.hypot(x-p.cx,y-p.cy)<=p.r;
+        if(ok&&(!best||p.z>best.z)) best=p; }
+      return best; }
+    let down=null;
+    box.addEventListener('pointerdown',e=>{ down={x:e.clientX,y:e.clientY,moved:false}; drag={x:e.clientX,y:e.clientY}; box.setPointerCapture(e.pointerId); });
+    box.addEventListener('pointermove',e=>{ if(!drag) return; const dx=e.clientX-drag.x, dy=e.clientY-drag.y; drag={x:e.clientX,y:e.clientY};
+      if(down&&Math.hypot(e.clientX-down.x,e.clientY-down.y)>6) down.moved=true;
+      if(down&&down.moved&&o.rotate!==false){ cam.vy=-dx*.009; cam.vp=dy*.007; cam.yaw+=cam.vy; cam.pitch=Math.max(-1.35,Math.min(1.35,cam.pitch+cam.vp)); box.style.cursor='grabbing'; } });
+    const up=e=>{ if(down&&!down.moved&&o.onPick){ const b=cv.getBoundingClientRect(), h=hit(e.clientX-b.left,e.clientY-b.top); o.onPick(h?h.id:null,h); ping(); }
+      drag=null; down=null; box.style.cursor='grab'; };
+    box.addEventListener('pointerup',up); box.addEventListener('pointercancel',()=>{drag=null;down=null;});
+    box.addEventListener('wheel',e=>{ e.preventDefault(); cam.zoom=Math.max(.6,Math.min(2.4,cam.zoom*(e.deltaY<0?1.08:.92))); },{passive:false});
+    box.tabIndex=0; box.setAttribute('role','img'); box.setAttribute('aria-label',o.label||'نموذجٌ ثلاثيُّ الأبعادِ: استعملِ الأسهمَ للتدويرِ');
+    box.addEventListener('keydown',e=>{ const k=e.key; if(k==='ArrowLeft')cam.yaw+=.15; else if(k==='ArrowRight')cam.yaw-=.15; else if(k==='ArrowUp')cam.pitch=Math.max(-1.35,cam.pitch-.12); else if(k==='ArrowDown')cam.pitch=Math.min(1.35,cam.pitch+.12); else return; e.preventDefault(); });
+    let last=performance.now();
+    (function frame(now){ const dt=Math.min(50,now-last); last=now;
+      if(!drag){ cam.vy*=.92; cam.vp*=.88; cam.yaw+=cam.vy; cam.pitch=Math.max(-1.35,Math.min(1.35,cam.pitch+cam.vp)); if(cam.auto&&!reduced&&Math.abs(cam.vy)<.002) cam.yaw+=dt*.00015; }
+      if(box.offsetParent!==null) render(reduced?0:now); requestAnimationFrame(frame); })(last);
+    return { cam, project, screen(p){ const q=project(p), b=cv.getBoundingClientRect(); return {x:b.left+q.x,y:b.top+q.y,s:q.s}; }, hit, canvas:cv };
   }
 
-  return {$, $$, ar, el, shuffle, say, hush, setupStages, go, toast, dnd, orbit, ball, shade, celebrate, reduced, get cur(){return cur;}};
+  /* mesh builders */
+  const mesh={
+    surface(fn,us,vs,op={}){ const v=[],f=[]; for(let j=0;j<=vs;j++) for(let i=0;i<=us;i++) v.push(fn(i/us,j/vs));
+      const W=us+1; for(let j=0;j<vs;j++) for(let i=0;i<us;i++){ const a=j*W+i,b=a+1,c=a+W,d=c+1; f.push([a,c,b],[b,c,d]); } return {v,f}; },
+    ellipsoid(o={}){ const rx=o.rx||100, ry=o.ry||rx, rz=o.rz||rx, bump=o.bump||(()=>1);
+      return mesh.surface((u,v)=>{ const th=u*Math.PI*2, ph=v*Math.PI, k=bump(u,v); return [Math.cos(th)*Math.sin(ph)*rx*k, Math.cos(ph)*ry*k, -Math.sin(th)*Math.sin(ph)*rz*k]; }, o.seg||28, o.ring||18); },
+    lathe(prof,seg=24){ return mesh.surface((u,v)=>{ const i=v*(prof.length-1), a=prof[Math.floor(i)], b=prof[Math.min(prof.length-1,Math.floor(i)+1)], t=i-Math.floor(i), r=a[0]+(b[0]-a[0])*t, y=a[1]+(b[1]-a[1])*t, th=u*Math.PI*2; return [Math.cos(th)*r,y,-Math.sin(th)*r]; }, seg, (prof.length-1)*2); },
+    box(w,h,d){ const x=w/2,y=h/2,z=d/2, v=[[-x,-y,-z],[x,-y,-z],[x,y,-z],[-x,y,-z],[-x,-y,z],[x,-y,z],[x,y,z],[-x,y,z]];
+      return {v,f:[[0,2,1],[0,3,2],[4,5,6],[4,6,7],[0,1,5],[0,5,4],[3,6,2],[3,7,6],[1,2,6],[1,6,5],[0,4,7],[0,7,3]]}; }
+  };
+
+  function celebrate(){ if(reduced) return; const c=document.createElement('canvas'); c.className='confetti'; document.body.appendChild(c); const x=c.getContext('2d'); c.width=innerWidth; c.height=innerHeight;
+    const cols=['#00c3fe','#12a06a','#ffd15c','#7b5cff','#e8425a'], P=Array.from({length:70},()=>({x:innerWidth/2+(Math.random()-.5)*160,y:innerHeight*.3,vx:(Math.random()-.5)*8,vy:-Math.random()*8-3,s:5+Math.random()*5,c:cols[Math.random()*5|0],r:Math.random()*6}));
+    let t=0; (function f(){ t++; x.clearRect(0,0,c.width,c.height); P.forEach(p=>{ p.vy+=.28; p.x+=p.vx; p.y+=p.vy; p.r+=.15; x.save(); x.translate(p.x,p.y); x.rotate(p.r); x.fillStyle=p.c; x.fillRect(-p.s/2,-p.s/4,p.s,p.s/2); x.restore(); }); if(t<100) requestAnimationFrame(f); else c.remove(); })(); }
+
+  return {$,$$,ar,shuffle,scene,start,ping,next,say,tries,toast,dnd,view3d,mesh,celebrate,reduced,goScene,get scene_(){return cur;},get step_(){return step;}};
 })();
 </script>
 <script>
-/* ================= ACTIVITY JS ================= */
-const {$, $$, ar, el, say, hush} = Kit;
-const done = {}; // gating flags
-
-/* ---------- multiple-choice helper (with "show me" after 2 wrong tries) ---------- */
-function mcq(host, fb, opts, correct, cfg={}){
-  host = typeof host==='string' ? $(host) : host; fb = typeof fb==='string' ? $(fb) : fb;
-  let wrong=0, finished=false; host.innerHTML='';
-  const btns = opts.map((t,i)=>{ const b=el('button',{class:'choice',type:'button','aria-pressed':'false'},t); host.appendChild(b);
-    b.addEventListener('click',()=>pick(i)); return b; });
-  function win(shown){
-    finished=true; btns.forEach((b,k)=>{ b.disabled=true; if(k===correct) b.classList.add('ok'); });
-    say(fb,'ok',(shown?'<b>الحلُّ:</b> ':'')+cfg.ok); cfg.onOk && cfg.onOk();
-  }
-  function pick(i){
-    if(finished) return;
-    btns.forEach(b=>b.setAttribute('aria-pressed','false')); btns[i].setAttribute('aria-pressed','true');
-    if(cfg.predict){ finished=true; btns.forEach(b=>b.disabled=true); cfg.predict(i); return; }
-    if(i===correct){ btns[i].classList.remove('bad'); win(false); return; }
-    wrong++; btns[i].classList.add('bad');
-    say(fb,'bad','حاولْ مرةً أخرى — '+((cfg.why&&cfg.why[i])||''));
-    if(wrong>=2){ const s=el('button',{class:'btn sm ghost',type:'button',style:'margin-top:8px'},'💡 أرني الحلَّ');
-      s.addEventListener('click',()=>win(true)); fb.querySelector('div').appendChild(el('div',{},'')).appendChild(s); }
-  }
-  return {get done(){return finished;}};
+/* ===== ACTIVITY JS ===== */
+/* ---------- shared helpers ---------- */
+const BONE='#f3ead2', BONE2='#e6d6b4', CART='#7fd6ff';
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const rectOf=el=>{ if(!el||el.offsetParent===null) return null; const b=el.getBoundingClientRect(); return {x:b.left+b.width/2,y:b.top+b.height/2,w:b.width+14,h:b.height+14,box:true}; };
+const inScene=s=>Kit.$('.scene.on '+s);
+function sorter(el,{chips,zones,cols,key,why,solution}){       // dnd sort used in scenes 2 & 3
+  el.innerHTML='<div class="chips">'+Kit.shuffle(chips).map(c=>'<span class="chip" data-id="'+c.id+'" data-z="'+c.z+'">'+c.t+'</span>').join('')+'</div>'+
+    '<div class="'+cols+'">'+zones.map(z=>'<div class="zone" data-z="'+z.z+'"><span class="zt">'+z.t+'</span></div>').join('')+'</div>';
+  Kit.dnd({chips:[...el.querySelectorAll('.chip')],zones:[...el.querySelectorAll('.zone')],accept:(c,z)=>c.dataset.z===z.dataset.z,
+    onDrop(c,z,ok){ if(ok) return; const n=Kit.tries(key); Kit.say('حاولْ مرةً أخرى — '+why[c.dataset.id]+(n>=2?'<br><b>الحلُّ:</b> '+solution:''),'bad'); }});
 }
 
-/* ---------- sorting helper on top of Kit.dnd ---------- */
-function sorter(chipHost, zones, items, fb, cfg){
-  chipHost=$(chipHost); fb=$(fb);
-  const chips = Kit.shuffle(items).map(it=>{ const c=el('span',{class:'chip','data-id':it.id},it.t); chipHost.appendChild(c); return c; });
-  const byId = Object.fromEntries(items.map(i=>[i.id,i]));
-  let wrong=0, placed=0;
-  function check(){ if(placed===items.length){ cfg.onDone && cfg.onDone(); } }
-  function showBtn(){
-    if(fb.querySelector('.showsol')) return;
-    const s=el('button',{class:'btn sm ghost showsol',type:'button',style:'margin-top:8px'},'💡 أرني الحلَّ');
-    s.addEventListener('click',()=>{ chips.forEach(c=>{ if(!c.dataset.locked){ const z=zones.find(z=>z.dataset.z===byId[c.dataset.id].z);
-      z.appendChild(c); c.classList.remove('bad','sel'); c.classList.add('ok'); c.dataset.locked='1'; c.setAttribute('tabindex','-1'); placed++; } });
-      say(fb,'ok','<b>الحلُّ:</b> '+cfg.solution); check(); });
-    fb.querySelector('div').appendChild(el('div',{},'')).appendChild(s);
-  }
-  Kit.dnd({chips, zones,
-    accept:(c,z)=>byId[c.dataset.id].z===z.dataset.z,
-    onDrop:(c,z,ok)=>{ const it=byId[c.dataset.id];
-      if(ok){ placed++; say(fb,'ok',it.ok); check(); }
-      else { wrong++; say(fb,'bad','حاولْ مرةً أخرى — '+it.bad); if(wrong>=2) showBtn(); } }
-  });
+/* ================= Scene 1: joints (3D) ================= */
+const OY=50, P=(x,y,z)=>[x,y+OY,z], PH=(x,y,z)=>[x,y+10,z];
+const J={type:'ball', u:[0,0], dirs:new Set(), a:20, w:0, hMax:false, hMin:false, side:false, fixedTry:false, shake:0,
+  cart:true, cartOff:false, rubbed:false, rubAcc:0, cartBack:false, lastMove:0, drag:null, found:{}};
+const domeM=Kit.mesh.lathe([[0,62],[34,58],[52,44],[60,24],[58,4]],20);
+const pelvisM=Kit.mesh.box(220,46,110);
+const skullM=Kit.mesh.ellipsoid({rx:95,ry:82,rz:112,seg:22,ring:14});
+function ballDir(){ return (()=>{ const v=[J.u[0]*1.1,-1,J.u[1]*1.1], l=Math.hypot(...v); return v.map(c=>c/l); })(); }
+function boneEnd(){
+  if(J.type==='ball'){ const d=ballDir(); return P(d[0]*185,d[1]*185,d[2]*185); }
+  if(J.type==='hinge'){ const a=J.a*Math.PI/180; return PH(Math.sin(a)*170,-Math.cos(a)*170,Math.sin(J.w)*40); }
+  return P(0,10,0);
 }
-
-/* =====================================================================
-   STAGE 0 — 3D joints lab
-   ===================================================================== */
-const BONE='#f3e8cc', BONE2='#e7d6ad', CART='#7fd8ff', SOCK='#c9a874';
-const J = {type:'ball', u:0, w:0, cart:true, lastMove:-1e9, trail:[], sectors:new Set(),
-  hingeMax:false, hingeMin:false, hingeSide:false, fixedTry:false, cartOff:false, cartRub:false, cartBack:false, msgKey:''};
-const add=(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]], mul=(a,k)=>[a[0]*k,a[1]*k,a[2]*k];
-
-function drawCyl(ctx,pa,pb,r,c,al){
-  const s=(pa.s+pb.s)/2, w=Math.max(1,2*r*s); const dx=pb.x-pa.x, dy=pb.y-pa.y, L=Math.hypot(dx,dy)||1; const nx=-dy/L, ny=dx/L;
-  const mx=(pa.x+pb.x)/2, my=(pa.y+pb.y)/2;
-  const g=ctx.createLinearGradient(mx-nx*w/2,my-ny*w/2,mx+nx*w/2,my+ny*w/2);
-  g.addColorStop(0,Kit.shade(c,-.5)); g.addColorStop(.28,'#ffffff'); g.addColorStop(.45,c); g.addColorStop(1,Kit.shade(c,-.5));
-  ctx.globalAlpha=al??1; ctx.strokeStyle=g; ctx.lineWidth=w; ctx.lineCap='round';
-  ctx.beginPath(); ctx.moveTo(pa.x,pa.y); ctx.lineTo(pb.x,pb.y); ctx.stroke(); ctx.globalAlpha=1;
-}
-function tag(ctx,x,y,txt,bg,fg){
-  ctx.font='800 13px '+getComputedStyle(document.body).fontFamily; ctx.direction='rtl'; ctx.textAlign='center'; ctx.textBaseline='middle';
-  const w=ctx.measureText(txt).width+16, h=24;
-  ctx.fillStyle=bg||'rgba(255,255,255,.92)'; ctx.beginPath();
-  if(ctx.roundRect) ctx.roundRect(x-w/2,y-h/2,w,h,12); else ctx.rect(x-w/2,y-h/2,w,h); ctx.fill();
-  ctx.fillStyle=fg||'#200058'; ctx.fillText(txt,x,y+1);
-}
-function sparks(ctx,pts){
-  ctx.lineCap='round';
-  pts.forEach(p=>{ for(let i=0;i<5;i++){ const a=Math.random()*Math.PI*2, l=6+Math.random()*14;
-    ctx.strokeStyle=Math.random()<.5?'#ff4d6a':'#ffd15c'; ctx.lineWidth=2.5; ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(p.x+Math.cos(a)*l,p.y+Math.sin(a)*l); ctx.stroke(); } });
-}
-
-function buildScene(now){
-  const it=[], labels=[], spk=[]; let extra=null;
-  const moving = now - J.lastMove < 320;
-  const B=(p,r,c,a,bias)=>it.push({k:'b',p,r,c,a,bias:bias||0});
-  const C=(p1,p2,r,c,a,bias)=>it.push({k:'c',p1,p2,r,c,a,bias:bias||0});
-  if(J.type==='ball'){
-    const hc=[0,40,0], R=48;
-    const m=Math.min(1,Math.hypot(J.u,J.w)), th=m*1.2, ph=Math.atan2(J.w,J.u);
-    const d=[Math.sin(th)*Math.cos(ph), -Math.cos(th), -Math.sin(th)*Math.sin(ph)];
-    const end=add(hc,mul(d,230));
-    C(add(hc,mul(d,R*.7)), end, 20, BONE2);
-    B(end,30,BONE2);
-    B(hc,R,BONE);
-    if(J.cart) B(hc,R+8,CART,.42,2);
-    for(let p=0.12;p<1.2;p+=0.2){ const n=Math.max(6,Math.round(20*Math.sin(p)+4));
-      for(let k=0;k<n;k++){ const az=k/n*Math.PI*2+p; const dir=[Math.sin(p)*Math.cos(az),Math.cos(p),Math.sin(p)*Math.sin(az)];
-        B(add(hc,mul(dir,R+22)),12,SOCK,.82); } }
-    C([0,hc[1]+R+26,0],[-130,175,-25],30,SOCK);
-    C([0,hc[1]+R+26,0],[115,165,15],26,SOCK);
-    if(moving && m>0.35 && (!J._lt || now-J._lt>60)){ J._lt=now; J.trail.push(end); if(J.trail.length>140) J.trail.shift(); }
-    J.trail.forEach(p=>B(p,5,'#00c3fe',.9));
-    labels.push({p:[-130,215,-25],t:'الحوضُ (نهايةٌ مقعّرةٌ)'});
-    labels.push({p:add(hc,[0,-R-30,0]),t:'رأسُ عظمِ الفخذِ (محدّبٌ)'});
-    labels.push({p:add(hc,mul(d,170)),t:'عظمُ الفخذِ',off:60});
-    if(J.cart) labels.push({p:add(hc,[R+10,0,0]),t:'الغضروفُ',bg:'#bff0ff',off:44});
-    if(!J.cart && moving) for(let i=0;i<4;i++){ const az=Math.random()*6.28, p=0.9+Math.random()*.4; spk.push(add(hc,mul([Math.sin(p)*Math.cos(az),Math.cos(p),Math.sin(p)*Math.sin(az)],R))); }
-  } else if(J.type==='hinge'){
-    const Jc=[0,40,0];
-    C([0,215,0],[0,62,0],22,BONE2);
-    C([-48,40,0],[48,40,0],30,BONE,1,30);
-    if(J.cart) C([-52,40,0],[52,40,0],37,CART,.4,32);
-    const side = Math.abs(J.u)>0.4;
-    const a=(J.w+1)/2*2.45;
-    const wob = side && moving ? Math.sin(now/35)*5 : 0;
-    const d=[0,-Math.cos(a),Math.sin(a)];
-    for(const off of [-15,15]){ C(add(add(Jc,mul(d,40)),[off+wob,0,0]), add(add(Jc,mul(d,210)),[off+wob,0,0]), 11, BONE2); }
-    B(add(add(Jc,mul(d,40)),[wob,0,0]),24,BONE2);
-    if(J.cart) B(add(Jc,mul(d,40)),27,CART,.35,3);
-    for(let k=0;k<=16;k++){ const aa=k/16*2.45; B(add(Jc,[0,-Math.cos(aa)*232,Math.sin(aa)*232]),3.5,'#ffffff',.5); }
-    labels.push({p:[0,160,0],t:'عظمُ العضدِ',off:70});
-    labels.push({p:add(Jc,mul(d,140)),t:'الساعدُ (الزندُ والكعبرةُ)',off:84});
-    if(J.cart) labels.push({p:[56,40,0],t:'الغضروفُ',bg:'#bff0ff',off:40});
-    if(side) extra={p:add(Jc,mul(d,215)),t:'✖ لا يتحرّكُ في هذا الاتجاهِ'};
-    if(!J.cart && moving) for(let i=0;i<4;i++){ spk.push([ (Math.random()-.5)*90, 40+ (Math.random()-.5)*40, 20+Math.random()*10 ]); }
-  } else {
-    B([0,40,0],150,BONE);
-    B([-52,30,138],24,'#5b4a3a',1,1); B([52,30,138],24,'#5b4a3a',1,1);
-    labels.push({p:[0,215,0],t:'الجمجمةُ'});
-    if(moving) extra={p:[0,-130,0],t:'🔒 مفصلٌ ثابتٌ — لا يتحرّكُ'};
-  }
-  return {it,labels,spk,extra};
-}
-function sutures(ctx,cam){
-  const c=[0,40,0], R=151; const pc=cam.project(...c);
-  const curves=[ t=>[0,Math.cos(t),Math.sin(t)], t=>[Math.sin(t),Math.cos(t)*.93,.35*Math.cos(t)], t=>[Math.sin(t),.45*Math.cos(t)+.15,-.85*Math.cos(t)] ];
-  ctx.strokeStyle='#7a5a32'; ctx.lineWidth=2.2; ctx.lineJoin='round';
-  curves.forEach(f=>{ let pen=false; ctx.beginPath();
-    for(let i=0;i<=120;i++){ const t=-1.35+i/120*2.7; let v=f(t); const n=Math.hypot(...v); v=v.map(x=>x/n);
-      const v2=f(t+0.01); const tg=[v2[0]-v[0],v2[1]-v[1],v2[2]-v[2]];
-      const pr=[v[1]*tg[2]-v[2]*tg[1], v[2]*tg[0]-v[0]*tg[2], v[0]*tg[1]-v[1]*tg[0]]; const pn=Math.hypot(...pr)||1;
-      const z=(i%2?1:-1)*0.035; const q=[v[0]+pr[0]/pn*z, v[1]+pr[1]/pn*z, v[2]+pr[2]/pn*z]; const qn=Math.hypot(...q);
-      const P=cam.project(c[0]+q[0]/qn*R, c[1]+q[1]/qn*R, c[2]+q[2]/qn*R);
-      if(P.z-pc.z>4){ if(pen) ctx.lineTo(P.x,P.y); else { ctx.moveTo(P.x,P.y); pen=true; } } else pen=false; }
-    ctx.stroke(); });
-  const lp=cam.project(0,40+R*.55,R*.55);
-  if(lp.z-pc.z>0) tag(ctx,lp.x,lp.y-18,'عظامٌ ملتحمةٌ','#fff3c4');
-}
-const cam3 = Kit.orbit($('#v3d'), (ctx,cam,W,H)=>{
-  const now=performance.now();
-  const S=buildScene(now);
-  const P=S.it.map(o=>{ if(o.k==='b'){ const p=cam.project(...o.p); return {o,p,z:p.z+o.bias}; }
-    const a=cam.project(...o.p1), b=cam.project(...o.p2); return {o,a,b,z:(a.z+b.z)/2+o.bias}; });
-  P.sort((x,y)=>x.z-y.z);
-  P.forEach(q=>{ const o=q.o;
-    if(o.k==='b'){ ctx.globalAlpha=o.a??1; Kit.ball(ctx,q.p.x,q.p.y,o.r*q.p.s,o.c); ctx.globalAlpha=1; }
-    else drawCyl(ctx,q.a,q.b,o.r,o.c,o.a); });
-  if(J.type==='fixed') sutures(ctx,cam);
-  S.labels.forEach(l=>{ const p=cam.project(...l.p); tag(ctx,p.x+(l.off||0)*Math.min(1,W/400),p.y,l.t,l.bg); });
-  if(S.spk.length){ const pts=S.spk.map(v=>cam.project(...v)); sparks(ctx,pts);
-    const c0=pts[0]; tag(ctx,Math.min(W-70,Math.max(70,c0.x)),c0.y-34,'⚡ احتكاكٌ!','#e8425a','#fff'); }
-  if(S.extra){ const p=cam.project(...S.extra.p); tag(ctx,Math.min(W-110,Math.max(110,p.x)),Math.min(H-50,p.y+34),S.extra.t,'#e8425a','#fff'); }
-},{yaw:0.75,pitch:0.28,zoom:0.85,auto:false});
-
-const pad=$('#pad'), knob=$('#knob');
-function placeKnob(){ knob.style.left=(50+J.u*42)+'%'; knob.style.top=(50-J.w*42)+'%';
-  pad.setAttribute('aria-valuetext', J.type==='hinge' ? 'ثنيُ الساعدِ '+ar(Math.round((J.w+1)/2*140))+'°' : 'الاتجاهُ '+ar(Math.round(J.u*10))+'، '+ar(Math.round(J.w*10))); }
-function setPad(u,w){
-  const m=Math.hypot(u,w); if(m>1){u/=m;w/=m;}
-  J.u=u; J.w=w; J.lastMove=performance.now(); placeKnob(); jEvent();
-}
-let padDrag=false;
-function padXY(e){ const r=pad.getBoundingClientRect(); return [((e.clientX-r.left)/r.width-.5)/.42, -((e.clientY-r.top)/r.height-.5)/.42]; }
-pad.addEventListener('pointerdown',e=>{ padDrag=true; pad.setPointerCapture(e.pointerId); setPad(...padXY(e)); e.preventDefault(); });
-pad.addEventListener('pointermove',e=>{ if(padDrag) setPad(...padXY(e)); });
-['pointerup','pointercancel'].forEach(t=>pad.addEventListener(t,()=>padDrag=false));
-pad.addEventListener('keydown',e=>{ const s=.15; let u=J.u,w=J.w;
-  if(e.key==='ArrowLeft') u-=s; else if(e.key==='ArrowRight') u+=s; else if(e.key==='ArrowUp') w+=s; else if(e.key==='ArrowDown') w-=s; else return;
-  e.preventDefault(); setPad(Math.max(-1,Math.min(1,u)),Math.max(-1,Math.min(1,w))); });
-
-const JNAME={ball:'مفصلُ الوركِ (كرويٌّ)',hinge:'مفصلُ الساعدِ (اسطوانيٌّ)',fixed:'عظامُ الجمجمةِ (مفصلٌ ثابتٌ)'};
-const JTASK={ball:'حرّكِ المقبضَ في كلِّ الاتجاهاتِ وراقبْ عظمَ الفخذِ.',
-  hinge:'حرّكِ المقبضَ إلى الأعلى والأسفلِ لثنيِ الساعدِ، ثمّ جرّبْه يميناً ويساراً.',
-  fixed:'حاولْ تحريكَ عظامِ الجمجمةِ بالمقبضِ.'};
-function setJoint(t){
-  J.type=t; J.msgKey='';
-  $$('.tabs .btn').forEach(b=>{ const on=b.dataset.j===t; b.setAttribute('aria-pressed',on); b.setAttribute('aria-selected',on); });
-  $('#jname').textContent=JNAME[t]; $('#jtask').textContent=JTASK[t];
-  J.u=0; J.w = t==='hinge' ? -1 : 0; placeKnob();
-  pad.classList.toggle('locked', t==='fixed');
-  $('#cartBtn').disabled = t==='fixed';
-  $('#v3d').setAttribute('aria-label','نموذجٌ ثلاثيُّ الأبعادِ: '+JNAME[t]+'. اسحبْ لتدويرِه.');
-  hush('#jfb');
-}
-$$('.tabs .btn').forEach(b=>b.addEventListener('click',()=>setJoint(b.dataset.j)));
-$('#cartBtn').addEventListener('click',()=>{
-  J.cart=!J.cart; const b=$('#cartBtn'); b.setAttribute('aria-pressed',!J.cart);
-  b.textContent = J.cart ? '🧊 أزِلِ الغضروفَ' : '🧊 أعِدِ الغضروفَ';
-  if(!J.cart){ J.cartOff=true; say('#jfb','warn','أُزيلَ الغضروفُ. حرّكِ العظمَ الآنَ وراقبْ ما يحدثُ عندَ نهايتَي العظمينِ.'); }
-  else { if(J.cartRub){ J.cartBack=true; say('#jfb','ok','عادَ الغضروفُ فصارتِ الحركةُ ناعمةً بلا احتكاكٍ. <b>الغضروفُ تركيبٌ مرنٌ يغطّي نهايةَ كلِّ عظمٍ ويمنعُ احتكاكَ العظمينِ.</b>'); }
-    else hush('#jfb'); }
-  J.msgKey=''; updMissions();
-});
-function jsay(key,type,html){ if(J.msgKey===key) return; J.msgKey=key; say('#jfb',type,html); }
-function jEvent(){
-  if(!J.cart && J.type!=='fixed'){
-    J.cartRub=true; updMissions();
-    jsay('rub','bad','⚡ احتكاكٌ! بدونِ الغضروفِ تحتكُّ نهايتا العظمينِ ببعضِهما. <b>الغضروفُ تركيبٌ مرنٌ يغطّي نهايةَ كلِّ عظمٍ؛ يمنعُ احتكاكَ العظمينِ ويمنعُ أمراضَ الهيكلِ.</b> أعِدِ الغضروفَ.');
-    return;
-  }
-  if(J.type==='ball'){
-    const m=Math.hypot(J.u,J.w);
-    if(m>0.4){ J.sectors.add(Math.floor((Math.atan2(J.w,J.u)+Math.PI)/(Math.PI*2)*8)%8); }
-    const n=J.sectors.size;
-    if(n>=4){ jsay('ballok','ok','رائعٌ! يتحرّكُ عظمُ الفخذِ بحريةٍ في <b>اتجاهاتٍ عدّةٍ</b> (انظرِ النقاطَ الزرقاءَ). هذا <b>مفصلٌ كرويٌّ</b>: رأسُ العظمِ المحدّبُ يدورُ داخلَ النهايةِ المقعّرةِ.'); }
-    else if(n>0) jsay('ball'+n,'info','اتجاهاتٌ جرّبتَها: '+ar(n)+' من ٤ — جرّبِ اتجاهاتٍ أخرى.');
-  } else if(J.type==='hinge'){
-    const a=(J.w+1)/2*140;
-    if(a>110) J.hingeMax=true; if(a<20) J.hingeMin=true;
-    if(Math.abs(J.u)>0.4){ J.hingeSide=true; jsay('side','warn','✖ لا يتحرّكُ في هذا الاتجاهِ! المفصلُ الاسطوانيُّ يتحرّكُ في مستوىً واحدٍ فقط (على المسارِ المنقّطِ) — كالانثناءِ والمدِّ.'); }
-    else if(J.hingeMax && J.hingeMin) jsay('hok','ok','انثنى الساعدُ وامتدَّ حولَ المفصلِ الاسطوانيِّ'+(J.hingeSide?'، ولم يتحرّكْ جانباً.':'. جرّبِ الآنَ تحريكَه يميناً ويساراً.'));
-    else jsay('h','info','الساعدُ يدورُ حولَ المفصلِ: '+ar(Math.round(a))+'°');
-  } else {
-    J.fixedTry=true; jsay('fixed','ok','🔒 <b>مفصلٌ ثابتٌ</b>: عظامُ الجمجمةِ مرتبطةٌ بقوّةٍ فلا تتحرّكُ.');
-  }
-  updMissions();
-}
-function updMissions(){
-  const st={ball:J.sectors.size>=4, hinge:J.hingeMax&&J.hingeMin&&J.hingeSide, fixed:J.fixedTry, cart:J.cartOff&&J.cartRub&&J.cartBack};
-  $$('#jm li').forEach(li=>{ const ok=st[li.dataset.m]; if(ok && !li.classList.contains('done')){ li.classList.add('done'); li.querySelector('.st').textContent='✓'; } });
-  done.s0 = Object.values(st).every(Boolean);
-  if(done.s0 && !J.celebrated){ J.celebrated=true; Kit.toast('أحسنتَ! جرّبتَ المفاصلَ الثلاثةَ والغضروفَ.'); }
-}
-setJoint('ball');
-
-/* =====================================================================
-   STAGE 1 — classify joints
-   ===================================================================== */
-sorter('#jchips', $$('.stage[data-stage="1"] .zone'), [
-  {id:'sh',t:'💪 الكتفُ',z:'ball',ok:'صحيحٌ! <b>مفصلُ الكتفِ كرويٌّ</b> — يتحرّكُ في اتجاهاتٍ عدّةٍ.',bad:'الكتفُ يدورُ في اتجاهاتٍ كثيرةٍ — فأيُّ نوعٍ يسمحُ بذلك؟'},
-  {id:'fa',t:'🦾 الساعدُ',z:'hinge',ok:'صحيحٌ! <b>مفصلُ الساعدِ اسطوانيٌّ</b> — رأيتَه ينثني ويمتدُّ ولا يتحرّكُ جانباً.',bad:'تذكّرْ نموذجَ الساعدِ: كانَ ينثني ويمتدُّ فقط.'},
-  {id:'sk',t:'💀 الجمجمةُ',z:'fixed',ok:'صحيحٌ! <b>عظامُ الجمجمةِ</b> مرتبطةٌ بقوّةٍ فلا تتحرّكُ — مفصلٌ ثابتٌ.',bad:'هل تتحرّكُ عظامُ الجمجمةِ؟ إنّها ملتحمةٌ مرتبطةٌ بقوّةٍ.'},
-  {id:'hp',t:'🦵 الوركُ',z:'ball',ok:'صحيحٌ! في الوركِ يدخلُ رأسُ عظمِ الفخذِ المحدّبُ في نهايةِ الحوضِ المقعّرةِ، فيتحرّكُ بحريةٍ — <b>مفصلٌ كرويٌّ</b>.',bad:'عظمُ الفخذِ يتحرّكُ بحريةٍ في اتجاهاتٍ عدّةٍ، ورأسُه محدّبٌ كالكرةِ.'}
-], '#sfb', {solution:'الكتفُ والوركُ ← كرويٌّ، الساعدُ ← اسطوانيٌّ، الجمجمةُ ← ثابتٌ.',
-  onDone:()=>{ done.s1=true; say('#sfb','ok','أحسنتَ! صنّفتَ المفاصلَ كلَّها: <b>الكتفُ والوركُ</b> كرويّانِ، <b>الساعدُ</b> اسطوانيٌّ، <b>الجمجمةُ</b> ثابتةٌ.'); }});
-
-/* =====================================================================
-   STAGE 2 — the book's wooden-strip model
-   ===================================================================== */
-const M={th:90, H:[280,330], L:250, n:215, out:false, pred:null, sawOpen:false, sawClose:false, oMin:false, oMax:false, step:1};
-const svgNS='http://www.w3.org/2000/svg';
-function sv(tag,attrs){ const e=document.createElementNS(svgNS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); return e; }
-function stripG(g){
-  g.appendChild(sv('rect',{x:M.H[0],y:M.H[1]-18,width:M.L,height:36,rx:6,fill:'url(#wood)',stroke:'#8a5520','stroke-width':2}));
-  for(let i=0;i<3;i++) g.appendChild(sv('path',{d:`M${M.H[0]+30} ${M.H[1]-9+i*9} q${M.L*.3} ${i%2?4:-4} ${M.L-50} 0`,stroke:'#b07434','stroke-width':1.2,fill:'none',opacity:.6}));
-}
-stripG($('#stripA')); stripG($('#stripB'));
-const IN_MIN=2*M.n*Math.sin(15*Math.PI/180), IN_MAX=2*M.n, RO=32, NO=13;
-function geo(th){
-  const t=th*Math.PI/180, H=M.H, a=[1,0], b=[Math.cos(t),-Math.sin(t)], na=[0,1], nb=[-Math.sin(t),-Math.cos(t)];
-  const pt=(d,k,n,o)=>[H[0]+d[0]*k+n[0]*o, H[1]+d[1]*k+n[1]*o];
-  const Ai=pt(a,M.n,na,0), Bi=pt(b,M.n,nb,0);
-  const Pa=pt(a,M.n,na,NO), Ta=pt(a,0,na,RO), Tb=pt(b,0,nb,RO), Pb=pt(b,M.n,nb,NO);
-  const inLen=Math.hypot(Bi[0]-Ai[0],Bi[1]-Ai[1]);
-  const outLen=Math.hypot(Pa[0]-Ta[0],Pa[1]-Ta[1])+RO*(Math.PI-t)+Math.hypot(Pb[0]-Tb[0],Pb[1]-Tb[1]);
-  return {t,a,b,Ai,Bi,Pa,Ta,Tb,Pb,inLen,outLen};
-}
-const OUT_MIN=geo(180).outLen, OUT_MAX=geo(30).outLen;
-function bandState(f){ return f<0.38?['short','قصيرٌ وغليظٌ (منقبضٌ)']:f>0.72?['long','طويلٌ ورفيعٌ (منبسطٌ)']:['','متوسّطٌ']; }
-function drawModel(){
-  const G=geo(M.th), H=M.H;
-  $('#stripB').setAttribute('transform',`rotate(${-M.th} ${H[0]} ${H[1]})`);
-  $('#hingeC').setAttribute('cx',H[0]); $('#hingeC').setAttribute('cy',H[1]);
-  const sc=$('#screws'); sc.innerHTML='';
-  [[-10,-8],[10,8],[-8,10],[9,-9]].forEach(([dx,dy])=>sc.appendChild(sv('circle',{cx:H[0]+dx,cy:H[1]+dy,r:3.2,fill:'#3b3f4c'})));
-  const fi=(G.inLen-IN_MIN)/(IN_MAX-IN_MIN), fo=(G.outLen-OUT_MIN)/(OUT_MAX-OUT_MIN);
-  const bi=$('#bandIn'); bi.setAttribute('x1',G.Ai[0]); bi.setAttribute('y1',G.Ai[1]); bi.setAttribute('x2',G.Bi[0]); bi.setAttribute('y2',G.Bi[1]);
-  bi.setAttribute('stroke-width',(12-8.5*fi).toFixed(1));
-  const bo=$('#bandOut'); bo.setAttribute('display',M.out?'inline':'none');
-  bo.setAttribute('d',`M${G.Pa} L${G.Ta} A${RO} ${RO} 0 0 1 ${G.Tb} L${G.Pb}`); bo.setAttribute('stroke-width',(12-8.5*fo).toFixed(1));
-  const nl=$('#nails'); nl.innerHTML='';
-  const nails=[G.Ai,G.Bi].concat(M.out?[G.Pa,G.Pb]:[]);
-  nails.forEach(p=>nl.appendChild(sv('circle',{cx:p[0],cy:p[1],r:6,fill:'url(#metal)',stroke:'#3b3f4c','stroke-width':1.5})));
-  // angle arc
-  const r=62, e=[H[0]+r*Math.cos(G.t),H[1]-r*Math.sin(G.t)];
-  $('#mArc').setAttribute('d',`M${H[0]} ${H[1]} L${H[0]+r} ${H[1]} A${r} ${r} 0 0 0 ${e[0]} ${e[1]} Z`);
-  const mid=G.t/2; const at=$('#angTxt'); at.setAttribute('x',H[0]+92*Math.cos(mid)); at.setAttribute('y',H[1]-92*Math.sin(mid)+6);
-  at.textContent=ar(Math.round(M.th))+'°';
-  const hd=$('#mHandle'); hd.setAttribute('cx',H[0]+M.L*G.b[0]*.96); hd.setAttribute('cy',H[1]+M.L*G.b[1]*.96);
-  hd.setAttribute('aria-valuenow',Math.round(M.th));
-  $('#mIn').style.width=(15+85*fi)+'%'; $('#mOut').style.width=(15+85*fo)+'%';
-  const si=bandState(fi), so=bandState(fo);
-  $('#stIn').className='state '+si[0]; $('#stIn').textContent=si[1];
-  $('#stOut').className='state '+so[0]; $('#stOut').textContent=so[1];
-}
-function setAngle(th){ M.th=Math.max(30,Math.min(180,th)); $('#mSlider').value=Math.round(M.th); drawModel(); modelEvent(); }
-$('#mSlider').addEventListener('input',e=>setAngle(+e.target.value));
-(function(){ const svg=$('#msvg'), hd=$('#mHandle'); let drag=false;
-  const toSvg=e=>{ const p=svg.createSVGPoint(); p.x=e.clientX; p.y=e.clientY; return p.matrixTransform(svg.getScreenCTM().inverse()); };
-  hd.addEventListener('pointerdown',e=>{ if($('#mSlider').disabled){ Kit.toast('اخترْ توقّعَك أوّلاً'); return; } drag=true; hd.setPointerCapture(e.pointerId); e.preventDefault(); });
-  hd.addEventListener('pointermove',e=>{ if(!drag) return; const p=toSvg(e); let a=Math.atan2(-(p.y-M.H[1]),p.x-M.H[0])*180/Math.PI;
-    if(a<0) a = a<-90?180:30; setAngle(a); });
-  ['pointerup','pointercancel'].forEach(t=>hd.addEventListener(t,()=>drag=false));
-  hd.addEventListener('keydown',e=>{ if($('#mSlider').disabled) return; if(e.key==='ArrowLeft'||e.key==='ArrowUp'){ setAngle(M.th+5); e.preventDefault(); }
-    else if(e.key==='ArrowRight'||e.key==='ArrowDown'){ setAngle(M.th-5); e.preventDefault(); } });
-})();
-const PRED=['يطولُ ويصبحُ أرقَّ','يقصرُ ويصبحُ أغلظَ','لا يتغيّرُ'];
-mcq('#q1','#f1',PRED,0,{predict:i=>{ M.pred=i; $('#mSlider').disabled=false;
-  say('#f1','info','سجّلنا توقّعَك: «'+PRED[i]+'». الآنَ جرّبْ: <b>باعِدْ بينَ الشريحتينِ</b> (أكثرَ من ١٥٠°) بالمنزلقِ أو بسحبِ طرفِ الشريحةِ.'); }});
-function modelEvent(){
-  if(M.pred===null) return;
-  if(M.step===1 && M.th>=150){ M.step=2;
-    say('#f1', M.pred===0?'ok':'info', (M.pred===0?'توقّعُك صحيحٌ! ':'توقّعُك كانَ «'+PRED[M.pred]+'»، لكنّ التجربةَ أظهرتْ شيئاً آخرَ: ')+'عندما تباعدتِ الشريحتانِ <b>طالَ الشريطُ المطاطيُّ وأصبحَ أرقَّ</b>.');
-    $('#st2').hidden=false; }
-  if(M.step===2 && M.th<=50){ M.step=2.5;
-    say('#f2a','ok','لاحظْ: عندما تقاربتِ الشريحتانِ <b>قصُرَ الشريطُ وأصبحَ أغلظَ</b>.'); $('#q2wrap').hidden=false; }
-  if(M.out){ if(M.th<=60) M.oMin=true; if(M.th>=150) M.oMax=true;
-    if(M.oMin && M.oMax && $('#q3wrap').hidden){ $('#q3wrap').hidden=false;
-      say('#f3a','info','راقبتَ الشريطينِ وهما يتغيّرانِ. انظرْ إلى المقياسينِ تحتَ الأنموذجِ، ثمّ أجبْ.'); } }
-}
-mcq('#q2','#f2',['متقاربتينِ (انثنى المفصلُ)','متباعدتينِ (امتدَّ المفصلُ)','لم يتغيّرْ موضعُهما'],0,{
-  why:['','انظرْ إلى الأنموذجِ: عندما قصُرَ الشريطُ كانتِ الزاويةُ صغيرةً.','تغيّرَ موضعُ الشريحةِ مع تغيّرِ طولِ الشريطِ — راقبِ الزاويةَ.'],
-  ok:'نعم! قِصَرُ الشريطِ يرافقُه تقاربُ الشريحتينِ، وطولُه يرافقُه تباعدُهما. فتغيُّرُ طولِ الشريطِ مرتبطٌ بتغيُّرِ موضعِ العظمِ.',
-  onOk:()=>{ $('#st3').hidden=false; }});
-$('#outBtn').addEventListener('click',()=>{ M.out=!M.out; const b=$('#outBtn'); b.setAttribute('aria-pressed',M.out);
-  b.textContent = M.out?'➖ أزِلِ الشريطَ الخارجيَّ':'➕ أضِفْ شريطاً ثانياً على الخارجِ';
-  $('#outRead').hidden=!M.out; drawModel();
-  if(M.out && $('#q3wrap').hidden) say('#f3a','info','أُضيفَ شريطٌ بنفسجيٌّ على الخارجِ. الآنَ قرِّبِ الشريحتينِ (أقلَّ من ٦٠°) وباعِدْهما (أكثرَ من ١٥٠°).'); });
-mcq('#q3','#f3',['يطولُ','يقصرُ أيضاً','لا يتغيّرُ'],0,{
-  why:['','راقبِ المقياسَ البنفسجيَّ وأنتَ تقرّبُ الشريحتينِ: هل نقصَ أم زادَ؟','قارنْ شكلَ الشريطِ البنفسجيِّ عندَ زاويةٍ صغيرةٍ وزاويةٍ كبيرةٍ.'],
-  ok:'صحيحٌ! <b>عندما يقصرُ أحدُ الشريطينِ يطولُ الآخرُ</b>، وعندما تتباعدُ الشريحتانِ يحدثُ العكسُ.',
-  onOk:()=>{ done.s2=true; }});
-drawModel();
-
-/* =====================================================================
-   STAGE 3 — model -> arm
-   ===================================================================== */
-sorter('#mapchips', $$('.stage[data-stage="3"] .zone'), [
-  {id:'st',t:'🪵 الشريحتانِ الخشبيتانِ',z:'bone',ok:'صحيحٌ! الشريحتانِ تمثّلانِ <b>عظمينِ</b>.',bad:'الشريحتانِ قطعتانِ صلبتانِ تتحرّكانِ — ماذا يشبهُهما في الجسمِ؟'},
-  {id:'hj',t:'🔩 قطعةُ الربطِ',z:'joint',ok:'صحيحٌ! قطعةُ الربطِ تمثّلُ <b>المفصلَ</b> الذي يربطُ العظمينِ.',bad:'قطعةُ الربطِ تربطُ الشريحتينِ وتسمحُ بحركتِهما — ما الذي يربطُ عظمينِ؟'},
-  {id:'rb',t:'🔴 الشريطُ المطاطيُّ',z:'muscle',ok:'صحيحٌ! الشريطُ المطاطيُّ يمثّلُ <b>العضلةَ</b>: يقصرُ ويطولُ.',bad:'الشريطُ يقصرُ ويطولُ — أيُّ جزءٍ في الجسمِ ينقبضُ وينبسطُ؟'}
-], '#mapfb', {solution:'الشريحتانِ ← عظمانِ، قطعةُ الربطِ ← مفصلٌ، الشريطُ المطاطيُّ ← عضلةٌ.',
-  onDone:()=>{ done.map=true; $('#bodyQ').hidden=false; say('#mapfb','ok','أحسنتَ! الشريحتانِ = عظمانِ، قطعةُ الربطِ = مفصلٌ، الشريطُ = عضلةٌ.'); }});
-mcq('#q4','#f4',['💪 الذراعُ','💀 الجمجمةُ','🍽️ المعدةُ','❤️ القلبُ'],0,{
-  why:['','عظامُ الجمجمةِ ثابتةٌ لا تنثني، أمّا الأنموذجُ فينثني ويمتدُّ.','المعدةُ عضوٌ داخليٌّ وليسَ فيها عظمانِ يربطُهما مفصلٌ.','القلبُ عضلاتٌ قلبيةٌ وليسَ فيه عظمانِ ومفصلٌ.'],
-  ok:'نعم! <b>الذراعُ</b>: عظمُ العضدِ والساعدُ يربطُهما مفصلٌ، وعضلةٌ تحرّكُهما.',
-  onOk:()=>{ done.body=true; $('#armPart').hidden=false; drawArm(); }});
-
-const A={v:0,bend:false,str:false};
-function drawArm(){
-  const g=$('#armG'); g.innerHTML='';
-  const S=[150,46], E=[150,236], phi=A.v/100*112*Math.PI/180;
-  const d=[Math.sin(phi),Math.cos(phi)], f=[Math.cos(phi),-Math.sin(phi)];
-  const P=(p,k,q,o)=>[p[0]+d[0]*k+(q?q[0]*o:0), p[1]+d[1]*k+(q?q[1]*o:0)];
-  // humerus
-  g.appendChild(sv('line',{x1:S[0],y1:S[1],x2:E[0],y2:E[1],stroke:'#8a7a55','stroke-width':30,'stroke-linecap':'round'}));
-  g.appendChild(sv('line',{x1:S[0],y1:S[1],x2:E[0],y2:E[1],stroke:'#f3e8cc','stroke-width':25,'stroke-linecap':'round'}));
-  g.appendChild(sv('circle',{cx:S[0],cy:S[1]-6,r:24,fill:'#f3e8cc',stroke:'#8a7a55','stroke-width':2.5}));
-  // forearm: two bones
-  const perp=[f[0],f[1]];
-  for(const o of [-8,8]){ const a=P(E,22,perp,o), b=P(E,185,perp,o);
-    g.appendChild(sv('line',{x1:a[0],y1:a[1],x2:b[0],y2:b[1],stroke:'#8a7a55','stroke-width':14,'stroke-linecap':'round'}));
-    g.appendChild(sv('line',{x1:a[0],y1:a[1],x2:b[0],y2:b[1],stroke:'#efe1bd','stroke-width':10,'stroke-linecap':'round'})); }
-  const hand=P(E,208); g.appendChild(sv('circle',{cx:hand[0],cy:hand[1],r:22,fill:'#f2c9a0',stroke:'#c48a5a','stroke-width':2}));
-  // joint
-  g.appendChild(sv('circle',{cx:E[0],cy:E[1],r:21,fill:'#bff0ff',stroke:'#0a8fc0','stroke-width':3}));
-  // muscle + tendons
-  const T1=[170,86], T2=P(E,46,f,15);
-  const ux=T2[0]-T1[0], uy=T2[1]-T1[1], ul=Math.hypot(ux,uy), u=[ux/ul,uy/ul];
-  const M1=[T1[0]+u[0]*28,T1[1]+u[1]*28], M2=[T2[0]-u[0]*24,T2[1]-u[1]*24];
-  const Lm=Math.hypot(M2[0]-M1[0],M2[1]-M1[1]), hw=Math.min(36,2300/Lm), p=[u[1],-u[0]];
-  const C=[(M1[0]+M2[0])/2+p[0]*hw*.8,(M1[1]+M2[1])/2+p[1]*hw*.8], ang=Math.atan2(u[1],u[0])*180/Math.PI;
-  [[T1,M1],[M2,T2]].forEach(([a,b])=>{ g.appendChild(sv('line',{x1:a[0],y1:a[1],x2:b[0],y2:b[1],stroke:'#d9c9a0','stroke-width':6,'stroke-linecap':'round'})); });
-  [T1,T2].forEach(t=>g.appendChild(sv('circle',{cx:t[0],cy:t[1],r:5,fill:'#8a7a55'})));
-  const mg=sv('g',{transform:`translate(${C[0]} ${C[1]}) rotate(${ang})`});
-  mg.appendChild(sv('ellipse',{cx:0,cy:0,rx:Lm/2+4,ry:hw,fill:'url(#mus)',stroke:'#a51f36','stroke-width':2}));
-  for(const k of [-.45,0,.45]) mg.appendChild(sv('path',{d:`M${-Lm/2+10} ${k*hw} Q0 ${k*hw*1.25} ${Lm/2-10} ${k*hw}`,stroke:'#ffb3bf','stroke-width':1.5,fill:'none',opacity:.8}));
-  g.appendChild(mg);
-  // labels
-  const L=(x,y,t,c,anchor)=>{ const tx=sv('text',{x,y,class:'svgtxt','font-size':16,fill:c||'#200058','text-anchor':anchor||'middle'}); tx.textContent=t; g.appendChild(tx); };
-  L(84,150,'عظمُ العضدِ');
-  L(92,242,'المفصلُ','#0a8fc0');
-  const fm=P(E,170,f,-42); L(Math.max(70,Math.min(350,fm[0])),Math.min(458,fm[1]),'الساعدُ','#5f4a1e');
-  const fm2=[fm[0],fm[1]+18]; L(Math.max(70,Math.min(350,fm2[0])),Math.min(462,fm2[1]),'(الزندُ والكعبرةُ)','#5f4a1e');
-  L(Math.min(380,C[0]+p[0]*(hw+30)+20),C[1]+p[1]*(hw+30),'العضلةُ','#a51f36');
-  L(T1[0]+44,T1[1]-4,'وترٌ','#7a6a3e');
-  const t2l=[T2[0]-f[0]*50,T2[1]-f[1]*50]; L(t2l[0],t2l[1]+6,'وترٌ','#7a6a3e');
-  // state
-  const s=$('#armState');
-  if(A.v>=70){ s.className='state short'; s.textContent='الذراعُ مثنيّةٌ ← العضلةُ منقبضةٌ (أقصرُ وأغلظُ)'; }
-  else if(A.v<=15){ s.className='state long'; s.textContent='الذراعُ ممدودةٌ ← العضلةُ منبسطةٌ (أطولُ وأرقُّ)'; }
-  else { s.className='state'; s.textContent='الذراعُ تتحرّكُ…'; }
-}
-$('#aSlider').addEventListener('input',e=>{ A.v=+e.target.value; drawArm();
-  if(A.v>=95 && !A.bend){ A.bend=true; mark('#am','bend'); say('#afb','ok','عندما <b>انقبضتِ العضلةُ</b> قصُرتْ وانتفختْ، فسحبتِ الساعدَ بالوترِ و<b>انثنتِ الذراعُ</b>.'); }
-  if(A.bend && A.v<=5 && !A.str){ A.str=true; mark('#am','str'); done.arm=true;
-    say('#afb','ok','عندما <b>انبسطتِ العضلةُ</b> طالتْ ورقّتْ و<b>امتدّتِ الذراعُ</b>. انقباضُ العضلاتِ وانبساطُها يحرّكانِ العظامَ — تماماً كالشريطِ في الأنموذجِ.'); }
-});
-function mark(list,m){ const li=$(list+' li[data-m="'+m+'"]'); if(li && !li.classList.contains('done')){ li.classList.add('done'); li.querySelector('.st').textContent='✓'; } }
-
-/* =====================================================================
-   STAGE 4 — voluntary / involuntary
-   ===================================================================== */
-const V={sleep:false, beats:0, arm:false, leg:false, tried:new Set()};
-setInterval(()=>{ V.beats++; $('#beatTxt').textContent='💓 نبضاتُ القلبِ: '+ar(V.beats);
-  if(!Kit.reduced){ const h=$('#heart'); h.classList.add('beat'); setTimeout(()=>h.classList.remove('beat'),160); } }, 850);
-function limbs(){ $('#limbArm').style.transform = V.arm?'rotate(-150deg)':'none'; $('#limbLeg').style.transform = V.leg?'rotate(-28deg)':'none'; }
-$$('.cmds .btn').forEach(b=>b.addEventListener('click',()=>{
-  const c=b.dataset.c; V.tried.add(c);
-  if(V.sleep && (c==='arm'||c==='leg')){ say('#cfb','info','الطفلُ نائمٌ الآنَ ولا يُعطي أوامرَ لذراعِه أو ساقِه. أيقِظْه أوّلاً — لكنْ راقبْ عدّادَ نبضاتِ القلبِ!'); return; }
-  if(c==='arm'){ V.arm=!V.arm; limbs(); say('#cfb','ok','🙋 تحرّكتِ الذراعُ كما أردتَ! عضلاتُ الذراعِ <b>إراديةٌ</b>: مرتبطةٌ بالهيكلِ ونتحكّمُ فيها.'); }
-  else if(c==='leg'){ V.leg=!V.leg; limbs(); say('#cfb','ok','🦵 تحرّكتِ الساقُ كما أردتَ! عضلاتُ الساقِ <b>إراديةٌ</b> نتحكّمُ فيها.'); }
-  else if(c==='heart'){ say('#cfb','warn','✋ لم يتوقّفِ القلبُ — ما زالَ ينبضُ وحدَه! القلبُ يتكوّنُ من <b>عضلاتٍ قلبيةٍ لاإراديةٍ</b> لا نتحكّمُ فيها.'); }
-  else { say('#cfb','warn','🍽️ لم يحدثْ شيءٌ بأمرِك! عضلاتُ المعدةِ <b>لاإراديةٌ</b> — في الأعضاءِ الداخليةِ، ولا نتحكّمُ فيها.'); }
-  checkV();
-}));
-$('#sleepBtn').addEventListener('click',()=>{ V.sleep=!V.sleep; const b=$('#sleepBtn'); b.setAttribute('aria-pressed',V.sleep);
-  b.textContent=V.sleep?'☀️ أيقِظِ الطفلَ':'😴 الطفلُ ينامُ'; $('#bodyBox').classList.toggle('sleeping',V.sleep);
-  if(V.sleep){ V.arm=false; V.leg=false; limbs(); V.tried.add('sleep');
-    say('#cfb','info','😴 الطفلُ نائمٌ: الذراعُ والساقُ ساكنتانِ. راقبْ عدّادَ نبضاتِ القلبِ…'); }
-  else say('#cfb','info','☀️ استيقظَ الطفلُ.');
-  checkV(); });
-function checkV(){ if(['arm','leg','heart','stomach','sleep'].every(k=>V.tried.has(k))) $('#sleepQ').hidden=false; }
-mcq('#q5','#f5',['نعم، تتوقّفُ العضلاتُ كلُّها','لا، القلبُ يستمرُّ في العملِ'],1,{
-  why:['انظرْ إلى عدّادِ النبضاتِ والطفلُ نائمٌ: هل توقّفَ؟'],
-  ok:'صحيحٌ! في أثناءِ النومِ <b>يستمرُّ القلبُ في النبضِ</b>، لأنّ العضلاتِ اللاإراديةَ تعملُ دونَ تحكّمٍ منّا.',
-  onOk:()=>{ $('#vSort').hidden=false; }});
-sorter('#vchips', $$('#vSort .zone'), [
-  {id:'h',t:'❤️ القلبُ',z:'inv',ok:'صحيحٌ! القلبُ عضلاتٌ قلبيةٌ <b>لاإراديةٌ</b>.',bad:'هل استطعتَ إيقافَ القلبِ بأمرِك؟'},
-  {id:'s',t:'🍽️ المعدةُ',z:'inv',ok:'صحيحٌ! عضلاتُ المعدةِ <b>لاإراديةٌ</b>.',bad:'المعدةُ عضوٌ داخليٌّ — هل تحرّكتْ بأمرِك؟'},
-  {id:'a',t:'💪 الذراعُ',z:'vol',ok:'صحيحٌ! عضلاتُ الذراعِ <b>إراديةٌ</b> نتحكّمُ فيها.',bad:'الذراعُ ارتفعتْ عندما أمرتَها — فهي…؟'},
-  {id:'l',t:'🦵 الساقُ',z:'vol',ok:'صحيحٌ! عضلاتُ الساقِ <b>إراديةٌ</b>.',bad:'الساقُ تحرّكتْ بأمرِك — فهي…؟'},
-  {id:'f',t:'🦶 القدمُ',z:'vol',ok:'صحيحٌ! عضلاتُ القدمِ <b>إراديةٌ</b> نتحكّمُ فيها.',bad:'هل تستطيعُ تحريكَ قدمِك متى شئتَ؟'}
-], '#vfb', {solution:'القلبُ والمعدةُ ← لاإراديةٌ؛ الذراعُ والساقُ والقدمُ ← إراديةٌ.',
-  onDone:()=>{ done.s4=true; Kit.celebrate(); $('#shapes').hidden=false;
-    say('#vfb','ok','ممتازٌ! <b>الإراديةُ</b> مرتبطةٌ بالهيكلِ ونتحكّمُ فيها، و<b>اللاإراديةُ</b> في الأعضاءِ الداخليةِ لا نتحكّمُ فيها.'); }});
-const SH=['طويلةٌ','قصيرةٌ','عريضةٌ'];
-$$('.shape-row').forEach(r=>{ const k=+r.dataset.k;
-  mcq(r.querySelector('.choices'),'#shfb',SH,k,{why:SH.map(()=>['فكّرْ: الساقانِ طويلتانِ.','تذكّرْ: العضلاتُ حولَ العمودِ الفقريِّ ليستْ طويلةً ولا عريضةً.','فكّرْ: البطنُ منطقةٌ واسعةٌ.'][k]),
-    ok:['عضلاتُ الساقينِ <b>طويلةٌ</b>.','العضلاتُ حولَ العمودِ الفقريِّ <b>قصيرةٌ</b>.','عضلاتُ البطنِ <b>عريضةٌ</b>.'][k]}); });
-
-/* =====================================================================
-   STAGE 5 — health check
-   ===================================================================== */
-const HL=[
-  {t:'🏃 أمارسُ الرياضةَ يومياً',good:true,why:'الرياضةُ اليوميةُ تمنحُ العضلاتِ الطاقةَ والقوّةَ.'},
-  {t:'💥 أقومُ بحركاتٍ عنيفةٍ ومفاجئةٍ',good:false,why:'الحركاتُ العنيفةُ المفاجئةُ قد تسبّبُ تمزّقَ العضلاتِ.'},
-  {t:'🧍 أقفُ مدّةً طويلةً',good:false,why:'الوقوفُ الطويلُ يُتعبُ عضلاتِ الساقينِ.'},
-  {t:'📺 أجلسُ طويلاً أمامَ التلفازِ والحاسوبِ',good:false,why:'الجلوسُ الطويلُ أمامَ الشاشاتِ يُجهدُ عضلاتِ العينينِ.'}
-];
-let hDone=0;
-HL.forEach(h=>{ const row=el('div',{class:'hrow'},'<span>'+h.t+'</span>'); const r=el('div',{class:'row'}); let ok=false;
-  [['✔ مفيدٌ',true,'green'],['✘ ضارٌّ',false,'red']].forEach(([lbl,val,cls])=>{
-    const b=el('button',{class:'btn sm ghost',type:'button'},lbl); r.appendChild(b);
-    b.addEventListener('click',()=>{ if(ok) return;
-      if(val===h.good){ ok=true; row.classList.add('ok'); b.classList.remove('ghost'); b.classList.add(cls); row.appendChild(el('div',{class:'why'},'✅ '+h.why)); hDone++;
-        r.querySelectorAll('button').forEach(x=>x.disabled=true);
-        if(hDone===HL.length){ say('#hfb','ok','🎉 أحسنتَ! أنتَ تعرفُ كيفَ تتحرّكُ وكيفَ تحافظُ على عضلاتِك.'); Kit.celebrate(); }
-        else hush('#hfb'); }
-      else say('#hfb','bad','حاولْ مرةً أخرى — '+(h.good?'هذهِ العادةُ تفيدُ العضلاتِ؛ فكّرْ: ماذا تمنحُها؟':'فكّرْ: هل تُتعبُ هذهِ العادةُ العضلاتِ أو تؤذيها؟')); }); });
-  row.appendChild(r); $('#health').appendChild(row); });
-
-/* =====================================================================
-   stages
-   ===================================================================== */
-Kit.setupStages(['مختبرُ المفاصلِ','أُصنّفُ المفاصلَ','أنموذجُ العضلةِ','من الأنموذجِ إلى الذراعِ','إراديةٌ أم لاإراديةٌ؟','خلاصةٌ'],{
-  canLeave(i){
-    if(i===0 && !done.s0) return 'أكملِ المهامَّ الأربعَ في مختبرِ المفاصلِ أوّلاً';
-    if(i===1 && !done.s1) return 'صنِّفِ المفاصلَ الأربعةَ أوّلاً';
-    if(i===2 && !done.s2) return 'أكملْ خطواتِ الأنموذجِ الثلاثَ أوّلاً';
-    if(i===3 && !(done.map && done.body && done.arm)) return 'أكملِ المطابقةَ وثنيَ الذراعِ ومدَّها أوّلاً';
-    if(i===4 && !done.s4) return 'صنِّفِ العضلاتِ أوّلاً';
-    return true;
+const o0={yaw:.35,pitch:.28,zoom:1,
+  draw(R,t){
+    const now=performance.now();
+    if(J.type==='ball'){
+      R.mesh(pelvisM,{pos:P(0,86,0)},{color:BONE2});
+      R.mesh(domeM,{pos:P(0,0,0)},{color:BONE2,doubleSided:true});
+      R.sphere(P(0,0,0),38,BONE,{id:'bone'});
+      if(J.cart) R.sphere(P(0,0,0),45,CART,{alpha:.6,id:'bone'});
+      const e=boneEnd(); R.cyl(P(0,0,0),e,16,BONE,{id:'bone'}); R.sphere(e,25,BONE,{id:'bone'});
+      R.text(P(165,86,0),'الحوضُ',{size:14});
+      R.text([e[0]+70,e[1]+60,e[2]],'عظمُ الفخذِ',{size:14});
+      R.text(P(0,160,0),J.found.ball?'⚪ مفصلُ الوركِ: كرويٌّ ✓':'⚪ مفصلُ الوركِ',{size:16,bg:'rgba(255,255,255,.16)',color:'#fff'});
+      if(J.cartSeen) R.text(P(-92,-14,0),J.cart?'🧊 الغضروفُ':'🧊 الغضروفُ مُزالٌ',{size:14,color:'#0a6f99'});
+      if(!J.cart && now-J.lastMove<450){
+        for(let i=0;i<7;i++){ const a=Math.random()*Math.PI*2, r0=30+Math.random()*10, r1=r0+18+Math.random()*22, y=-6+Math.random()*12;
+          R.line(P(Math.cos(a)*r0,y,Math.sin(a)*r0),P(Math.cos(a)*r1,y-8,Math.sin(a)*r1),i%2?'#ffd15c':'#f6a723',3,{glow:true,front:true}); }
+        R.text(P(95,30,0),'⚡ احتكاكٌ!',{size:16,bg:'#e8425a',color:'#fff'});
+      }
+    } else if(J.type==='hinge'){
+      const arc=[]; for(let k=0;k<=24;k++){ const a=k/24*140*Math.PI/180; arc.push(PH(Math.sin(a)*170,-Math.cos(a)*170,0)); }
+      R.poly(arc,'rgba(0,195,254,.75)',2.5,{dash:[7,7]});
+      R.cyl(PH(0,175,0),PH(0,0,0),17,BONE);
+      R.cyl(PH(0,0,-38),PH(0,0,38),26,BONE2,{id:'bone'});
+      if(J.cart) R.cyl(PH(0,0,-41),PH(0,0,41),31,CART,{alpha:.45});
+      const e=boneEnd(); R.cyl(PH(0,0,0),e,15,BONE,{id:'bone'}); R.sphere(e,22,BONE,{id:'bone'});
+      R.text(PH(-70,110,0),'العضدُ',{size:14}); R.text([e[0]*.55-60,(e[1]-10)*.55+10,0],'الساعدُ',{size:14});
+      R.text(PH(0,205,0),J.found.hinge?'🔩 مفصلُ الساعدِ: اسطوانيٌّ ✓':'🔩 مفصلُ الساعدِ',{size:16,bg:'rgba(255,255,255,.16)',color:'#fff'});
+      if(now-J.sideT<1400) R.text(PH(0,-40,60),'✖ لا يتحرّكُ جانباً',{size:15,bg:'#f6a723'});
+    } else {
+      const sx=J.shake>0?Math.sin(now/30)*3*J.shake:0; J.shake=Math.max(0,J.shake-.03);
+      R.mesh(skullM,{pos:P(sx,10,0)},{id:'skull',color:BONE});
+      [-38,38].forEach(x=>R.sphere(P(x+sx,0,98),20,'#3a2a48'));
+      const z1=[],z2=[]; for(let k=0;k<=16;k++){ const z=-100+k*12.5, y=82*Math.sqrt(Math.max(0,1-(z/112)**2))+12; z1.push(P(sx+(k%2?6:-6),y,z)); }
+      for(let k=0;k<=12;k++){ const x=-80+k*13.3, y=82*Math.sqrt(Math.max(0,1-(x/95)**2-.09))+12; z2.push(P(x+sx,y,-34+(k%2?6:-6))); }
+      R.poly(z1,'#8a6d45',2.5,{front:true}); R.poly(z2,'#8a6d45',2.5,{front:true});
+      R.text(P(0,160,0),J.found.fixed?'🔒 عظامُ الجمجمةِ: ثابتٌ ✓':'🔒 عظامُ الجمجمةِ',{size:16,bg:'rgba(255,255,255,.16)',color:'#fff'});
+      if(J.shake>0) R.text(P(0,140,0),'🔒 لا تتحرّكُ',{size:15,bg:'#f6a723'});
+    }
+    R.shadow(P(0,J.type==='fixed'?-80:-245,0),110,60);
   },
-  onEnter(i){ if(i===3 && done.body) drawArm(); if(i===5 && !done.sumCel){ done.sumCel=true; } }
-});
+  onPick(id){ if(id==='skull'){ tryFixed(); } }};
+J.sideT=0;
+const v0=Kit.view3d(Kit.$('#view0'),o0);
+function tryFixed(){ J.fixedTry=true; J.shake=1; Kit.ping(); }
+function applyDrag(dx,dy){
+  const cy=Math.cos(v0.cam.yaw), sy=Math.sin(v0.cam.yaw);
+  const wx=dx*cy+dy*sy, wz=-dx*sy+dy*cy;            // screen drag -> world x/z
+  if(J.type==='ball'){
+    let u=[J.u[0]+wx/90, J.u[1]+wz/90]; const m=Math.hypot(u[0],u[1]); if(m>1) u=[u[0]/m,u[1]/m]; J.u=u;
+    if(u[0]>.55) J.dirs.add('+x'); if(u[0]<-.55) J.dirs.add('-x'); if(u[1]>.55) J.dirs.add('+z'); if(u[1]<-.55) J.dirs.add('-z');
+    const c=inScene('#dirCnt'); if(c) c.textContent='الاتجاهاتُ: '+Kit.ar(J.dirs.size)+' من ٤';
+    J.lastMove=performance.now();
+    if(!J.cart){ J.rubAcc+=Math.hypot(dx,dy); if(J.rubAcc>60) J.rubbed=true; }
+  } else if(J.type==='hinge'){
+    if(Math.abs(wz)>Math.abs(wx)*1.2){ J.sideAcc=(J.sideAcc||0)+Math.abs(wz); J.w=clamp(wz/60,-.12,.12);
+      if(J.sideAcc>45){ J.side=true; J.sideT=performance.now(); J.sideAcc=0; Kit.say('✖ لا يتحرّكُ جانباً! يتحرّكُ الساعدُ على المسارِ المنقّطِ فقط.','warn'); } }
+    else { J.a=clamp(J.a+wx*.9,0,140); if(J.a>=110) J.hMax=true; if(J.hMax&&J.a<=15) J.hMin=true; }
+  } else tryFixed();
+  Kit.ping();
+}
+// drag the bone itself (rotation is paused while dragging a bone)
+const box0=Kit.$('#view0');
+box0.addEventListener('pointerdown',e=>{ const b=v0.canvas.getBoundingClientRect(), h=v0.hit(e.clientX-b.left,e.clientY-b.top);
+  if(h&&(h.id==='bone'||h.id==='skull')){ o0.rotate=false; J.drag={x:e.clientX,y:e.clientY}; } });
+box0.addEventListener('pointermove',e=>{ if(!J.drag) return; const dx=e.clientX-J.drag.x, dy=e.clientY-J.drag.y; J.drag={x:e.clientX,y:e.clientY}; applyDrag(dx,dy); });
+const endDrag=()=>{ J.drag=null; o0.rotate=true; if(J.type==='hinge') J.w=0; };
+box0.addEventListener('pointerup',endDrag); box0.addEventListener('pointercancel',endDrag);
+function nudge(dx,dy){ const n=Kit.reduced?1:10; let i=0; (function f(){ applyDrag(dx/n,dy/n); if(++i<n) requestAnimationFrame(f); else if(J.type==='hinge') J.w=0; })(); }
+function setType(t){ J.type=t; Kit.$$('.scene.on .jsel .btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.j===t?'true':'false')); Kit.ping(); }
+function body0(extra){ return el=>{
+  el.innerHTML='<div class="jsel" role="group" aria-label="أنواعُ المفاصلِ">'+
+    '<button class="btn ghost" type="button" data-j="ball">⚪ كرويٌّ<small>الكتفُ، الوركُ</small></button>'+
+    '<button class="btn ghost" type="button" data-j="hinge">🔩 اسطوانيٌّ<small>الساعدُ</small></button>'+
+    '<button class="btn ghost" type="button" data-j="fixed">🔒 ثابتٌ<small>الجمجمةُ</small></button></div>'+(extra||'')+
+    '<div class="pad"><button class="btn sm ghost" type="button" data-d="0,-90" aria-label="حرّكْ للأعلى">▲</button><button class="btn sm ghost" type="button" data-d="0,90" aria-label="حرّكْ للأسفلِ">▼</button>'+
+    '<button class="btn sm ghost" type="button" data-d="90,0" aria-label="حرّكْ لليمينِ">▶</button><button class="btn sm ghost" type="button" data-d="-90,0" aria-label="حرّكْ لليسارِ">◀</button>'+
+    '<span class="hint">اسحبِ العظمَ نفسَه، أو استعملِ الأسهمَ.</span></div>';
+  el.querySelectorAll('.jsel .btn').forEach(b=>b.onclick=()=>setType(b.dataset.j));
+  el.querySelectorAll('.pad .btn').forEach(b=>b.onclick=()=>{ const [dx,dy]=b.dataset.d.split(',').map(Number); nudge(dx,dy); });
+  const cb=el.querySelector('#cartBtn'); if(cb) cb.onclick=()=>{ J.type='ball'; J.cart=!J.cart; J.cartSeen=true;
+    if(!J.cart){ J.cartOff=true; J.rubAcc=0; } else if(J.rubbed) J.cartBack=true;
+    cb.textContent=J.cart?'🧊 أزِلِ الغضروفَ':'🧊 أعِدِ الغضروفَ'; cb.setAttribute('aria-pressed',J.cart?'false':'true'); setType('ball'); };
+  setType(J.type);
+}; }
+const boneSpot=()=>{ const s=v0.screen(boneEnd()); return {x:s.x,y:s.y,r:34}; };
+const cartBtnHTML=()=>'<p style="margin:8px 0 0"><button class="btn cyan" type="button" id="cartBtn" aria-pressed="'+(J.cart?'false':'true')+'">'+(J.cart?'🧊 أزِلِ الغضروفَ':'🧊 أعِدِ الغضروفَ')+'</button></p>';
+Kit.scene(0,{title:'أستكشفُ',
+  book:'<p><b>المفصلُ</b>: تركيبٌ عظميٌّ يربطُ عظمينِ مع بعضِهما ويسمحُ للعظامِ بحريةِ الحركةِ. أشكالُه: كرويٌّ (الكتفُ، الوركُ)، اسطوانيٌّ (الساعدُ)، ثابتٌ (الجمجمةُ).</p><p><b>الغضروفُ</b> تركيبٌ مرنٌ يغطّي نهايةَ كلِّ عظمٍ ويمنعُ احتكاكَ العظمينِ.</p>'+
+    '<p class="extra">الكتابُ يسمّي أشكالَ المفاصلِ ولا يصفُ اتجاهاتِ حركتِها. حركةُ المفصلِ الاسطوانيِّ في مستوىً واحدٍ هنا تمثيلٌ للنشاطِ.</p>',
+  summary:['المفصلُ يربطُ عظمينِ: كرويٌّ (الكتفُ، الوركُ)، اسطوانيٌّ (الساعدُ)، ثابتٌ (الجمجمةُ)','الغضروفُ يغطّي نهايةَ العظمِ ويمنعُ الاحتكاكَ'],
+  steps:[
+    {text:'حرّكْ <b>عظمَ الفخذِ</b> في ٤ اتجاهاتٍ', body:body0('<span class="cnt" id="dirCnt">الاتجاهاتُ: ٠ من ٤</span>'),
+      target:()=>J.type!=='ball'?rectOf(inScene('.jsel [data-j="ball"]')):boneSpot(),
+      enter(){ J.dirs.clear(); }, check(){ const ok=J.type==='ball'&&J.dirs.size>=4; if(ok) J.found.ball=true; return ok; },
+      after:'يتحرّكُ في <b>اتجاهاتٍ عدّةٍ</b>: رأسُ الفخذِ المحدّبُ يدورُ في نهايةِ الحوضِ المقعّرةِ. هذا <b>مفصلٌ كرويٌّ</b>.'},
+    {text:'اخترِ <b>الاسطوانيَّ</b>، ثمّ اثنِ الساعدَ ومُدَّه', body:body0(),
+      target:()=>J.type!=='hinge'?rectOf(inScene('.jsel [data-j="hinge"]')):boneSpot(),
+      enter(){ J.hMax=false; J.hMin=false; J.a=20; }, check(){ const ok=J.type==='hinge'&&J.hMax&&J.hMin; if(ok) J.found.hinge=true; return ok; },
+      after:'ينثني الساعدُ ويمتدُّ في مستوىً واحدٍ: هذا <b>مفصلٌ اسطوانيٌّ</b>.'},
+    {text:'اخترِ <b>الثابتَ</b>، وحاولْ تحريكَ الجمجمةِ', body:body0(),
+      target:()=>J.type!=='fixed'?rectOf(inScene('.jsel [data-j="fixed"]')):(()=>{ const s=v0.screen(P(0,10,0)); return {x:s.x,y:s.y,r:50}; })(),
+      enter(){ J.fixedTry=false; }, check(){ const ok=J.type==='fixed'&&J.fixedTry; if(ok) J.found.fixed=true; return ok; },
+      after:'عظامُ الجمجمةِ مرتبطةٌ بقوّةٍ فلا تتحرّكُ: هذا <b>مفصلٌ ثابتٌ</b>.'},
+    {text:'أزِلِ <b>الغضروفَ</b> الأزرقَ، ثمّ حرّكِ العظمَ', body:el=>body0(cartBtnHTML())(el),
+      target:()=>J.cart?rectOf(inScene('#cartBtn')):boneSpot(),
+      enter(){ setType('ball'); J.cartSeen=true; J.rubbed=false; J.rubAcc=0; }, check(){ return J.cartOff&&!J.cart&&J.rubbed; },
+      after:'⚡ <b>احتكاكٌ</b>! بدونِ الغضروفِ تحتكُّ نهايتا العظمينِ ببعضِهما.'},
+    {text:'أعِدِ <b>الغضروفَ</b> إلى مكانِه', body:el=>body0(cartBtnHTML())(el),
+      target:()=>rectOf(inScene('#cartBtn')), check(){ return J.cart&&J.cartBack; },
+      after:'<b>الغضروفُ</b> تركيبٌ مرنٌ يغطّي نهايةَ كلِّ عظمٍ ويمنعُ احتكاكَ العظمينِ.'}
+  ]});
+
+/* ================= Scene 2: the book's model (strips + rubber band) ================= */
+const M={th:90, out:false, sawOpen:false, sawClose:false, mapped:false};
+const HX=30, HZ=70, LEN=210, NAIL=165;
+const W2=(u,v,h)=>[HX+u,h,HZ-v];                         // 2D plan (u right, v away) -> world
+const dir2=f=>[Math.cos(f),Math.sin(f)];
+const plankM=Kit.mesh.box(LEN,12,42);
+function nailPt(f,side,along,h){ const d=dir2(f), n=dir2(f+side*Math.PI/2); return W2(d[0]*along+n[0]*13,d[1]*along+n[1]*13,h); }
+function drawBand(R,pts,col,r){ for(let i=0;i<pts.length-1;i++) R.cyl(pts[i],pts[i+1],r,col); }
+const len=pts=>pts.slice(1).reduce((s,p,i)=>s+Math.hypot(p[0]-pts[i][0],p[2]-pts[i][2]),0);
+function bandState(short,long){ return short?'قصيرٌ ← منقبضٌ':long?'طويلٌ ← منبسطٌ':''; }
+const v1=Kit.view3d(Kit.$('#view1'),{yaw:0,pitch:.8,zoom:1.3,
+  draw(R){
+    const fA=Math.PI, fB=Math.PI-M.th*Math.PI/180;
+    [fA,fB].forEach((f,i)=>{ const d=dir2(f), c=W2(d[0]*(LEN/2+8),d[1]*(LEN/2+8),6);
+      R.shadow([c[0],-1,c[2]],LEN*.5,26);
+      R.mesh(plankM,{pos:c,rot:[0,f,0]},{color:i?'#d79c55':'#e0a861'});
+      const on=dir2(f+(i?-1:1)*Math.PI/2), lp=W2(d[0]*(LEN*.62)+on[0]*52,d[1]*(LEN*.62)+on[1]*52,14); R.text(lp,M.mapped?'🦴 عظمٌ':'🪵 شريحةٌ',{size:14});
+      // nails
+      [1,-1].forEach(side=>{ if(side===-1&&!M.out) return; const s=(i?1:-1)*side, b=nailPt(f,s,NAIL,12), tp=nailPt(f,s,NAIL,40);
+        R.cyl(b,tp,4,'#8d93a3'); R.sphere(tp,7,'#b7bcc8'); });
+    });
+    R.cyl(W2(0,0,0),W2(0,0,26),17,'#9aa3b5'); R.sphere(W2(0,0,28),9,'#c7ccd8');
+    R.text(W2(30,-46,30),M.mapped?'⚙️ مفصلٌ':'🔩 قطعةُ ربطٍ',{size:14});
+    // inner band (between the strips)
+    const a=nailPt(fA,-1,NAIL,34), b=nailPt(fB,1,NAIL,34), L=len([a,b]);
+    drawBand(R,[a,b],'#e8425a',clamp(3+520/L,4,12));
+    const mid=[(a[0]+b[0])/2,40,(a[2]+b[2])/2];
+    if(M.th>70) R.text(mid,M.mapped?'💪 عضلةٌ':'🔴 شريطٌ مطاطيٌّ',{size:14,dy:-14});
+    const st=bandState(M.th<=60,M.th>=150); if(st) R.text(mid,st,{size:13,dy:16,bg:'#e8425a',color:'#fff'});
+    if(M.out){ // outer band wraps round the hinge
+      const pts=[nailPt(fA,1,NAIL,34)], steps=8;
+      let a0=fA+Math.PI/2, a1=fB-Math.PI/2;           // outer normals of A and B
+      if(a1<a0) a1+=2*Math.PI;                         // go round the outside of the hinge
+      for(let k=0;k<=steps;k++){ const t=a0+(a1-a0)*k/steps, d=dir2(t); pts.push(W2(d[0]*30,d[1]*30,34)); }
+      pts.push(nailPt(fB,-1,NAIL,34));
+      drawBand(R,pts,'#7b5cff',clamp(3+(M.th-30)/30,4,8));
+      const st2=bandState(M.th>=150,M.th<=60); const q=pts[Math.floor(pts.length/2)];
+      R.text([q[0],40,q[2]],st2?'🟣 '+st2:'🟣 الشريطُ الخارجيُّ',{size:13,dy:22,bg:st2?'#7b5cff':undefined,color:st2?'#fff':undefined});
+    }
+  }});
+const ang=Kit.$('#ang');
+ang.addEventListener('input',()=>{ M.th=+ang.value; Kit.$('#angOut').textContent=Kit.ar(M.th)+'°';
+  if(M.out){ if(M.th>=150) M.sawOpen=true; if(M.th<=50) M.sawClose=true; } Kit.ping(); });
+Kit.scene(1,{title:'أجرّبُ',
+  book:'<p>الأنموذجُ: شريحتانِ خشبيتانِ تربطُهما قطعةُ ربطٍ، وفي كلٍّ منهما مسمارٌ قربَ طرفِها، وبينَ المسمارينِ شريطٌ مطاطيٌّ.</p><p><b>العضلةُ</b> نسيجٌ عضليٌّ قويٌّ يحرّكُ العظامَ؛ انقباضُها وانبساطُها يحرّكانِ العظامَ.</p>',
+  summary:['تتقاربُ الشريحتانِ ← يقصرُ الشريطُ ويغلظُ','عندما يقصرُ أحدُ الشريطينِ يطولُ الآخرُ','الشريحتانِ عظمانِ، قطعةُ الربطِ مفصلٌ، الشريطُ عضلةٌ'],
+  steps:[
+    {text:'باعِدِ الشريحتينِ: حرّكِ المنزلقَ إلى ١٨٠°', target:'#ang', check(){ return M.th>=165; },
+      after:'تباعدتِ الشريحتانِ فـ<b>طالَ الشريطُ</b> وأصبحَ أرقَّ.'},
+    {text:'قرِّبِ الشريحتينِ إلى أقلَّ من ٥٠°', target:'#ang', check(){ return M.th<=50; },
+      after:'تقاربتِ الشريحتانِ فـ<b>قصُرَ الشريطُ</b> وأصبحَ أغلظَ.'},
+    {text:'أضِفْ شريطاً خارجياً، ثمّ باعِدْ وقرِّبْ',
+      body(el){ el.innerHTML='<button class="btn cyan" type="button" id="outBtn">🟣 أضِفْ شريطاً على الخارجِ</button>';
+        el.querySelector('#outBtn').onclick=e=>{ M.out=true; e.target.disabled=true; e.target.textContent='✓ أُضيفَ الشريطُ الخارجيُّ'; Kit.ping(); }; },
+      target:()=>!M.out?rectOf(inScene('#outBtn')):rectOf(Kit.$('#ang')),
+      enter(){ M.sawOpen=M.sawClose=false; }, check(){ return M.out&&M.sawOpen&&M.sawClose; },
+      after:'<b>عندما يقصرُ أحدُ الشريطينِ يطولُ الآخرُ</b>، وعندما تتباعدُ الشريحتانِ يحدثُ العكسُ.'},
+    {text:'ماذا يمثّلُ كلُّ جزءٍ في الجسمِ؟ ضعْه في مكانِه',
+      body(el){ sorter(el,{key:'map',cols:'zones3',
+        chips:[{id:'st',t:'🪵 الشريحتانِ',z:'bone'},{id:'hj',t:'🔩 قطعةُ الربطِ',z:'joint'},{id:'rb',t:'🔴 الشريطُ',z:'muscle'}],
+        zones:[{z:'bone',t:'🦴 عظمانِ'},{z:'joint',t:'⚙️ مفصلٌ'},{z:'muscle',t:'💪 عضلةٌ'}],
+        why:{st:'الشريحتانِ قطعتانِ صلبتانِ تتحرّكانِ — ماذا يشبهُهما في الجسمِ؟',hj:'قطعةُ الربطِ تربطُ الشريحتينِ — ما الذي يربطُ عظمينِ؟',rb:'الشريطُ يقصرُ ويطولُ — أيُّ جزءٍ ينقبضُ وينبسطُ؟'},
+        solution:'الشريحتانِ = عظمانِ، قطعةُ الربطِ = مفصلٌ، الشريطُ = عضلةٌ.'}); },
+      target:'.chip:not(.ok)', check(){ const ok=document.querySelectorAll('.scene.on .g-body .chip.ok').length===3; if(ok) M.mapped=true; return ok; },
+      after:'الشريحتانِ = <b>عظمانِ</b>، قطعةُ الربطِ = <b>مفصلٌ</b>، الشريطُ = <b>عضلةٌ</b> تنقبضُ وتنبسطُ.'}
+  ]});
+
+/* ================= Scene 3: the arm + voluntary / involuntary ================= */
+const A={bend:0, s:0, raised:false, heartTry:false, hasMoved:false};
+const SH=[-60,130];
+const rot2=(v,deg)=>{ const a=deg*Math.PI/180, c=Math.cos(a), s=Math.sin(a); return [v[0]*c-v[1]*s, v[0]*s+v[1]*c]; };
+const add2=(a,b)=>[a[0]+b[0],a[1]+b[1]];
+const W3=(p,z=0)=>[p[0],p[1],z];
+const musM=Kit.mesh.ellipsoid({rx:1,ry:1,rz:1,seg:18,ring:12});
+const heartM=Kit.mesh.ellipsoid({rx:34,ry:38,rz:28,seg:18,ring:12,bump:(u,v)=>1+.18*Math.max(0,Math.cos(u*Math.PI*4))*Math.sin(v*Math.PI)*(v<.5?1:0)});
+function armPts(){ const b=A.bend*1.3, E=add2(SH,rot2([0,-170],A.s)), H=add2(E,rot2([0,-160],A.s+b));
+  const T1=add2(SH,rot2([18,-28],A.s)), T2=add2(E,rot2([15,-38],A.s+b)); return {E,H,T1,T2}; }
+const v2=Kit.view3d(Kit.$('#view2'),{yaw:.3,pitch:.15,zoom:1.05,
+  draw(R){
+    const now=performance.now(), {E,H,T1,T2}=armPts();
+    // heart (keeps beating)
+    const beat=Kit.reduced?0:Math.pow(Math.max(0,Math.sin(now/1000*Math.PI*2*1.15)),6), hs=1+.12*beat;
+    R.mesh(heartM,{pos:[-250,-30,-30],rot:[0,0,.45],scale:hs},{color:'#e8425a'}); R.cyl([-240,5,-30],[-225,40,-30],9,'#c22b43');
+    R.text([-250,-92,-30],'💓 القلبُ',{size:14});
+    // bones
+    R.sphere(W3(SH),24,BONE); R.cyl(W3(SH),W3(E),17,BONE);
+    R.cyl(W3(E,-22),W3(E,22),20,BONE2); R.cyl(W3(E),W3(H),14,BONE); R.sphere(W3(H),20,'#f2c9a0');
+    // muscle with tendons
+    const d=[T2[0]-T1[0],T2[1]-T1[1]], dl=Math.hypot(d[0],d[1]), n=[d[0]/dl,d[1]/dl];
+    const M1=add2(T1,[n[0]*18,n[1]*18]), M2=add2(T2,[-n[0]*18,-n[1]*18]), L=Math.hypot(M2[0]-M1[0],M2[1]-M1[1]), r=clamp(2700/L,15,40);
+    R.cyl(W3(T1),W3(M1),4,'#f7f2e6'); R.cyl(W3(M2),W3(T2),4,'#f7f2e6');
+    const mid=[(M1[0]+M2[0])/2,(M1[1]+M2[1])/2];
+    R.mesh(musM,{pos:W3(mid,4),rot:[0,0,Math.atan2(-n[0],n[1])],scale:[r,L/2,r*.9]},{color:'#e8425a'});
+    // labels
+    R.text(W3(add2(SH,rot2([-70,-85],A.s))),'العضدُ',{size:14});
+    const calm=A.s<5; if(calm) R.text(W3(add2(E,rot2([-52,-100],A.s+A.bend*1.3))),'الساعدُ',{size:14});
+    const st=A.bend>=70?'منقبضةٌ: قصيرةٌ وغليظةٌ':A.bend<=20?'منبسطةٌ: طويلةٌ ورقيقةٌ':'';
+    if(calm) R.text(W3(add2(mid,[r+58,0])),'العضلةُ',{size:14,dy:st?-14:0}); if(st&&calm) R.text(W3(add2(mid,[r+58,0])),st,{size:12.5,dy:16,bg:'#e8425a',color:'#fff'});
+    if(A.hasMoved&&calm) R.text(W3(add2(T2,[40,-6])),'الوترُ',{size:13,bg:'#f7f2e6'});
+    if(now-A.heartT<1800) R.text([-250,50,-30],'✋ لم يتوقّفْ!',{size:15,bg:'#f6a723'});
+  }});
+A.heartT=0;
+const bend=Kit.$('#bend');
+function setBend(v){ A.bend=v; bend.value=v; Kit.$('#bendOut').textContent=v>=70?'مثنيّةٌ':v<=20?'ممدودةٌ':Kit.ar(v)+'٪'; Kit.ping(); }
+bend.addEventListener('input',()=>setBend(+bend.value));
+function animS(to,ms,done){ if(Kit.reduced){ A.s=to; done&&done(); return; } const from=A.s, t0=performance.now();
+  (function f(now){ const k=Math.min(1,(now-t0)/ms); A.s=from+(to-from)*(1-Math.pow(1-k,3)); if(k<1) requestAnimationFrame(f); else done&&done(); })(t0); }
+Kit.scene(2,{title:'أتحدّى',
+  book:'<p>يؤدّي <b>انقباضُ العضلاتِ وانبساطُها</b> إلى حركةِ العظامِ. العضلاتُ الإراديةُ ترتبطُ بالعظامِ بالأوتارِ ونتحكّمُ فيها؛ أمّا اللاإراديةُ (القلبُ، المعدةُ) فلا نتحكّمُ فيها.</p><p>الجهازُ الهيكليُّ + الجهازُ العضليُّ = <b>الجهازُ الحركيُّ</b>.</p>',
+  summary:['انقباضُ العضلةِ وانبساطُها يحرّكانِ العظامَ','الوترُ يربطُ العضلةَ بالعظمِ','إراديةٌ: الذراعُ والساقُ · لاإراديةٌ: القلبُ والمعدةُ'],
+  steps:[
+    {text:'اثنِ الذراعَ تماماً وراقبِ <b>العضلةَ</b>', target:'#bend', check(){ return A.bend>=95; },
+      after:'<b>انقبضتِ العضلةُ</b>: قصُرتْ وانتفختْ، فسحبتِ الساعدَ بالوترِ.'},
+    {text:'مُدَّ الذراعَ تماماً', target:'#bend', enter(){ A.hasMoved=true; }, check(){ return A.bend<=5; },
+      after:'<b>انبسطتِ العضلةُ</b>: طالتْ ورقّتْ، فامتدّتِ الذراعُ.'},
+    {text:'جرّبِ الأمرينِ: ارفعْ ذراعَك، وأوقفْ قلبَك',
+      body(el){ el.innerHTML='<div class="cmds"><button class="btn" type="button" id="cmdArm">🙋 ارفعْ ذراعَك</button><button class="btn red" type="button" id="cmdHeart">✋ أوقفْ قلبَك</button></div>';
+        el.querySelector('#cmdArm').onclick=()=>{ animS(80,700,()=>{ A.raised=true; Kit.say('🙋 ارتفعتِ الذراعُ كما أردتَ: عضلاتُها <b>إراديةٌ</b>.','ok'); Kit.ping(); setTimeout(()=>animS(0,700),1200); }); };
+        el.querySelector('#cmdHeart').onclick=()=>{ A.heartTry=true; A.heartT=performance.now(); Kit.say('✋ لم يتوقّفِ القلبُ، ما زالَ ينبضُ وحدَه: عضلاتُه <b>لاإراديةٌ</b>.','warn'); Kit.ping(); }; },
+      target:()=>rectOf(inScene(A.raised?'#cmdHeart':'#cmdArm')), enter(){ A.raised=false; A.heartTry=false; },
+      check(){ return A.raised&&A.heartTry; },
+      after:'الذراعُ تتحرّكُ بأمرِك: عضلاتُها <b>إراديةٌ</b>. القلبُ ينبضُ وحدَه: عضلاتُه <b>لاإراديةٌ</b>.'},
+    {text:'صنِّفِ العضلاتِ: إراديةٌ أم لاإراديةٌ؟',
+      body(el){ sorter(el,{key:'vol',cols:'zones2',
+        chips:[{id:'h',t:'❤️ القلبُ',z:'inv'},{id:'s',t:'🍽️ المعدةُ',z:'inv'},{id:'a',t:'💪 الذراعُ',z:'vol'},{id:'l',t:'🦵 الساقُ',z:'vol'}],
+        zones:[{z:'vol',t:'🙋 إراديةٌ (نتحكّمُ فيها)'},{z:'inv',t:'💓 لاإراديةٌ (لا نتحكّمُ فيها)'}],
+        why:{h:'هل استطعتَ إيقافَ القلبِ بأمرِك؟',s:'المعدةُ عضوٌ داخليٌّ — هل تتحرّكُ بأمرِك؟',a:'الذراعُ ارتفعتْ عندما أمرتَها — فهي…؟',l:'الساقُ تتحرّكُ بأمرِك — فهي…؟'},
+        solution:'الذراعُ والساقُ إراديةٌ، القلبُ والمعدةُ لاإراديةٌ.'}); },
+      target:'.chip:not(.ok)', check(){ return document.querySelectorAll('.scene.on .g-body .chip.ok').length===4; },
+      after:'<b>الإراديةُ</b> ترتبطُ بالعظامِ بالأوتارِ ونتحكّمُ فيها، و<b>اللاإراديةُ</b> في الأعضاءِ الداخليةِ لا نتحكّمُ فيها.'}
+  ]});
+
+Kit.start();
 </script>
 </body>
 </html>
