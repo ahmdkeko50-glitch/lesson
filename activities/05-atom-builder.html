@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>أبني ذرّتي</title>
+<!--
+  BASE TEMPLATE — copy this whole file, then:
+  1. change <title>, the header (.ref chip, h1), and the STAGES list
+  2. write each stage inside <main> as <section class="stage" data-stage="i">
+  3. put activity CSS in the second <style> block and activity JS in the last <script>
+  Everything (CSS + JS) stays inline. No external files, fonts or CDNs.
+-->
+<style>
+/* ================= DESIGN TOKENS (from the book's brand) ================= */
+:root{
+  --navy:#200058; --navy-2:#3a1f7a; --ink:#200058; --muted:#5f5a85;
+  --cyan:#00c3fe; --cyan-d:#0a8fc0; --cyan-l:#e3f8ff; --cyan-b:#b8ebff;
+  --green:#12a06a; --green-d:#0b7a50; --green-l:#e4f6ee; --green-b:#9cd9bd;
+  --red:#e8425a; --red-d:#c22b43; --red-l:#fde8ec; --red-b:#f5b3bf;
+  --yellow:#ffd15c; --orange:#f6a723; --yellow-l:#fff6dc;
+  --purple:#7b5cff; --purple-l:#efeaff;
+  --bg:#f1f0fb; --bg-2:#e3f8ff; --card:#ffffff; --line:#e0ddf0; --soft:#faf9fe;
+  --r-s:12px; --r:18px; --r-l:26px;
+  --sh:0 6px 18px rgba(32,0,88,.08); --sh-l:0 18px 50px rgba(32,0,88,.14);
+  --font: "Segoe UI","Noto Sans Arabic","Noto Naskh Arabic","Geeza Pro","Arial",Tahoma,system-ui,sans-serif;
+  --tap:48px;
+}
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{margin:0;min-height:100vh;font-family:var(--font);color:var(--ink);
+  background:linear-gradient(180deg,var(--bg) 0%,var(--bg-2) 100%) fixed;line-height:1.7;}
+button,input,select,textarea{font-family:inherit;color:inherit;}
+img,svg,canvas{max-width:100%;}
+:focus-visible{outline:3px solid var(--cyan);outline-offset:3px;border-radius:8px;}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+
+/* ================= SHELL ================= */
+.app{max-width:1120px;margin:0 auto;padding:14px 16px 110px;}
+.topbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--card);border:1.5px solid var(--line);
+  border-radius:var(--r);box-shadow:var(--sh);padding:10px 14px;}
+.ref{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13.5px;font-weight:700;color:var(--cyan-d);
+  background:var(--cyan-l);border:1.5px solid var(--cyan-b);border-radius:999px;padding:6px 14px;}
+.ref b{color:var(--navy);}
+.topbar h1{flex:1;min-width:200px;margin:0;font-size:clamp(19px,2.6vw,26px);font-weight:900;line-height:1.3;}
+.topbar h1 small{display:block;font-size:13px;font-weight:600;color:var(--muted);}
+.dots{display:flex;gap:6px;align-items:center;list-style:none;margin:0;padding:0;}
+.dots li{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:14px;
+  background:var(--soft);border:2px solid var(--line);color:var(--muted);transition:all .25s;}
+.dots li.on{background:var(--navy);border-color:var(--navy);color:#fff;transform:scale(1.08);}
+.dots li.done{background:var(--green);border-color:var(--green);color:#fff;}
+
+.stage{display:none;margin-top:16px;background:var(--card);border-radius:var(--r-l);box-shadow:var(--sh-l);overflow:hidden;
+  animation:rise .4s ease both;}
+.stage.on{display:block;}
+.stage-h{background:var(--navy);color:#fff;padding:14px 22px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.stage-h .kind{font-size:13px;font-weight:800;background:rgba(255,255,255,.14);border-radius:999px;padding:4px 12px;}
+.stage-h h2{margin:0;font-size:clamp(18px,2.4vw,23px);font-weight:900;}
+.stage-b{padding:20px 22px 24px;}
+.lead{font-size:17px;margin:0 0 14px;}
+.task{display:flex;gap:10px;align-items:flex-start;background:var(--yellow-l);border:1.5px solid #f3dc97;border-radius:var(--r-s);
+  padding:10px 14px;font-weight:700;margin:0 0 14px;}
+.task::before{content:"👆";font-size:20px;line-height:1.4;}
+.book{font-size:15px;background:var(--purple-l);border-inline-start:5px solid var(--purple);border-radius:var(--r-s);padding:10px 14px;margin:10px 0;}
+.book::before{content:"📘 من الكتاب: ";font-weight:800;color:var(--purple);}
+.extra{font-size:13.5px;color:var(--muted);background:var(--soft);border:1.5px dashed var(--line);border-radius:var(--r-s);padding:8px 12px;margin:10px 0;}
+.extra::before{content:"ℹ️ توضيح للنشاط وليس من الكتاب: ";font-weight:800;}
+.grid2{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:20px;align-items:start;}
+@media (max-width:820px){.grid2{grid-template-columns:minmax(0,1fr);}}
+.panel{background:var(--soft);border:1.5px solid var(--line);border-radius:var(--r);padding:14px;}
+.panel h3{margin:0 0 8px;font-size:17px;font-weight:900;}
+
+/* ================= CONTROLS ================= */
+.btn{min-height:var(--tap);min-width:var(--tap);display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:0 20px;border-radius:999px;border:2px solid transparent;font-size:16px;font-weight:800;cursor:pointer;
+  background:var(--navy);color:#fff;transition:transform .12s,background .2s,box-shadow .2s;touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;user-select:none;}
+.btn:active{transform:scale(.96);}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+.btn.cyan{background:var(--cyan);color:var(--navy);}
+.btn.green{background:var(--green);}
+.btn.red{background:var(--red);}
+.btn.ghost{background:#fff;color:var(--navy);border-color:var(--line);}
+.btn.ghost[aria-pressed="true"]{background:var(--navy);color:#fff;border-color:var(--navy);}
+.btn.sm{min-height:40px;font-size:14.5px;padding:0 14px;}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;}
+.choice{min-height:56px;text-align:start;padding:10px 14px;border-radius:var(--r-s);border:2px solid var(--line);background:#fff;
+  font-size:16px;font-weight:700;cursor:pointer;transition:all .15s;}
+.choice:hover{border-color:var(--cyan);}
+.choice[aria-pressed="true"]{border-color:var(--navy);background:var(--purple-l);}
+.choice.ok{border-color:var(--green);background:var(--green-l);}
+.choice.bad{border-color:var(--red);background:var(--red-l);}
+input[type=range]{width:100%;height:44px;accent-color:var(--cyan-d);cursor:pointer;}
+.slider-lbl{display:flex;justify-content:space-between;font-size:13.5px;font-weight:700;color:var(--muted);}
+
+/* chips + drop zones (Kit.dnd) */
+.chips{display:flex;flex-wrap:wrap;gap:8px;min-height:56px;padding:8px;border-radius:var(--r-s);background:var(--soft);
+  border:1.5px dashed var(--line);}
+.chip{min-height:46px;display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;background:#fff;
+  border:2px solid var(--cyan-b);font-weight:800;font-size:15.5px;cursor:grab;touch-action:none;user-select:none;
+  -webkit-user-select:none;box-shadow:0 2px 0 var(--cyan-b);transition:transform .12s,box-shadow .12s,border-color .2s;}
+.chip.sel{border-color:var(--navy);box-shadow:0 0 0 4px rgba(0,195,254,.35);transform:translateY(-2px);}
+.chip.dragging{opacity:.35;}
+.chip.ghost{position:fixed;z-index:999;pointer-events:none;opacity:.95;transform:rotate(-3deg) scale(1.05);box-shadow:var(--sh-l);}
+.chip.ok{border-color:var(--green);background:var(--green-l);box-shadow:0 2px 0 var(--green-b);cursor:default;}
+.chip.bad{border-color:var(--red);background:var(--red-l);animation:shake .4s;}
+.zone{min-height:64px;border:2.5px dashed var(--cyan-b);border-radius:var(--r-s);padding:8px;background:#fff;
+  transition:background .15s,border-color .15s;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;}
+.zone.hot{background:var(--cyan-l);border-color:var(--cyan);border-style:solid;}
+.zone .zt{width:100%;font-weight:900;font-size:15px;color:var(--navy);}
+
+/* feedback */
+.fb{display:none;margin-top:12px;border-radius:var(--r-s);padding:12px 14px 12px 14px;font-size:16px;font-weight:600;
+  border:2px solid;animation:rise .25s ease both;}
+.fb.show{display:flex;gap:10px;align-items:flex-start;}
+.fb .ic{font-size:22px;line-height:1.3;flex:none;}
+.fb.ok{background:var(--green-l);border-color:var(--green-b);color:#064b31;}
+.fb.bad{background:var(--red-l);border-color:var(--red-b);color:#7a1426;}
+.fb.info{background:var(--cyan-l);border-color:var(--cyan-b);color:#06456a;}
+.fb.warn{background:var(--yellow-l);border-color:#f3dc97;color:#5a4200;}
+
+/* meters & badges */
+.meter{height:16px;border-radius:999px;background:#ece9f8;overflow:hidden;}
+.meter>i{display:block;height:100%;border-radius:999px;background:var(--cyan);transition:width .4s;}
+.badge{display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:14px;border-radius:999px;padding:4px 12px;
+  background:var(--soft);border:1.5px solid var(--line);}
+.badge.ok{background:var(--green-l);border-color:var(--green-b);color:var(--green-d);}
+.badge.bad{background:var(--red-l);border-color:var(--red-b);color:var(--red-d);}
+.missions{list-style:none;margin:0;padding:0;display:grid;gap:8px;}
+.missions li{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-s);background:#fff;
+  border:2px solid var(--line);font-weight:700;}
+.missions li .st{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--soft);
+  border:2px solid var(--line);flex:none;font-size:15px;}
+.missions li.cur{border-color:var(--cyan);}
+.missions li.done{border-color:var(--green-b);background:var(--green-l);}
+.missions li.done .st{background:var(--green);border-color:var(--green);color:#fff;}
+
+/* 3D canvas wrapper (Kit.orbit) */
+.view3d{position:relative;border-radius:var(--r);background:radial-gradient(ellipse at 50% 40%,#2d1670 0%,#160038 75%);
+  overflow:hidden;touch-action:none;cursor:grab;aspect-ratio:4/3;width:100%;}
+.view3d canvas{display:block;width:100%;height:100%;}
+.view3d .hint3d{position:absolute;bottom:10px;inset-inline-start:10px;font-size:13px;font-weight:700;color:#d9d2ff;
+  background:rgba(255,255,255,.1);border-radius:999px;padding:4px 12px;pointer-events:none;}
+
+/* nav footer */
+.navbar{position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);
+  border-top:1.5px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));}
+.navbar .in{max-width:1120px;margin:0 auto;display:flex;gap:10px;align-items:center;justify-content:space-between;}
+.navbar .where{font-weight:800;color:var(--muted);font-size:14.5px;text-align:center;flex:1;}
+
+/* summary card */
+.sum{display:grid;gap:10px;}
+.sum li{background:var(--green-l);border:1.5px solid var(--green-b);border-radius:var(--r-s);padding:10px 14px;font-weight:700;list-style:none;}
+.sum{padding:0;margin:0;}
+
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:998;}
+@keyframes rise{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+@keyframes shake{0%,100%{transform:none;}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+@keyframes pop{0%{transform:scale(.6);opacity:0;}70%{transform:scale(1.08);}100%{transform:scale(1);opacity:1;}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;scroll-behavior:auto !important;}}
+@media (max-width:560px){.stage-b{padding:16px 14px 20px;}.stage-h{padding:12px 14px;}.dots li{width:28px;height:28px;font-size:12.5px;}.btn{padding:0 16px;}}
+</style>
+<style>
+/* ================= ACTIVITY-SPECIFIC CSS ================= */
+.pd{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;font-weight:900;font-size:17px;line-height:1;
+  color:#fff;flex:none;box-shadow:inset -3px -4px 0 rgba(0,0,0,.18);}
+.pd.p{background:var(--red);} .pd.n{background:var(--green);font-size:15px;} .pd.e{background:var(--yellow);color:var(--navy);width:22px;height:22px;font-size:16px;}
+.legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin:10px 0 0;padding:0;list-style:none;font-weight:700;font-size:14.5px;}
+.legend li{display:flex;align-items:center;gap:6px;}
+.vcap{font-size:14px;font-weight:800;color:var(--muted);margin:6px 2px 0;}
+.partbtns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+.partbtns .choice{display:flex;align-items:center;gap:8px;min-height:52px;}
+.info{margin-top:12px;background:#fff;border:2px solid var(--cyan-b);border-radius:var(--r);padding:12px 14px;min-height:120px;}
+.info h4{margin:0 0 6px;font-size:18px;display:flex;align-items:center;gap:8px;}
+.info dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:15.5px;}
+.info dt{font-weight:900;white-space:nowrap;} .info dd{margin:0;}
+.info .warnline{margin-top:8px;font-weight:800;color:var(--red-d);font-size:15px;}
+.found{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.counter{display:grid;grid-template-columns:1fr auto auto auto;align-items:center;gap:8px;background:#fff;border:2px solid var(--line);
+  border-radius:var(--r-s);padding:6px 10px;margin-top:8px;}
+.counter .nm{display:flex;align-items:center;gap:8px;font-weight:800;font-size:15.5px;min-width:0;}
+.counter output{min-width:34px;text-align:center;font-size:22px;font-weight:900;}
+.counter .btn{padding:0;width:48px;font-size:24px;}
+.readout{margin-top:12px;}
+.readout h3{margin:0 0 4px;font-size:16px;}
+.bal{width:100%;max-width:300px;display:block;margin:0 auto;}
+.bal .beamg,.bal .pan{transition:transform .5s ease;}
+.chargeline{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;align-items:center;margin-top:4px;font-weight:700;}
+.massbar{display:flex;height:26px;border-radius:8px;background:#ece9f8;overflow:hidden;border:1.5px solid var(--line);}
+.massbar i{display:block;height:100%;transition:width .4s;}
+.massbar .mn{background:repeating-linear-gradient(135deg,var(--red) 0 10px,var(--green) 10px 20px);}
+.massbar .me{background:var(--yellow);box-shadow:inset 0 0 0 1px #b88a00;}
+.mlbl{display:flex;justify-content:space-between;gap:8px;font-size:13.5px;font-weight:700;color:var(--muted);margin-top:4px;flex-wrap:wrap;}
+.mission-act{margin-top:10px;}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px auto 0;max-width:720px;}
+.cmp .view3d{aspect-ratio:1/1;}
+.cmp .cap{text-align:center;font-weight:800;margin-top:4px;font-size:15px;}
+.part{border-top:2px dashed var(--line);margin-top:18px;padding-top:14px;}
+.part:first-child{border-top:0;margin-top:0;padding-top:0;}
+.part h3{margin:0 0 8px;font-size:18px;font-weight:900;}
+.cardhead{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.ccard{display:none;} .ccard.on{display:block;animation:rise .3s ease both;}
+.ccard .q{font-size:18px;font-weight:900;margin:0 0 10px;}
+.fig{display:block;width:100%;max-width:240px;margin:0 auto 10px;background:radial-gradient(ellipse at 50% 40%,#2d1670 0%,#160038 75%);border-radius:var(--r);}
+.slots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px;}
+.slots .zone{flex-direction:column;align-items:center;justify-content:center;min-height:96px;}
+.slots .zone .zt{text-align:center;font-size:14px;}
+.slots .chip{padding:6px 10px;font-size:15px;}
+.btn[hidden]{display:none;}
+.bigtick{font-size:46px;text-align:center;margin:6px 0;}
+@media (max-width:560px){.slots .zone .zt{font-size:12.5px;} .info dl{font-size:15px;} .partbtns .choice{font-size:15px;padding:8px 10px;}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <span class="ref">📘 <b>الفصلُ ٥: بناءُ المادةِ</b> · الدرسُ ١: الذرةُ · <span>كتابُ النشاطِ ص ٣٧–٣٩</span></span>
+    <h1>«أبني ذرّتي»<small>كيف تُبنى الذرةُ؟ ولماذا هي متعادلةٌ؟</small></h1>
+    <ol class="dots" id="dots" aria-label="مراحلُ النشاطِ"></ol>
+  </header>
+
+  <main id="main">
+    <!-- ============ STAGE 1: EXPLORE ============ -->
+    <section class="stage" data-stage="0" aria-labelledby="s0h">
+      <div class="stage-h"><span class="kind">أستكشفُ</span><h2 id="s0h">ممَّ تتكوّنُ الذرةُ؟</h2></div>
+      <div class="stage-b">
+        <p class="book">كلُّ شيءٍ من حولي مادةٌ، ووحدةُ بنائِها الأساسيةُ الذرةُ: أصغرُ جزءٍ من المادةِ يشتركُ في التغيرِ الكيميائيِّ. الذراتُ لا تُرى بالعينِ المجردةِ؛ لاحظَها العلماءُ بالمجهرِ الإلكترونيِّ الماسحِ.</p>
+        <p class="task">دوِّرْ نموذجَ ذرةِ الهيليومِ بإصبعِكَ، ثم انقرْ على كلِّ جزءٍ (في النموذجِ أو بالأزرارِ) لتعرفَ مكانَه وشحنتَه وكتلتَه.</p>
+        <div class="grid2">
+          <div>
+            <div class="view3d" id="v1"><span class="hint3d">↻ اسحبْ للتدويرِ · انقرْ على جسيمٍ</span></div>
+            <ul class="legend" aria-label="مفتاحُ الألوانِ">
+              <li><span class="pd p" aria-hidden="true">+</span> بروتونٌ p⁺</li>
+              <li><span class="pd n" aria-hidden="true">n</span> نيوترونٌ n</li>
+              <li><span class="pd e" aria-hidden="true">−</span> إلكترونٌ e⁻</li>
+            </ul>
+            <p class="extra">النموذجُ مكبَّرٌ جداً، وألوانُه كألوانِ رسمِ الكتابِ. حركةُ الإلكتروناتِ في النموذجِ أبطأُ كثيراً من الحقيقةِ.</p>
+          </div>
+          <div class="panel">
+            <h3>أجزاءُ الذرةِ</h3>
+            <div class="partbtns" id="partBtns">
+              <button class="choice" type="button" data-part="nucleus" aria-pressed="false"><span class="pd p" aria-hidden="true" style="background:linear-gradient(90deg,var(--red) 50%,var(--green) 50%)">●</span> النواةُ</button>
+              <button class="choice" type="button" data-part="p" aria-pressed="false"><span class="pd p" aria-hidden="true">+</span> البروتونُ</button>
+              <button class="choice" type="button" data-part="n" aria-pressed="false"><span class="pd n" aria-hidden="true">n</span> النيوترونُ</button>
+              <button class="choice" type="button" data-part="e" aria-pressed="false"><span class="pd e" aria-hidden="true">−</span> الإلكترونُ</button>
+            </div>
+            <div class="info" id="info" aria-live="polite"><p style="margin:0;color:var(--muted);font-weight:700">انقرْ على جزءٍ لتظهرَ بطاقتُه هنا.</p></div>
+            <h3 style="margin-top:14px">🔎 مهمّةٌ: اعثرْ على أنواعِ الجسيماتِ الثلاثةِ</h3>
+            <div class="found" id="found">
+              <span class="badge" data-f="p">☐ البروتونُ</span>
+              <span class="badge" data-f="n">☐ النيوترونُ</span>
+              <span class="badge" data-f="e">☐ الإلكترونُ</span>
+            </div>
+          </div>
+        </div>
+        <div class="part" id="miscon" style="margin-top:18px">
+          <h3>🤔 سؤالٌ سريعٌ: أينَ توجدُ الإلكتروناتُ؟</h3>
+          <div id="q1"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ STAGE 2: BUILD ============ -->
+    <section class="stage" data-stage="1" aria-labelledby="s1h">
+      <div class="stage-h"><span class="kind">أبني</span><h2 id="s1h">أبني ذرّتي بنفسي</h2></div>
+      <div class="stage-b">
+        <p class="task">أضِفِ الجسيماتِ أو أزلْها بالأزرارِ ＋ و −، وراقبِ الشحنةَ والكتلةَ والحجمَ. ثم أنجزِ المهامَّ واضغطْ «تحقّقْ».</p>
+        <div class="grid2">
+          <div>
+            <div class="view3d" id="v2"><span class="hint3d">↻ اسحبْ للتدويرِ</span></div>
+            <ul class="legend" aria-hidden="true">
+              <li><span class="pd p">+</span> بروتونٌ p⁺</li>
+              <li><span class="pd n">n</span> نيوترونٌ n</li>
+              <li><span class="pd e">−</span> إلكترونٌ e⁻</li>
+            </ul>
+            <div id="counters"></div>
+            <p class="vcap" id="liveNote" aria-live="polite"></p>
+          </div>
+          <div>
+            <div class="panel">
+              <h3>🎯 المهامُّ</h3>
+              <ol class="missions" id="missions">
+                <li data-m="0"><span class="st">١</span><span>ابنِ ذرةَ الهيليومِ: نواةٌ فيها بروتونانِ ونيوترونانِ، ويدورُ حولَها إلكترونانِ.</span></li>
+                <li data-m="1"><span class="st">٢</span><span>ابنِ ذرةَ الهيدروجينِ كما يرسمُها الكتابُ: بروتونٌ واحدٌ وإلكترونٌ واحدٌ.</span></li>
+                <li data-m="2"><span class="st">٣</span><span>ابنِ ذرةً متعادلةً فيها ٣ إلكتروناتٍ (ذرةُ الليثيومِ). استنتجْ عددَ البروتوناتِ من قاعدةِ التعادلِ.</span></li>
+              </ol>
+              <div class="row mission-act"><button class="btn green" type="button" id="checkBtn">✔ تحقّقْ</button><button class="btn ghost sm" type="button" id="clearBtn">↺ ابدأْ من جديدٍ</button></div>
+              <div class="fb" id="fb2"></div>
+            </div>
+            <div class="panel readout">
+              <h3>⚡ الشحنةُ: ميزانُ الشحناتِ</h3>
+              <div id="bal2"></div>
+            </div>
+            <div class="panel readout">
+              <h3>⚖️ أينَ الكتلةُ؟</h3>
+              <div class="massbar" id="mass2" aria-hidden="true"><i class="mn"></i><i class="me"></i></div>
+              <div class="mlbl"><span>▨ النواةُ (بروتوناتٌ + نيوتروناتٌ)</span><span>▮ الإلكتروناتُ</span></div>
+              <p class="vcap" id="massTxt" aria-live="polite"></p>
+              <p class="extra">أطوالُ الشريطِ للتوضيحِ فقط: تبيّنُ أنَّ كتلةَ الإلكترونِ صغيرةٌ جداً مقارنةً بالبروتونِ والنيوترونِ.</p>
+            </div>
+            <div class="panel readout">
+              <h3>📏 حجمُ الذرةِ</h3>
+              <div class="meter" aria-hidden="true"><i id="sizeBar" style="width:0%;background:var(--yellow)"></i></div>
+              <p class="vcap" id="sizeTxt" aria-live="polite"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ STAGE 3: PREDICT & TEST ============ -->
+    <section class="stage" data-stage="2" aria-labelledby="s2h">
+      <div class="stage-h"><span class="kind">أتوقّعُ ثم أجرّبُ</span><h2 id="s2h">ماذا يحدثُ لو…؟</h2></div>
+      <div class="stage-b">
+        <div class="part">
+          <h3>١) لو فقدتِ الذرةُ أحدَ إلكتروناتِها، فما الشحنةُ التي ستبقى؟</h3>
+          <div class="grid2">
+            <div>
+              <div class="view3d" id="v3"><span class="hint3d">ذرةُ الهيليومِ · ↻ اسحبْ للتدويرِ</span></div>
+            </div>
+            <div>
+              <p class="task">توقّعْ أولاً، ثم اضغطْ «جرّبْ» وراقبِ الميزانَ.</p>
+              <div class="choices" id="predA">
+                <button class="choice" type="button" data-v="pos" aria-pressed="false">➕ موجبةٌ</button>
+                <button class="choice" type="button" data-v="neg" aria-pressed="false">➖ سالبةٌ</button>
+                <button class="choice" type="button" data-v="neu" aria-pressed="false">⚖️ متعادلةٌ</button>
+              </div>
+              <div class="row" style="margin-top:10px"><button class="btn cyan" type="button" id="tryA" disabled>🚀 جرّبْ: أبعِدْ إلكتروناً</button><button class="btn ghost sm" type="button" id="resetA">↺ أعِدْ</button></div>
+              <div class="panel readout"><div id="bal3"></div></div>
+              <div class="fb" id="fbA"></div>
+            </div>
+          </div>
+        </div>
+        <div class="part">
+          <h3>٢) أيُّهما أكبرُ: ذرةٌ فيها إلكترونانِ، أم ذرةٌ فيها ٨ إلكتروناتٍ؟</h3>
+          <p class="task">توقّعْ، ثم اعرضِ الذرتينِ جنباً إلى جنبٍ.</p>
+          <div class="choices" id="predB">
+            <button class="choice" type="button" data-v="2" aria-pressed="false">الذرةُ التي فيها إلكترونانِ</button>
+            <button class="choice" type="button" data-v="8" aria-pressed="false">الذرةُ التي فيها ٨ إلكتروناتٍ</button>
+            <button class="choice" type="button" data-v="eq" aria-pressed="false">متساويتانِ في الحجمِ</button>
+          </div>
+          <div class="row" style="margin-top:10px"><button class="btn cyan" type="button" id="showB" disabled>👀 اعرضِ الذرتينِ</button></div>
+          <div id="cmpWrap" hidden>
+            <div class="cmp">
+              <div><div class="view3d" id="v4"></div><p class="cap">إلكترونانِ (٢ e⁻)</p></div>
+              <div><div class="view3d" id="v5"></div><p class="cap">٨ إلكتروناتٍ (٨ e⁻)</p></div>
+            </div>
+            <p class="extra">رُسمتْ في كلِّ نواةٍ بروتوناتٌ بعددِ الإلكتروناتِ (قاعدةُ التعادلِ)؛ أمّا عددُ النيوتروناتِ في الذرةِ الثانيةِ فللرسمِ فقط.</p>
+          </div>
+          <div class="fb" id="fbB"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ STAGE 4: CHALLENGE ============ -->
+    <section class="stage" data-stage="3" aria-labelledby="s3h">
+      <div class="stage-h"><span class="kind">أتحدّى</span><h2 id="s3h">بطاقاتُ التحدّي</h2></div>
+      <div class="stage-b">
+        <div class="cardhead"><span class="badge" id="cardNo"></span><span class="badge ok" id="cardScore"></span></div>
+        <div id="cards"></div>
+      </div>
+    </section>
+
+    <!-- ============ STAGE 5: SUMMARY ============ -->
+    <section class="stage" data-stage="4" aria-labelledby="s4h">
+      <div class="stage-h"><span class="kind">خلاصةٌ</span><h2 id="s4h">ماذا تعلّمتُ؟</h2></div>
+      <div class="stage-b">
+        <div class="bigtick" aria-hidden="true">⚛️🎉</div>
+        <ul class="sum">
+          <li>الذرةُ أصغرُ جزءٍ من المادةِ يشتركُ في التغيرِ الكيميائيِّ، ولا تُرى بالعينِ المجردةِ.</li>
+          <li>تتكوّنُ الذرةُ من <b>نواةٍ</b> في مركزِها، و<b>إلكتروناتٍ</b> تدورُ حولَها بسرعةٍ هائلةٍ — الإلكتروناتُ ليستْ داخلَ النواةِ.</li>
+          <li>النواةُ شحنتُها موجبةٌ، وتشغلُ حيّزاً صغيراً، لكنها تشملُ كاملَ كتلةِ الذرةِ تقريباً. فيها <b>بروتوناتٌ p⁺</b> موجبةٌ و<b>نيوتروناتٌ n</b> متعادلةٌ.</li>
+          <li>الإلكترونُ <b>e⁻</b> سالبُ الشحنةِ وكتلتُه صغيرةٌ جداً. ترتيبُ الكتلةِ: الإلكترونُ &lt; البروتونُ &lt; النيوترونُ.</li>
+          <li>الذرةُ متعادلةٌ لأنَّ عددَ إلكتروناتِها يساوي عددَ بروتوناتِها. إذا فقدتْ إلكتروناً بقيتْ شحنةٌ موجبةٌ.</li>
+          <li>كلما زادَ عددُ الإلكتروناتِ كبرَ حجمُ الذرةِ، كالحقيبةِ التي تحملُ كتباً أكثرَ.</li>
+        </ul>
+        <div class="row" style="margin-top:16px;justify-content:center"><button class="btn cyan" type="button" id="againBtn">↺ أعِدِ النشاطَ من البدايةِ</button></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<nav class="navbar" aria-label="التنقلُ بينَ المراحلِ">
+  <div class="in">
+    <button class="btn ghost" id="prevBtn" type="button">→ السابقُ</button>
+    <div class="where" id="where" aria-live="polite"></div>
+    <button class="btn" id="nextBtn" type="button">التالي ←</button>
+  </div>
+</nav>
+
+<script>
+/* ================= KIT (shared helpers) ================= */
+const Kit = (() => {
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const $ = (s, r=document) => r.querySelector(s);
+  const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+  const AR = '٠١٢٣٤٥٦٧٨٩';
+  const ar = n => String(n).replace(/[0-9]/g, d => AR[d]).replace('-', '−');
+  const shuffle = a => { a = a.slice(); for (let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; };
+  const el = (tag, attrs={}, html) => { const e=document.createElement(tag);
+    for (const k in attrs){ if(k==='class') e.className=attrs[k]; else if(k.startsWith('on')) e.addEventListener(k.slice(2),attrs[k]); else e.setAttribute(k,attrs[k]); }
+    if (html!=null) e.innerHTML=html; return e; };
+
+  /* ---- feedback: Kit.say(box, 'ok'|'bad'|'info'|'warn', html) ---- */
+  const ICON = {ok:'✅', bad:'🤔', info:'💡', warn:'⚠️'};
+  function say(box, type, html){
+    if (typeof box==='string') box=$(box);
+    box.className='fb show '+type; box.setAttribute('role','status'); box.setAttribute('aria-live','polite');
+    box.innerHTML='<span class="ic" aria-hidden="true">'+ICON[type]+'</span><div>'+html+'</div>';
+  }
+  function hush(box){ if (typeof box==='string') box=$(box); box.className='fb'; box.innerHTML=''; }
+
+  /* ---- stages + nav. canLeave(i) may return false or a message string to block "next". ---- */
+  let stages=[], cur=0, names=[], hooks={};
+  function setupStages(stageNames, opts={}){
+    names=stageNames; hooks=opts; stages=$$('.stage');
+    const dots=$('#dots'); dots.innerHTML='';
+    names.forEach((n,i)=>{ const li=el('li',{title:n,'aria-label':'المرحلة '+ar(i+1)+': '+n},ar(i+1)); dots.appendChild(li); });
+    $('#prevBtn').onclick=()=>go(cur-1); $('#nextBtn').onclick=()=>go(cur+1);
+    go(0, true);
+  }
+  function go(i, first){
+    if (i<0||i>=stages.length) return;
+    if (!first && i>cur && hooks.canLeave){ const r=hooks.canLeave(cur); if (r!==true && r!==undefined){ toast(r||'أكملِ المهمةَ أولاً'); return; } }
+    stages.forEach((s,k)=>s.classList.toggle('on',k===i));
+    $$('#dots li').forEach((d,k)=>{ d.classList.toggle('on',k===i); d.classList.toggle('done',k<i); });
+    cur=i; $('#where').textContent=ar(i+1)+' / '+ar(stages.length)+' · '+names[i];
+    $('#prevBtn').disabled=i===0; $('#nextBtn').style.visibility=i===stages.length-1?'hidden':'visible';
+    if(!first) window.scrollTo({top:0,behavior:reduced?'auto':'smooth'});
+    hooks.onEnter && hooks.onEnter(i);
+  }
+  let toastT;
+  function toast(msg){
+    let t=$('#kitToast'); if(!t){ t=el('div',{id:'kitToast',role:'alert'}); Object.assign(t.style,{position:'fixed',bottom:'86px',left:'50%',
+      transform:'translateX(-50%)',background:'#200058',color:'#fff',padding:'12px 20px',borderRadius:'999px',fontWeight:'800',
+      zIndex:1000,boxShadow:'0 10px 30px rgba(0,0,0,.25)',maxWidth:'90vw',textAlign:'center'}); document.body.appendChild(t); }
+    t.textContent=msg; t.style.display='block'; clearTimeout(toastT); toastT=setTimeout(()=>t.style.display='none',2600);
+  }
+
+  /* ---- drag & drop with tap-to-place + keyboard.
+     Kit.dnd({ chips:[chipEls], zones:[zoneEls], accept:(chip,zone)=>bool|string, onDrop:(chip,zone,ok)=>{} , lockCorrect:true })
+     chips need data-id. zone gets the chip appended when accepted (or always, if place:'always'). ---- */
+  function dnd(cfg){
+    let sel=null;
+    const zones=cfg.zones;
+    const clear=()=>{ if(sel){sel.classList.remove('sel'); sel.setAttribute('aria-pressed','false');} sel=null; };
+    function drop(chip, zone){
+      const ok = cfg.accept ? cfg.accept(chip, zone) : true;
+      if (ok===true || cfg.place==='always'){ zone.appendChild(chip); }
+      if (ok===true){ chip.classList.remove('bad'); if(cfg.lockCorrect!==false){ chip.classList.add('ok'); chip.dataset.locked='1'; chip.setAttribute('tabindex','-1'); chip.setAttribute('aria-disabled','true'); } }
+      else { chip.classList.remove('bad'); void chip.offsetWidth; chip.classList.add('bad'); }
+      cfg.onDrop && cfg.onDrop(chip, zone, ok===true, ok);
+    }
+    zones.forEach(z=>{
+      z.setAttribute('tabindex', z.getAttribute('tabindex')||'0'); z.setAttribute('role','button');
+      const act=()=>{ if(sel){ const c=sel; clear(); drop(c,z);} };
+      z.addEventListener('click', e=>{ if(e.target.closest('.chip') && !sel) return; act(); });
+      z.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); act(); } });
+    });
+    cfg.chips.forEach(chip=>{
+      chip.setAttribute('tabindex','0'); chip.setAttribute('role','button'); chip.setAttribute('aria-pressed','false');
+      chip.addEventListener('keydown', e=>{ if(chip.dataset.locked) return; if(e.key==='Enter'||e.key===' '){ e.preventDefault(); const was=sel===chip; clear(); if(!was){sel=chip;chip.classList.add('sel');chip.setAttribute('aria-pressed','true');} } });
+      let start=null, ghost=null, moved=false, overZ=null;
+      chip.addEventListener('pointerdown', e=>{
+        if (chip.dataset.locked || e.button>0) return;
+        start={x:e.clientX,y:e.clientY}; moved=false; chip.setPointerCapture(e.pointerId);
+      });
+      chip.addEventListener('pointermove', e=>{
+        if(!start) return;
+        if(!moved && Math.hypot(e.clientX-start.x,e.clientY-start.y)>7){
+          moved=true; clear(); ghost=chip.cloneNode(true); ghost.classList.add('ghost'); ghost.classList.remove('sel','bad');
+          document.body.appendChild(ghost); chip.classList.add('dragging');
+        }
+        if(moved){
+          ghost.style.left=(e.clientX-ghost.offsetWidth/2)+'px'; ghost.style.top=(e.clientY-ghost.offsetHeight/2)+'px';
+          const under=document.elementFromPoint(e.clientX,e.clientY); const z=under&&under.closest('.zone');
+          const zz = z && zones.includes(z) ? z : null;
+          if(zz!==overZ){ overZ&&overZ.classList.remove('hot'); overZ=zz; overZ&&overZ.classList.add('hot'); }
+        }
+      });
+      const end=e=>{
+        if(!start) return; start=null;
+        if(moved){ ghost.remove(); ghost=null; chip.classList.remove('dragging'); if(overZ){ overZ.classList.remove('hot'); drop(chip,overZ); overZ=null; } }
+        else if(e.type==='pointerup'){ const was=sel===chip; clear(); if(!was){ sel=chip; chip.classList.add('sel'); chip.setAttribute('aria-pressed','true'); } }
+      };
+      chip.addEventListener('pointerup', end); chip.addEventListener('pointercancel', end);
+    });
+    return { clear, reset(home){ cfg.chips.forEach(c=>{ c.classList.remove('ok','bad','sel'); delete c.dataset.locked; c.setAttribute('tabindex','0'); c.removeAttribute('aria-disabled'); home.appendChild(c); }); } };
+  }
+
+  /* ---- 3D orbit view: Kit.orbit(container, draw(ctx, cam, w, h, t), {yaw,pitch,zoom,auto}) ----
+     cam.project(x,y,z) -> {x,y,s,z}  (s = perspective scale, z = depth: larger = closer to viewer) */
+  function orbit(box, draw, o={}){
+    const cv=document.createElement('canvas'); box.prepend(cv);
+    const ctx=cv.getContext('2d');
+    const cam={yaw:o.yaw??0.6, pitch:o.pitch??0.35, zoom:o.zoom??1, dist:o.dist??900, auto:o.auto??true, vy:0, vp:0};
+    let W=0,H=0,dpr=1, drag=null, last=performance.now(), userTouched=false;
+    function size(){ const r=box.getBoundingClientRect(); dpr=Math.min(2,devicePixelRatio||1); W=r.width; H=r.height; cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
+    new ResizeObserver(size).observe(box); size();
+    cam.project=(x,y,z)=>{
+      const cy=Math.cos(cam.yaw), sy=Math.sin(cam.yaw), cp=Math.cos(cam.pitch), sp=Math.sin(cam.pitch);
+      let X=x*cy - z*sy, Z=x*sy + z*cy;           // yaw around Y
+      let Y=y*cp - Z*sp; Z=y*sp + Z*cp;            // pitch around X
+      const unit=Math.min(W,H)/520*cam.zoom;
+      const s=cam.dist/(cam.dist - Z);
+      return {x:W/2 + X*s*unit, y:H/2 - Y*s*unit, s:s*unit, z:Z};
+    };
+    box.addEventListener('pointerdown',e=>{ drag={x:e.clientX,y:e.clientY}; userTouched=true; box.setPointerCapture(e.pointerId); box.style.cursor='grabbing'; });
+    box.addEventListener('pointermove',e=>{ if(!drag) return; const dx=e.clientX-drag.x, dy=e.clientY-drag.y; drag={x:e.clientX,y:e.clientY};
+      cam.vy=-dx*0.008; cam.vp=dy*0.006; cam.yaw+=cam.vy; cam.pitch=Math.max(-1.3,Math.min(1.3,cam.pitch+cam.vp)); });
+    const up=()=>{ drag=null; box.style.cursor='grab'; };
+    box.addEventListener('pointerup',up); box.addEventListener('pointercancel',up);
+    box.addEventListener('wheel',e=>{ e.preventDefault(); cam.zoom=Math.max(.6,Math.min(2.2,cam.zoom*(e.deltaY<0?1.08:.92))); },{passive:false});
+    box.tabIndex=0; box.setAttribute('role','img');
+    box.addEventListener('keydown',e=>{ const k=e.key; if(k==='ArrowLeft'){cam.yaw+=.15;} else if(k==='ArrowRight'){cam.yaw-=.15;}
+      else if(k==='ArrowUp'){cam.pitch=Math.max(-1.3,cam.pitch-.12);} else if(k==='ArrowDown'){cam.pitch=Math.min(1.3,cam.pitch+.12);}
+      else if(k==='+'||k==='='){cam.zoom=Math.min(2.2,cam.zoom*1.1);} else if(k==='-'){cam.zoom=Math.max(.6,cam.zoom*.9);} else return; e.preventDefault(); userTouched=true; });
+    function frame(now){
+      const dt=Math.min(50,now-last); last=now;
+      if(!drag){ cam.vy*=0.93; cam.vp*=0.9; cam.yaw+=cam.vy; cam.pitch=Math.max(-1.3,Math.min(1.3,cam.pitch+cam.vp));
+        if(cam.auto && !reduced && Math.abs(cam.vy)<0.002) cam.yaw+=dt*0.00018*(userTouched?0.4:1); }
+      ctx.clearRect(0,0,W,H); draw(ctx,cam,W,H,reduced?0:now,dt);
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+    return cam;
+  }
+  /* shaded sphere */
+  function ball(ctx,x,y,r,color,label,labelColor){
+    if(r<=0.5) return;
+    const g=ctx.createRadialGradient(x-r*.35,y-r*.4,r*.15,x,y,r);
+    g.addColorStop(0,'#ffffff'); g.addColorStop(.25,color); g.addColorStop(1,shade(color,-0.45));
+    ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+    if(label && r>8){ ctx.fillStyle=labelColor||'#fff'; ctx.font='900 '+Math.round(r*1.05)+'px '+getComputedStyle(document.body).fontFamily;
+      ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(label,x,y+r*.05); }
+  }
+  function shade(hex,p){ const n=parseInt(hex.slice(1),16); let r=n>>16,g=n>>8&255,b=n&255;
+    const f=v=>Math.max(0,Math.min(255,Math.round(p<0?v*(1+p):v+(255-v)*p))); return 'rgb('+f(r)+','+f(g)+','+f(b)+')'; }
+
+  /* small celebration */
+  function celebrate(){
+    if(reduced) return;
+    const c=document.createElement('canvas'); c.className='confetti'; document.body.appendChild(c);
+    const x=c.getContext('2d'); c.width=innerWidth; c.height=innerHeight;
+    const cols=['#00c3fe','#12a06a','#ffd15c','#7b5cff','#e8425a'];
+    const P=Array.from({length:90},()=>({x:innerWidth/2+(Math.random()-.5)*200,y:innerHeight*.35,vx:(Math.random()-.5)*9,vy:-Math.random()*9-3,
+      s:5+Math.random()*6,c:cols[Math.random()*5|0],r:Math.random()*6}));
+    let t=0; (function f(){ t++; x.clearRect(0,0,c.width,c.height);
+      P.forEach(p=>{ p.vy+=.28; p.x+=p.vx; p.y+=p.vy; p.r+=.15; x.save(); x.translate(p.x,p.y); x.rotate(p.r); x.fillStyle=p.c; x.fillRect(-p.s/2,-p.s/4,p.s,p.s/2); x.restore(); });
+      if(t<110) requestAnimationFrame(f); else c.remove(); })();
+  }
+
+  return {$, $$, ar, el, shuffle, say, hush, setupStages, go, toast, dnd, orbit, ball, shade, celebrate, reduced, get cur(){return cur;}};
+})();
+</script>
+<script>
+/* ================= ACTIVITY JS ================= */
+const {$, $$, ar, el, say, hush} = Kit;
+const COL = {p:'#e8425a', n:'#12a06a', e:'#ffd15c'};
+const NR = 15, ER = 8;            // world radii: nucleon vs electron (electron drawn much smaller)
+
+/* ---------- 3D atom model ---------- */
+const nucCache = {};
+function nucleusLayout(p, n){
+  const key = p+'-'+n; if (nucCache[key]) return nucCache[key];
+  const N = p+n, out = [];
+  const types = []; let ip=0, inn=0;
+  for (let k=0;k<N;k++){ if (inn>=n || (ip<p && ip*n <= inn*p)){ types.push('p'); ip++; } else { types.push('n'); inn++; } }
+  const R = 11*Math.cbrt(N) + (N===2?2:0), ga = Math.PI*(3-Math.sqrt(5));
+  for (let k=0;k<N;k++){
+    if (N===1){ out.push({x:0,y:0,z:0,t:types[k]}); continue; }
+    const y = 1-2*(k+.5)/N, rr = Math.sqrt(1-y*y), th = k*ga, f = R*(0.78+0.22*((k*7)%3)/2);
+    out.push({x:Math.cos(th)*rr*f, y:y*f, z:Math.sin(th)*rr*f, t:types[k]});
+  }
+  return nucCache[key] = out;
+}
+function nucRadius(N){ return N ? (N===1 ? NR : 11*Math.cbrt(N)+NR) : 0; }
+function ringPt(R, om, inc, a){
+  const x = R*Math.cos(a), y0 = R*Math.sin(a);
+  const y = y0*Math.cos(inc), z = y0*Math.sin(inc);
+  return {x: x*Math.cos(om)+z*Math.sin(om), y, z: -x*Math.sin(om)+z*Math.cos(om)};
+}
+function atomRadius(e){ return 75 + 11*e; }   // grows with electron count (book's size rule)
+function symbol(ctx, it){
+  const r = it.r;
+  if (it.t==='p'){ ctx.fillStyle='#fff'; const w=r*1.0, h=Math.max(1.8,r*.22); ctx.fillRect(it.x-w/2,it.y-h/2,w,h); ctx.fillRect(it.x-h/2,it.y-w/2,h,w); }
+  else if (it.t==='e'){ ctx.fillStyle='#200058'; const w=r*1.15, h=Math.max(1.8,r*.28); ctx.fillRect(it.x-w/2,it.y-h/2,w,h); }
+  else if (r>7){ ctx.fillStyle='rgba(255,255,255,.92)'; ctx.font='800 '+Math.round(r*.95)+'px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('n',it.x,it.y-r*.08); }
+}
+function drawAtom(ctx, cam, W, H, t, st){
+  const nuc = nucleusLayout(st.p, st.n), e = st.e, items = [];
+  const now = performance.now();
+  const fly = st.fly; const fp = fly ? Math.min(1,(now-fly.start)/1300) : 0;
+  const c = cam.project(0,0,0);
+  if (!nuc.length && !e){
+    ctx.fillStyle='#d9d2ff'; ctx.font='700 16px '+getComputedStyle(document.body).fontFamily; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(st.empty||'أضِفْ جسيماتٍ لتبنيَ ذرّتَكَ', W/2, H/2); st.balls=[]; return;
+  }
+  const nr = nucRadius(nuc.length);
+  if (nuc.length){
+    const gr = nr*c.s*2.2, g = ctx.createRadialGradient(c.x,c.y,0,c.x,c.y,gr);
+    g.addColorStop(0,'rgba(255,130,150,.35)'); g.addColorStop(1,'rgba(255,130,150,0)');
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(c.x,c.y,gr,0,Math.PI*2); ctx.fill();
+  }
+  nuc.forEach(b=>{ const q=cam.project(b.x,b.y,b.z); items.push({k:'b',t:b.t,x:q.x,y:q.y,r:NR*q.s,z:q.z}); });
+  const Rb = atomRadius(e);
+  for (let i=0;i<e;i++){
+    const om = i*Math.PI/e + 0.35, inc = 0.35 + ((i*0.77)%1.15);
+    const R = Rb*(1+0.06*((i%3)-1));
+    const a = i*2.1 + t*0.0016*(1+0.12*(i%3));
+    const isFly = fly && fly.i===i, sc = isFly ? 1+2.6*fp*fp : 1, al = isFly ? 1-fp : 1;
+    const SEG = 48; let prev = null;
+    for (let j=0;j<=SEG;j++){
+      const P = ringPt(R,om,inc,j/SEG*Math.PI*2), q = cam.project(P.x,P.y,P.z);
+      if (prev) items.push({k:'s',t:'e',x1:prev.x,y1:prev.y,x2:q.x,y2:q.y,z:(prev.z+q.z)/2,al:al,R:R});
+      prev = q;
+    }
+    const P = ringPt(R*sc,om,inc,a), q = cam.project(P.x,P.y,P.z);
+    items.push({k:'b',t:'e',x:q.x,y:q.y,r:ER*q.s,z:q.z,al:al});
+  }
+  items.sort((a,b)=>a.z-b.z);
+  const balls = [];
+  const match = it => !st.hl || it.t===st.hl || (st.hl==='nucleus' && it.t!=='e');
+  ctx.lineWidth = 1.6;
+  for (const it of items){
+    const m = match(it);
+    if (it.k==='s'){
+      const d = .2 + .4*Math.max(0,Math.min(1,(it.z/it.R+1)/2));
+      ctx.globalAlpha = it.al*(m?1:.25); ctx.strokeStyle='rgba(255,226,140,'+d.toFixed(2)+')';
+      ctx.beginPath(); ctx.moveTo(it.x1,it.y1); ctx.lineTo(it.x2,it.y2); ctx.stroke();
+    } else {
+      ctx.globalAlpha = (it.al??1)*(m?1:.22);
+      Kit.ball(ctx,it.x,it.y,it.r,COL[it.t]); symbol(ctx,it);
+      if (st.hl && m && st.hl!=='nucleus'){ ctx.strokeStyle='#fff'; ctx.lineWidth=2.5; ctx.beginPath(); ctx.arc(it.x,it.y,it.r+3,0,Math.PI*2); ctx.stroke(); ctx.lineWidth=1.6; }
+      balls.push(it);
+    }
+  }
+  ctx.globalAlpha = 1;
+  if (st.hl==='nucleus' && nuc.length){
+    ctx.save(); ctx.setLineDash([6,5]); ctx.strokeStyle='#fff'; ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.arc(c.x,c.y,nr*c.s*1.18,0,Math.PI*2); ctx.stroke(); ctx.restore();
+  }
+  st.balls = balls; st.center = {x:c.x,y:c.y,r:nr*c.s*1.15};
+  if (fly && fp>=1){ const cb = fly.done; st.fly = null; cb && cb(); }
+}
+function atomView(box, st, opts){ st.balls=[]; return Kit.orbit(box,(ctx,cam,W,H,t)=>drawAtom(ctx,cam,W,H,t,st),opts); }
+function describe(st){
+  return 'نموذجٌ ثلاثيُّ الأبعادِ لذرةٍ: في النواةِ '+ar(st.p)+' بروتون و'+ar(st.n)+' نيوترون، وحولَها '+ar(st.e)+' إلكترون.';
+}
+function flyElectron(st, done){
+  if (st.e<1) return;
+  if (Kit.reduced){ done(); return; }
+  st.fly = {i: st.e-1, start: performance.now(), done};
+}
+
+/* ---------- charge balance (SVG) ---------- */
+function makeBalance(host){
+  host.innerHTML =
+   '<svg class="bal" viewBox="-22 14 304 178" role="img" aria-label="">'+
+   '<rect x="95" y="156" width="70" height="9" rx="4" fill="#c9c3e6"/><polygon points="130,44 116,158 144,158" fill="#c9c3e6"/>'+
+   '<g class="pan" data-s="L"><line x1="0" y1="0" x2="-28" y2="52" stroke="#5f5a85" stroke-width="2"/><line x1="0" y1="0" x2="28" y2="52" stroke="#5f5a85" stroke-width="2"/>'+
+     '<path d="M-38 52 Q0 82 38 52 Z" fill="#fde8ec" stroke="#e8425a" stroke-width="2.5"/><text x="0" y="68" text-anchor="middle" font-size="17" font-weight="900" fill="#c22b43" class="tL"></text><text x="0" y="96" text-anchor="middle" font-size="13" font-weight="800" fill="#c22b43">موجبةٌ ➕</text></g>'+
+   '<g class="pan" data-s="R"><line x1="0" y1="0" x2="-28" y2="52" stroke="#5f5a85" stroke-width="2"/><line x1="0" y1="0" x2="28" y2="52" stroke="#5f5a85" stroke-width="2"/>'+
+     '<path d="M-38 52 Q0 82 38 52 Z" fill="#fff6dc" stroke="#d4a017" stroke-width="2.5"/><text x="0" y="68" text-anchor="middle" font-size="17" font-weight="900" fill="#7a5a00" class="tR"></text><text x="0" y="96" text-anchor="middle" font-size="13" font-weight="800" fill="#7a5a00">سالبةٌ ➖</text></g>'+
+   '<g class="beamg"><rect x="28" y="40" width="204" height="8" rx="4" fill="#200058"/></g>'+
+   '<circle cx="130" cy="44" r="7" fill="#ffd15c" stroke="#200058" stroke-width="2"/>'+
+   '</svg><div class="chargeline"><span class="badge st"></span><span class="cnt"></span></div>';
+  const svg = host.querySelector('svg'), beam = host.querySelector('.beamg'), pL = host.querySelector('[data-s=L]'), pR = host.querySelector('[data-s=R]');
+  const badge = host.querySelector('.st'), cnt = host.querySelector('.cnt');
+  return function update(p, e){
+    const th = Math.max(-22, Math.min(22, (e-p)*7)) * Math.PI/180;   // negative side (right) sinks when e>p
+    beam.style.transformOrigin = '130px 44px'; beam.style.transform = 'rotate('+(th*180/Math.PI)+'deg)';
+    const L = {x:130-102*Math.cos(th), y:44-102*Math.sin(th)}, R = {x:130+102*Math.cos(th), y:44+102*Math.sin(th)};
+    pL.style.transform = 'translate('+L.x+'px,'+L.y+'px)'; pR.style.transform = 'translate('+R.x+'px,'+R.y+'px)';
+    host.querySelector('.tL').textContent = ar(p)+' +'; host.querySelector('.tR').textContent = ar(e)+' −';
+    let s, cls, txt;
+    if (p===0 && e===0){ s='لا شحناتَ بعدُ'; cls='badge st'; }
+    else if (p===e){ s='⚖️ متعادلةٌ'; cls='badge st ok'; }
+    else if (p>e){ s='➕ موجبةٌ'; cls='badge st bad'; }
+    else { s='➖ سالبةٌ'; cls='badge st bad'; }
+    badge.className = cls; badge.textContent = s;
+    cnt.textContent = 'الموجبةُ: '+ar(p)+' · السالبةُ: '+ar(e);
+    svg.setAttribute('aria-label','ميزانُ الشحناتِ: '+ar(p)+' شحنات موجبة و'+ar(e)+' شحنات سالبة. الحالة: '+s.replace(/^\S+\s/,''));
+    return s;
+  };
+}
+
+/* ---------- multiple-choice helper ---------- */
+function mcq(host, fb, opts, onDone){
+  let wrong = 0, done = false;
+  const wrap = el('div',{class:'choices'}); host.appendChild(wrap);
+  const right = opts.find(o=>o.ok);
+  const btns = opts.map(o=>{
+    const b = el('button',{class:'choice',type:'button'},o.t); wrap.appendChild(b);
+    b.addEventListener('click',()=>{
+      if (done) return;
+      if (o.ok){ b.classList.add('ok'); done=true; say(fb,'ok','<b>صحيحٌ!</b> '+o.why); onDone && onDone(true); }
+      else {
+        b.classList.add('bad'); wrong++;
+        say(fb,'bad','حاولْ مرةً أخرى — '+o.why);
+        if (wrong>=2) showBtn();
+      }
+    });
+    return b;
+  });
+  function showBtn(){
+    const sb = el('button',{class:'btn ghost sm',type:'button',style:'margin-top:8px'},'💡 أرني الحلَّ');
+    sb.onclick = ()=>{ if (done) return; done=true; btns[opts.indexOf(right)].classList.add('ok');
+      say(fb,'info','الحلُّ: <b>'+right.t+'</b> — '+right.why); onDone && onDone(false); };
+    fb.querySelector('div').appendChild(el('br')); fb.querySelector('div').appendChild(sb);
+  }
+  return {get done(){return done;}};
+}
+
+/* ================= STAGE 1: explore helium ================= */
+const st1 = {p:2,n:2,e:2,hl:null};
+const v1 = $('#v1'); atomView(v1, st1, {zoom:1.7, pitch:.3});
+v1.setAttribute('aria-label', describe(st1)+' استخدمِ الأزرارَ المجاورةَ للتعرّفِ على كلِّ جزءٍ.');
+const INFO = {
+  nucleus: {h:'<span class="pd p" aria-hidden="true" style="background:linear-gradient(90deg,var(--red) 50%,var(--green) 50%)">●</span> النواةُ',
+    where:'تشغلُ مركزَ الذرةِ، وحيّزُها صغيرٌ.', q:'موجبةٌ ➕ (لأنَّ فيها بروتوناتٍ موجبةً ونيوتروناتٍ متعادلةً).', m:'تشملُ كاملَ كتلةِ الذرةِ تقريباً.',
+    x:'تحتوي نوعينِ من الجسيماتِ: البروتوناتِ والنيوتروناتِ.'},
+  p: {h:'<span class="pd p" aria-hidden="true">+</span> البروتونُ p⁺', where:'داخلَ النواةِ.', q:'موجبةٌ ➕', m:'كبيرةٌ.'},
+  n: {h:'<span class="pd n" aria-hidden="true">n</span> النيوترونُ n', where:'داخلَ النواةِ.', q:'متعادلةٌ (لا موجبةٌ ولا سالبةٌ).', m:'أكبرُ بمقدارٍ ضئيلٍ من كتلةِ البروتونِ.'},
+  e: {h:'<span class="pd e" aria-hidden="true">−</span> الإلكترونُ e⁻', where:'خارجَ النواةِ: يدورُ حولَها بسرعةٍ هائلةٍ.', q:'سالبةٌ ➖', m:'صغيرةٌ جداً مقارنةً بالبروتوناتِ والنيوتروناتِ.',
+    w:'⚠️ انتبهْ: الإلكتروناتُ ليستْ داخلَ النواةِ.'}
+};
+const found = new Set();
+function reveal(part){
+  st1.hl = part;
+  $$('#partBtns .choice').forEach(b=>b.setAttribute('aria-pressed', b.dataset.part===part ? 'true':'false'));
+  const d = INFO[part];
+  $('#info').innerHTML = '<h4>'+d.h+'</h4><dl><dt>📍 المكانُ:</dt><dd>'+d.where+'</dd><dt>⚡ الشحنةُ:</dt><dd>'+d.q+'</dd><dt>⚖️ الكتلةُ:</dt><dd>'+d.m+'</dd></dl>'+
+    (d.x?'<p style="margin:6px 0 0;font-size:15px">'+d.x+'</p>':'')+(d.w?'<p class="warnline">'+d.w+'</p>':'');
+  if (part!=='nucleus' && !found.has(part)){
+    found.add(part);
+    const b = $('#found [data-f="'+part+'"]'); b.classList.add('ok'); b.textContent = '✅ '+b.textContent.slice(2);
+    if (found.size===3) Kit.toast('أحسنتَ! وجدتَ أنواعَ الجسيماتِ الثلاثةَ 👏');
+  }
+}
+$$('#partBtns .choice').forEach(b=>b.addEventListener('click',()=>reveal(b.dataset.part)));
+(function tapHit(){
+  let down = null;
+  v1.addEventListener('pointerdown', e=>{ down = {x:e.clientX, y:e.clientY}; });
+  v1.addEventListener('pointerup', e=>{
+    if (!down) return; const moved = Math.hypot(e.clientX-down.x, e.clientY-down.y); down = null;
+    if (moved > 8) return;
+    const r = v1.getBoundingClientRect(), x = e.clientX-r.left, y = e.clientY-r.top;
+    let hit = null;
+    for (let i=st1.balls.length-1;i>=0;i--){ const b = st1.balls[i]; if (Math.hypot(x-b.x,y-b.y) <= Math.max(b.r+4, 16)){ hit=b; break; } }
+    if (hit) reveal(hit.t);
+    else if (st1.center && Math.hypot(x-st1.center.x,y-st1.center.y) <= st1.center.r) reveal('nucleus');
+  });
+})();
+const fbQ1 = el('div',{class:'fb'});
+mcq($('#q1'), fbQ1, [
+  {t:'داخلَ النواةِ، معَ البروتوناتِ', ok:false, why:'النواةُ فيها البروتوناتُ والنيوتروناتُ فقط؛ لاحظْ في النموذجِ أنَّ الإلكتروناتِ الصفراءَ تتحرّكُ بعيداً عن المركزِ.'},
+  {t:'خارجَ النواةِ، تدورُ حولَها بسرعةٍ هائلةٍ', ok:true, why:'الإلكتروناتُ سالبةُ الشحنةِ وتدورُ حولَ النواةِ، وليستْ داخلَها.'},
+  {t:'ملتصقةٌ بالنيوتروناتِ في المركزِ', ok:false, why:'النيوتروناتُ داخلَ النواةِ، أمّا الإلكتروناتُ فتدورُ حولَ النواةِ من الخارجِ.'}
+]);
+$('#q1').appendChild(fbQ1);
+
+/* ================= STAGE 2: workbench ================= */
+const st2 = {p:0,n:0,e:0,hl:null};
+const v2 = $('#v2'); atomView(v2, st2, {zoom:1.3, pitch:.3});
+const bal2 = makeBalance($('#bal2'));
+const KINDS = [
+  {k:'p', nm:'البروتوناتُ', sym:'p⁺', ic:'+'},
+  {k:'n', nm:'النيوتروناتُ', sym:'n', ic:'n'},
+  {k:'e', nm:'الإلكتروناتُ', sym:'e⁻', ic:'−'}
+];
+KINDS.forEach(K=>{
+  const row = el('div',{class:'counter'},
+    '<span class="nm"><span class="pd '+K.k+'" aria-hidden="true">'+K.ic+'</span><span>'+K.nm+' <bdi dir="ltr">'+K.sym+'</bdi></span></span>'+
+    '<button class="btn ghost" type="button" data-d="-1" aria-label="أزلْ واحداً من '+K.nm+'">−</button>'+
+    '<output id="c_'+K.k+'" aria-live="polite">٠</output>'+
+    '<button class="btn" type="button" data-d="1" aria-label="أضِفْ واحداً إلى '+K.nm+'">+</button>');
+  row.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+    const v = Math.max(0, Math.min(8, st2[K.k] + (+b.dataset.d)));
+    if (v===st2[K.k]){ Kit.toast(v===8 ? 'الحدُّ الأعلى في هذا النشاطِ ٨' : 'لا يوجدُ ما يُزالُ'); return; }
+    st2[K.k] = v; refresh2();
+  }));
+  $('#counters').appendChild(row);
+});
+function refresh2(){
+  const {p,n,e} = st2;
+  KINDS.forEach(K=>$('#c_'+K.k).textContent = ar(st2[K.k]));
+  bal2(p,e);
+  const MAX = 8*10 + 8*10.4 + 8*0.4, wn = (p*10+n*10.4)/MAX*100, we = e*0.4/MAX*100;
+  const mb = $('#mass2'); mb.children[0].style.width = wn+'%'; mb.children[1].style.width = e ? 'max(4px,'+we+'%)' : '0';
+  $('#massTxt').textContent = (p+n)===0 ? (e ? 'الإلكتروناتُ وحدَها كتلتُها صغيرةٌ جداً — الشريطُ يكادُ يكونُ فارغاً!' : 'لا جسيماتِ بعدُ.')
+    : 'معظمُ كتلةِ الذرةِ في النواةِ؛ كلُّ إلكترونٍ يضيفُ شيئاً ضئيلاً جداً.';
+  $('#sizeBar').style.width = (e/8*100)+'%';
+  $('#sizeTxt').textContent = 'عددُ الإلكتروناتِ '+ar(e)+': كلما زادَ عددُ الإلكتروناتِ كبرَ حجمُ الذرةِ.';
+  let note = '';
+  if (e>0 && p+n===0) note = '⚠️ الإلكتروناتُ تدورُ حولَ النواةِ — أضِفْ بروتوناتٍ ونيوتروناتٍ لتكوّنَ النواةَ.';
+  else if (p+n>0 && e===0) note = 'هذه نواةٌ فقط؛ أضِفْ إلكتروناتٍ تدورُ حولَها.';
+  $('#liveNote').textContent = note;
+  v2.setAttribute('aria-label', describe(st2));
+}
+refresh2();
+function neutralMsg(p,e){
+  if (p===e) return '';
+  return 'عددُ الإلكتروناتِ '+ar(e)+' والبروتوناتِ '+ar(p)+': الشحنةُ '+(p>e?'الموجبةُ':'السالبةُ')+' أكبرُ، فالذرةُ ليستْ متعادلةً.';
+}
+const MISSIONS = [
+  {sol:{p:2,n:2,e:2}, check(s){ const m=[];
+      if (s.p!==2) m.push('عددُ البروتوناتِ عندكَ '+ar(s.p)+'، وفي نواةِ الهيليومِ بروتونانِ.');
+      if (s.n!==2) m.push('عددُ النيوتروناتِ عندكَ '+ar(s.n)+'، وفي نواةِ الهيليومِ نيوترونانِ.');
+      if (s.e!==2) m.push('عددُ الإلكتروناتِ عندكَ '+ar(s.e)+'، ويدورُ حولَ نواةِ الهيليومِ إلكترونانِ.');
+      const nm = neutralMsg(s.p,s.e); if (nm) m.push(nm); return m; },
+   ok:'هذه ذرةُ الهيليومِ: بروتونانِ ونيوترونانِ في النواةِ، وإلكترونانِ حولَها. لاحظِ الميزانَ: ٢ موجبةٌ = ٢ سالبةٌ، فالذرةُ متعادلةٌ.'},
+  {sol:{p:1,n:0,e:1}, check(s){ const m=[];
+      if (s.p!==1) m.push('عددُ البروتوناتِ عندكَ '+ar(s.p)+'، والكتابُ يرسمُ ذرةَ الهيدروجينِ ببروتونٍ واحدٍ.');
+      if (s.e!==1) m.push('عددُ الإلكتروناتِ عندكَ '+ar(s.e)+'، والكتابُ يرسمُها بإلكترونٍ واحدٍ.');
+      if (s.n!==0) m.push('الكتابُ يرسمُ ذرةَ الهيدروجينِ ببروتونٍ واحدٍ وإلكترونٍ واحدٍ فقط، من دونِ نيوتروناتٍ؛ أزِلِ النيوتروناتِ.');
+      const nm = neutralMsg(s.p,s.e); if (nm) m.push(nm); return m; },
+   ok:'هذه ذرةُ الهيدروجينِ كما يرسمُها الكتابُ: بروتونٌ واحدٌ وإلكترونٌ واحدٌ، وهي متعادلةٌ. لاحظْ أنها صغيرةٌ: فيها إلكترونٌ واحدٌ فقط.'},
+  {sol:{p:3,n:0,e:3}, check(s){ const m=[];
+      if (s.e!==3) m.push('عددُ الإلكتروناتِ عندكَ '+ar(s.e)+'، والمطلوبُ ٣ إلكتروناتٍ خارجَ النواةِ.');
+      const nm = neutralMsg(s.p,s.e); if (nm) m.push(nm+' استنتجْ من قاعدةِ التعادلِ: عددُ البروتوناتِ = عددُ الإلكتروناتِ.');
+      else if (s.p===0) m.push('لا توجدُ نواةٌ! أضِفْ بروتوناتٍ.');
+      return m; },
+   ok:'ذرةٌ متعادلةٌ فيها ٣ إلكتروناتٍ تحتاجُ ٣ بروتوناتٍ (قاعدةُ التعادلِ). لم يذكرِ الكتابُ عددَ نيوتروناتِ الليثيومِ، لذلك قبلنا أيَّ عددٍ منها. لاحظْ: ذرةُ الليثيومِ (٣ إلكتروناتٍ) أكبرُ من ذرةِ الهيدروجينِ (إلكترونٌ واحدٌ).'}
+];
+let mCur = 0; const mWrong = [0,0,0];
+function paintMissions(){
+  $$('#missions li').forEach((li,i)=>{ li.classList.toggle('cur', i===mCur); li.classList.toggle('done', i<mCur);
+    li.querySelector('.st').textContent = i<mCur ? '✓' : ar(i+1); });
+  $('#checkBtn').disabled = mCur>=3;
+}
+paintMissions();
+function missionDone(i, how){
+  mCur = i+1; paintMissions();
+  say('#fb2', how==='show'?'info':'ok', (how==='show'?'<b>الحلُّ:</b> ':'<b>أحسنتَ!</b> ')+MISSIONS[i].ok+
+    (mCur<3 ? '<br>➡️ انتقلْ إلى المهمةِ التاليةِ.' : '<br>🎉 أنجزتَ المهامَّ الثلاثَ! انتقلْ إلى المرحلةِ التاليةِ.'));
+  if (mCur>=3) Kit.celebrate();
+}
+$('#checkBtn').addEventListener('click',()=>{
+  if (mCur>=3) return;
+  const M = MISSIONS[mCur], msgs = M.check(st2);
+  if (!msgs.length){ missionDone(mCur); return; }
+  mWrong[mCur]++;
+  say('#fb2','bad','حاولْ مرةً أخرى — '+msgs.join('<br>'));
+  if (mWrong[mCur]>=2){
+    const i = mCur, sb = el('button',{class:'btn ghost sm',type:'button',style:'margin-top:8px'},'💡 أرني الحلَّ');
+    sb.onclick = ()=>{ Object.assign(st2, MISSIONS[i].sol); refresh2(); missionDone(i,'show'); };
+    const d = $('#fb2 div'); d.appendChild(el('br')); d.appendChild(sb);
+  }
+});
+$('#clearBtn').addEventListener('click',()=>{ st2.p=st2.n=st2.e=0; refresh2(); hush('#fb2'); });
+
+/* ================= STAGE 3: predict & test ================= */
+const st3 = {p:2,n:2,e:2,hl:null};
+const v3 = $('#v3'); atomView(v3, st3, {zoom:1.6, pitch:.3});
+const bal3 = makeBalance($('#bal3')); bal3(2,2);
+let predA = null, doneA = false, doneB = false, busyA = false, predB = null;
+const LBL = {pos:'موجبةٌ', neg:'سالبةٌ', neu:'متعادلةٌ'};
+$$('#predA .choice').forEach(b=>b.addEventListener('click',()=>{
+  if (busyA || st3.e<2) return;
+  predA = b.dataset.v; $$('#predA .choice').forEach(x=>x.setAttribute('aria-pressed', x===b?'true':'false'));
+  $('#tryA').disabled = false;
+  say('#fbA','info','توقّعُكَ: <b>'+LBL[predA]+'</b>. الآنَ اضغطْ «جرّبْ».');
+}));
+function v3label(){ v3.setAttribute('aria-label', describe(st3)); }
+v3label();
+$('#tryA').addEventListener('click',()=>{
+  if (!predA || busyA || st3.e<2) return;
+  busyA = true; $('#tryA').disabled = true;
+  flyElectron(st3, ()=>{
+    st3.e = 1; bal3(2,1); v3label(); busyA = false; doneA = true;
+    const why = 'بقيَ في الذرةِ بروتونانِ (٢ موجبةٌ) وإلكترونٌ واحدٌ (١ سالبةٌ): الشحنةُ الموجبةُ أكبرُ، فتبقى شحنةٌ <b>موجبةٌ</b>. الذرةُ تكونُ متعادلةً فقط عندما يتساوى عددُ الإلكتروناتِ وعددُ البروتوناتِ.';
+    $$('#predA .choice').forEach(x=>x.classList.toggle('ok', x.dataset.v==='pos'));
+    if (predA==='pos') say('#fbA','ok','<b>توقّعُكَ صحيحٌ!</b> '+why);
+    else say('#fbA','warn','توقّعتَ «'+LBL[predA]+'»، لكنَّ التجربةَ أظهرتْ غيرَ ذلكَ: '+why);
+  });
+});
+$('#resetA').addEventListener('click',()=>{
+  if (busyA) return; st3.e = 2; st3.fly = null; bal3(2,2); v3label(); predA = null;
+  $$('#predA .choice').forEach(x=>{ x.setAttribute('aria-pressed','false'); x.classList.remove('ok'); });
+  $('#tryA').disabled = true; hush('#fbA');
+});
+const st4 = {p:2,n:2,e:2,hl:null}, st5 = {p:8,n:8,e:8,hl:null};
+const v4 = $('#v4'), v5 = $('#v5');
+atomView(v4, st4, {zoom:1, pitch:.35}); atomView(v5, st5, {zoom:1, pitch:.35});
+v4.setAttribute('aria-label','ذرةٌ فيها إلكترونانِ: حجمُها أصغرُ.'); v5.setAttribute('aria-label','ذرةٌ فيها ٨ إلكتروناتٍ: حجمُها أكبرُ.');
+const LB = {'2':'الذرةُ التي فيها إلكترونانِ', '8':'الذرةُ التي فيها ٨ إلكتروناتٍ', 'eq':'متساويتانِ'};
+$$('#predB .choice').forEach(b=>b.addEventListener('click',()=>{
+  if (doneB) return;
+  predB = b.dataset.v; $$('#predB .choice').forEach(x=>x.setAttribute('aria-pressed', x===b?'true':'false'));
+  $('#showB').disabled = false;
+  say('#fbB','info','توقّعُكَ: <b>'+LB[predB]+'</b>. اضغطْ «اعرضِ الذرتينِ».');
+}));
+$('#showB').addEventListener('click',()=>{
+  if (!predB) return;
+  $('#cmpWrap').hidden = false; doneB = true; $('#showB').disabled = true;
+  $$('#predB .choice').forEach(x=>x.classList.toggle('ok', x.dataset.v==='8'));
+  const why = 'كلما زادَ عددُ الإلكتروناتِ كبرَ حجمُ الذرةِ، مثلَ الحقائبِ المدرسيةِ: الحقيبةُ التي تحملُ كتباً أكثرَ تكونُ أكبرَ. لذلك الذرةُ التي فيها ٨ إلكتروناتٍ أكبرُ.';
+  if (predB==='8') say('#fbB','ok','<b>توقّعُكَ صحيحٌ!</b> '+why);
+  else say('#fbB','warn','توقّعتَ «'+LB[predB]+'»، لكنْ قارِنِ الذرتينِ: '+why);
+});
+
+/* ================= STAGE 4: challenge cards ================= */
+function svgAtom(p, n, e){
+  const cx=110, cy=110, N=p+n, parts=[];
+  const types=[]; let ip=0, inn=0;
+  for (let k=0;k<N;k++){ if (inn>=n || (ip<p && ip*n <= inn*p)){ types.push('p'); ip++; } else { types.push('n'); inn++; } }
+  let s = '';
+  for (let i=0;i<e;i++){
+    const rot = i*180/e + 20;
+    s += '<ellipse cx="'+cx+'" cy="'+cy+'" rx="92" ry="34" fill="none" stroke="rgba(255,226,140,.55)" stroke-width="1.6" transform="rotate('+rot+' '+cx+' '+cy+')"/>';
+  }
+  for (let k=0;k<N;k++){
+    const rr = k===0?0:(k<7?21:40), a = k<7 ? (k-1)*Math.PI/3 : (k-7)*Math.PI/6+0.26, x = cx+rr*Math.cos(a), y = cy+rr*Math.sin(a), t = types[k];
+    s += '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="10" fill="'+COL[t]+'" stroke="rgba(0,0,0,.25)"/>'+
+         '<text x="'+x.toFixed(1)+'" y="'+(y+5).toFixed(1)+'" text-anchor="middle" font-size="'+(t==='p'?17:13)+'" font-weight="900" fill="#fff">'+(t==='p'?'+':'n')+'</text>';
+  }
+  for (let i=0;i<e;i++){
+    const rot = (i*180/e + 20)*Math.PI/180, th = 0.9 + i*1.7;
+    const ex = 92*Math.cos(th), ey = 34*Math.sin(th);
+    const x = cx + ex*Math.cos(rot) - ey*Math.sin(rot), y = cy + ex*Math.sin(rot) + ey*Math.cos(rot);
+    s += '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="8" fill="#ffd15c" stroke="#b88a00"/><rect x="'+(x-4.5).toFixed(1)+'" y="'+(y-1.3).toFixed(1)+'" width="9" height="2.6" fill="#200058"/>';
+  }
+  return '<svg class="fig" viewBox="0 0 220 220" role="img" aria-label="شكلُ ذرةٍ: في النواةِ '+ar(p)+' بروتون و'+ar(n)+' نيوترون، وحولَها '+ar(e)+' إلكترون">'+s+'</svg>';
+}
+const CARDS = [
+  {q:'عُدَّ البروتوناتِ (+) والإلكتروناتِ (−) في الشكلِ. ما شحنةُ هذه الذرةِ؟', fig:[3,4,3], opts:[
+    {t:'⚖️ متعادلةٌ', ok:true, why:'في النواةِ ٣ بروتوناتٍ، وحولَها ٣ إلكتروناتٍ: الشحناتُ الموجبةُ تساوي السالبةَ. (النيوتروناتُ متعادلةٌ فلا تُغيّرُ الشحنةَ.)'},
+    {t:'➕ موجبةٌ', ok:false, why:'عُدَّ جيداً: عددُ البروتوناتِ يساوي عددَ الإلكتروناتِ. ولا تَعُدَّ النيوتروناتِ لأنها متعادلةٌ.'},
+    {t:'➖ سالبةٌ', ok:false, why:'لا توجدُ إلكتروناتٌ زائدةٌ: عددُ الإلكتروناتِ يساوي عددَ البروتوناتِ.'}]},
+  {q:'وهذه الذرةُ؟ عُدَّ ثم قرِّرْ: ما الشحنةُ التي بقيتْ فيها؟', fig:[3,3,2], opts:[
+    {t:'⚖️ متعادلةٌ', ok:false, why:'لكي تكونَ متعادلةً يجبُ أن يتساوى عددُ الإلكتروناتِ وعددُ البروتوناتِ، وهنا لا يتساويانِ.'},
+    {t:'➕ موجبةٌ', ok:true, why:'فيها ٣ بروتوناتٍ وإلكترونانِ فقط: الشحنةُ الموجبةُ أكبرُ، كما حدثَ عندما فقدتِ الذرةُ إلكتروناً.'},
+    {t:'➖ سالبةٌ', ok:false, why:'عددُ الإلكتروناتِ (السالبةِ) هنا أقلُّ من عددِ البروتوناتِ (الموجبةِ)، لا أكثرُ.'}]},
+  {q:'أينَ توجدُ معظمُ كتلةِ الذرةِ؟', opts:[
+    {t:'في النواةِ', ok:true, why:'النواةُ تشملُ كاملَ كتلةِ الذرةِ تقريباً، مع أنها تشغلُ حيّزاً صغيراً؛ فالبروتوناتُ والنيوتروناتُ كتلتُها كبيرةٌ.'},
+    {t:'في الإلكتروناتِ', ok:false, why:'كتلةُ الإلكترونِ صغيرةٌ جداً مقارنةً بالبروتوناتِ والنيوتروناتِ، والإلكتروناتُ تشغلُ معظمَ حجمِ الذرةِ لا كتلتِها.'},
+    {t:'موزّعةٌ بالتساوي على أجزاءِ الذرةِ', ok:false, why:'تذكّرْ شريطَ الكتلةِ في مرحلةِ البناءِ: الإلكتروناتُ أضافتْ شيئاً ضئيلاً جداً.'}]},
+  {order:true, q:'رتّبِ الجسيماتِ حسبَ كتلتِها تصاعدياً: من الأخفِّ إلى الأثقلِ. اسحبْ كلَّ جسيمٍ (أو انقرْه ثم انقرِ الخانةَ).'},
+  {q:'ما الجسيمُ المتعادلُ الشحنةِ؟', opts:[
+    {t:'البروتونُ p⁺', ok:false, why:'البروتونُ موجبُ الشحنةِ، ولهذا رمزُه p⁺.'},
+    {t:'النيوترونُ n', ok:true, why:'النيوترونُ متعادلُ الشحنةِ، ويوجدُ معَ البروتوناتِ في النواةِ.'},
+    {t:'الإلكترونُ e⁻', ok:false, why:'الإلكترونُ سالبُ الشحنةِ، ولهذا رمزُه e⁻.'}]},
+  {q:'لماذا شحنةُ النواةِ موجبةٌ؟', opts:[
+    {t:'لأنها تحتوي بروتوناتٍ موجبةً ونيوتروناتٍ متعادلةً', ok:true, why:'البروتوناتُ موجبةٌ والنيوتروناتُ متعادلةٌ، فتكونُ شحنةُ النواةِ كلِّها موجبةً.'},
+    {t:'لأنَّ الإلكتروناتِ موجودةٌ داخلَها', ok:false, why:'الإلكتروناتُ ليستْ داخلَ النواةِ؛ هي تدورُ حولَها، وشحنتُها سالبةٌ أصلاً.'},
+    {t:'لأنها أثقلُ جزءٍ في الذرةِ', ok:false, why:'الكتلةُ لا تحدّدُ الشحنةَ؛ الشحنةُ تأتي من نوعِ الجسيماتِ التي فيها.'}]}
+];
+let cIdx = 0, cDone = 0, cFirst = 0;
+const cardsHost = $('#cards');
+const cardEls = CARDS.map((C,i)=>{
+  const card = el('div',{class:'ccard','data-i':i});
+  card.appendChild(el('p',{class:'q'},C.q));
+  const fb = el('div',{class:'fb'});
+  const nextB = el('button',{class:'btn green',type:'button',hidden:''}, i<CARDS.length-1 ? 'البطاقةُ التاليةُ ←' : '🏁 أنهيتُ التحدّيَ');
+  nextB.addEventListener('click',()=>{ if (i<CARDS.length-1) showCard(i+1); else { Kit.go(4); } });
+  const finish = first => { cDone++; if (first) cFirst++; nextB.hidden = false; paintScore();
+    if (i===CARDS.length-1){ Kit.celebrate(); } };
+  if (C.fig) card.insertAdjacentHTML('beforeend', svgAtom(...C.fig));
+  if (C.order){ buildOrder(card, fb, finish); }
+  else { const h = el('div'); card.appendChild(h); mcq(h, fb, C.opts, first=>finish(first)); }
+  card.appendChild(fb);
+  card.appendChild(el('div',{class:'row',style:'margin-top:10px'})).appendChild(nextB);
+  cardsHost.appendChild(card); return card;
+});
+function buildOrder(card, fb, finish){
+  const P = [{id:'e', html:'<span class="pd e" aria-hidden="true">−</span> الإلكترونُ e⁻', nm:'الإلكترونُ'},
+             {id:'p', html:'<span class="pd p" aria-hidden="true">+</span> البروتونُ p⁺', nm:'البروتونُ'},
+             {id:'n', html:'<span class="pd n" aria-hidden="true">n</span> النيوترونُ n', nm:'النيوترونُ'}];
+  const home = el('div',{class:'chips'}); card.appendChild(home);
+  const chips = Kit.shuffle(P).map(x=>{ const c = el('div',{class:'chip','data-id':x.id,'aria-label':x.nm}, x.html); home.appendChild(c); return c; });
+  const slotsBox = el('div',{class:'slots'}); card.appendChild(slotsBox);
+  const SL = [['e','١ — الأخفُّ'],['p','٢'],['n','٣ — الأثقلُ']];
+  const zones = SL.map(([w,t])=>{ const z = el('div',{class:'zone','data-want':w,'aria-label':'الخانةُ '+t},'<span class="zt">'+t+'</span>'); slotsBox.appendChild(z); return z; });
+  const WHY = {
+    e:'الإلكترونُ هو الأخفُّ: كتلتُه صغيرةٌ جداً مقارنةً بالبروتونِ والنيوترونِ.',
+    p:'البروتونُ كتلتُه كبيرةٌ، لكنَّ النيوترونَ أكبرُ منه بمقدارٍ ضئيلٍ.',
+    n:'النيوترونُ هو الأثقلُ: كتلتُه أكبرُ بمقدارٍ ضئيلٍ من كتلةِ البروتونِ.'
+  };
+  let wrong = 0, placed = 0, done = false;
+  const D = Kit.dnd({chips, zones, accept:(c,z)=>c.dataset.id===z.dataset.want || 'no',
+    onDrop:(c,z,ok)=>{
+      if (done) return;
+      if (ok){ placed++; if (placed===3){ done = true; say(fb,'ok','<b>صحيحٌ!</b> الإلكترونُ &lt; البروتونُ &lt; النيوترونُ. '+WHY.n); finish(wrong===0); }
+               else say(fb,'ok','أحسنتَ — '+WHY[c.dataset.id]); }
+      else { wrong++; say(fb,'bad','حاولْ مرةً أخرى — '+WHY[c.dataset.id]);
+        if (wrong>=2){ const sb = el('button',{class:'btn ghost sm',type:'button',style:'margin-top:8px'},'💡 أرني الحلَّ');
+          sb.onclick = ()=>{ if (done) return; done = true; D.clear();
+            chips.forEach(ch=>{ const z = zones.find(zz=>zz.dataset.want===ch.dataset.id); z.appendChild(ch); ch.classList.remove('bad'); ch.classList.add('ok'); ch.dataset.locked='1'; });
+            say(fb,'info','الحلُّ: الإلكترونُ &lt; البروتونُ &lt; النيوترونُ. '+WHY.e+' '+WHY.n); finish(false); };
+          const d = fb.querySelector('div'); d.appendChild(el('br')); d.appendChild(sb); } }
+    }});
+}
+function paintScore(){ $('#cardScore').textContent = '✔ أنجزتَ '+ar(cDone)+' من '+ar(CARDS.length); }
+function showCard(i){ cIdx = i; cardEls.forEach((c,k)=>c.classList.toggle('on',k===i)); $('#cardNo').textContent = '🃏 البطاقةُ '+ar(i+1)+' من '+ar(CARDS.length); }
+showCard(0); paintScore();
+
+/* ================= STAGES ================= */
+let celebrated = false;
+Kit.setupStages(['أستكشفُ','أبني','أتوقّعُ ثم أجرّبُ','أتحدّى','خلاصةٌ'], {
+  canLeave(i){
+    if (i===0 && found.size<3) return 'اعثرْ أولاً على البروتونِ والنيوترونِ والإلكترونِ.';
+    if (i===1 && mCur<3) return 'أنجزِ المهامَّ الثلاثَ أولاً (أو استعملْ «أرني الحلَّ»).';
+    if (i===2 && !(doneA && doneB)) return 'جرّبِ التجربتينِ أولاً: إبعادُ الإلكترونِ، ومقارنةُ الحجمينِ.';
+    if (i===3 && cDone<CARDS.length) return 'أكملْ بطاقاتِ التحدّي أولاً.';
+    return true;
+  },
+  onEnter(i){ if (i===4 && !celebrated){ celebrated = true; Kit.celebrate(); } }
+});
+$('#againBtn').addEventListener('click',()=>location.reload());
+</script>
+</body>
+</html>
