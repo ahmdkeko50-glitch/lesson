@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>مزرعةُ الدرناتِ</title>
+<style>
+/* ================= DESIGN TOKENS (from the book's brand) ================= */
+:root{
+  --navy:#200058; --navy-2:#3a1f7a; --ink:#200058; --muted:#5f5a85;
+  --cyan:#00c3fe; --cyan-d:#0a8fc0; --cyan-l:#e3f8ff; --cyan-b:#b8ebff;
+  --green:#12a06a; --green-d:#0b7a50; --green-l:#e4f6ee; --green-b:#9cd9bd;
+  --red:#e8425a; --red-d:#c22b43; --red-l:#fde8ec; --red-b:#f5b3bf;
+  --yellow:#ffd15c; --orange:#f6a723; --yellow-l:#fff6dc;
+  --purple:#7b5cff; --purple-l:#efeaff;
+  --bg:#f1f0fb; --bg-2:#e3f8ff; --card:#ffffff; --line:#e0ddf0; --soft:#faf9fe;
+  --r-s:12px; --r:18px; --r-l:26px;
+  --sh:0 6px 18px rgba(32,0,88,.08); --sh-l:0 18px 50px rgba(32,0,88,.14);
+  --font: "Segoe UI","Noto Sans Arabic","Noto Naskh Arabic","Geeza Pro","Arial",Tahoma,system-ui,sans-serif;
+  --tap:48px;
+}
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{margin:0;min-height:100vh;font-family:var(--font);color:var(--ink);
+  background:linear-gradient(180deg,var(--bg) 0%,var(--bg-2) 100%) fixed;line-height:1.7;}
+button,input,select,textarea{font-family:inherit;color:inherit;}
+img,svg,canvas{max-width:100%;}
+:focus-visible{outline:3px solid var(--cyan);outline-offset:3px;border-radius:8px;}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+
+/* ================= SHELL ================= */
+.app{max-width:1120px;margin:0 auto;padding:14px 16px 110px;}
+.topbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--card);border:1.5px solid var(--line);
+  border-radius:var(--r);box-shadow:var(--sh);padding:10px 14px;}
+.ref{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13.5px;font-weight:700;color:var(--cyan-d);
+  background:var(--cyan-l);border:1.5px solid var(--cyan-b);border-radius:999px;padding:6px 14px;}
+.ref b{color:var(--navy);}
+.topbar h1{flex:1;min-width:200px;margin:0;font-size:clamp(19px,2.6vw,26px);font-weight:900;line-height:1.3;}
+.topbar h1 small{display:block;font-size:13px;font-weight:600;color:var(--muted);}
+.dots{display:flex;gap:6px;align-items:center;list-style:none;margin:0;padding:0;}
+.dots li{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:14px;
+  background:var(--soft);border:2px solid var(--line);color:var(--muted);transition:all .25s;}
+.dots li.on{background:var(--navy);border-color:var(--navy);color:#fff;transform:scale(1.08);}
+.dots li.done{background:var(--green);border-color:var(--green);color:#fff;}
+
+.stage{display:none;margin-top:16px;background:var(--card);border-radius:var(--r-l);box-shadow:var(--sh-l);overflow:hidden;
+  animation:rise .4s ease both;}
+.stage.on{display:block;}
+.stage-h{background:var(--navy);color:#fff;padding:14px 22px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.stage-h .kind{font-size:13px;font-weight:800;background:rgba(255,255,255,.14);border-radius:999px;padding:4px 12px;}
+.stage-h h2{margin:0;font-size:clamp(18px,2.4vw,23px);font-weight:900;}
+.stage-b{padding:20px 22px 24px;}
+.lead{font-size:17px;margin:0 0 14px;}
+.task{display:flex;gap:10px;align-items:flex-start;background:var(--yellow-l);border:1.5px solid #f3dc97;border-radius:var(--r-s);
+  padding:10px 14px;font-weight:700;margin:0 0 14px;}
+.task::before{content:"👆";font-size:20px;line-height:1.4;}
+.book{font-size:15px;background:var(--purple-l);border-inline-start:5px solid var(--purple);border-radius:var(--r-s);padding:10px 14px;margin:10px 0;}
+.book::before{content:"📘 من الكتاب: ";font-weight:800;color:var(--purple);}
+.extra{font-size:13.5px;color:var(--muted);background:var(--soft);border:1.5px dashed var(--line);border-radius:var(--r-s);padding:8px 12px;margin:10px 0;}
+.extra::before{content:"ℹ️ توضيح للنشاط وليس من الكتاب: ";font-weight:800;}
+.grid2{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:20px;align-items:start;}
+@media (max-width:820px){.grid2{grid-template-columns:minmax(0,1fr);}}
+.panel{background:var(--soft);border:1.5px solid var(--line);border-radius:var(--r);padding:14px;}
+.panel h3{margin:0 0 8px;font-size:17px;font-weight:900;}
+
+/* ================= CONTROLS ================= */
+.btn{min-height:var(--tap);min-width:var(--tap);display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:0 20px;border-radius:999px;border:2px solid transparent;font-size:16px;font-weight:800;cursor:pointer;
+  background:var(--navy);color:#fff;transition:transform .12s,background .2s,box-shadow .2s;touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;user-select:none;}
+.btn:active{transform:scale(.96);}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+.btn.cyan{background:var(--cyan);color:var(--navy);}
+.btn.green{background:var(--green);}
+.btn.red{background:var(--red);}
+.btn.ghost{background:#fff;color:var(--navy);border-color:var(--line);}
+.btn.ghost[aria-pressed="true"]{background:var(--navy);color:#fff;border-color:var(--navy);}
+.btn.sm{min-height:40px;font-size:14.5px;padding:0 14px;}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;}
+.choice{min-height:56px;text-align:start;padding:10px 14px;border-radius:var(--r-s);border:2px solid var(--line);background:#fff;
+  font-size:16px;font-weight:700;cursor:pointer;transition:all .15s;}
+.choice:hover{border-color:var(--cyan);}
+.choice[aria-pressed="true"]{border-color:var(--navy);background:var(--purple-l);}
+.choice.ok{border-color:var(--green);background:var(--green-l);}
+.choice.bad{border-color:var(--red);background:var(--red-l);}
+input[type=range]{width:100%;height:44px;accent-color:var(--cyan-d);cursor:pointer;}
+.slider-lbl{display:flex;justify-content:space-between;font-size:13.5px;font-weight:700;color:var(--muted);}
+
+/* chips + drop zones (Kit.dnd) */
+.chips{display:flex;flex-wrap:wrap;gap:8px;min-height:56px;padding:8px;border-radius:var(--r-s);background:var(--soft);
+  border:1.5px dashed var(--line);}
+.chip{min-height:46px;display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;background:#fff;
+  border:2px solid var(--cyan-b);font-weight:800;font-size:15.5px;cursor:grab;touch-action:none;user-select:none;
+  -webkit-user-select:none;box-shadow:0 2px 0 var(--cyan-b);transition:transform .12s,box-shadow .12s,border-color .2s;}
+.chip.sel{border-color:var(--navy);box-shadow:0 0 0 4px rgba(0,195,254,.35);transform:translateY(-2px);}
+.chip.dragging{opacity:.35;}
+.chip.ghost{position:fixed;z-index:999;pointer-events:none;opacity:.95;transform:rotate(-3deg) scale(1.05);box-shadow:var(--sh-l);}
+.chip.ok{border-color:var(--green);background:var(--green-l);box-shadow:0 2px 0 var(--green-b);cursor:default;}
+.chip.bad{border-color:var(--red);background:var(--red-l);animation:shake .4s;}
+.zone{min-height:64px;border:2.5px dashed var(--cyan-b);border-radius:var(--r-s);padding:8px;background:#fff;
+  transition:background .15s,border-color .15s;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;}
+.zone.hot{background:var(--cyan-l);border-color:var(--cyan);border-style:solid;}
+.zone .zt{width:100%;font-weight:900;font-size:15px;color:var(--navy);}
+
+/* feedback */
+.fb{display:none;margin-top:12px;border-radius:var(--r-s);padding:12px 14px 12px 14px;font-size:16px;font-weight:600;
+  border:2px solid;animation:rise .25s ease both;}
+.fb.show{display:flex;gap:10px;align-items:flex-start;}
+.fb .ic{font-size:22px;line-height:1.3;flex:none;}
+.fb.ok{background:var(--green-l);border-color:var(--green-b);color:#064b31;}
+.fb.bad{background:var(--red-l);border-color:var(--red-b);color:#7a1426;}
+.fb.info{background:var(--cyan-l);border-color:var(--cyan-b);color:#06456a;}
+.fb.warn{background:var(--yellow-l);border-color:#f3dc97;color:#5a4200;}
+
+/* meters & badges */
+.meter{height:16px;border-radius:999px;background:#ece9f8;overflow:hidden;}
+.meter>i{display:block;height:100%;border-radius:999px;background:var(--cyan);transition:width .4s;}
+.badge{display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:14px;border-radius:999px;padding:4px 12px;
+  background:var(--soft);border:1.5px solid var(--line);}
+.badge.ok{background:var(--green-l);border-color:var(--green-b);color:var(--green-d);}
+.badge.bad{background:var(--red-l);border-color:var(--red-b);color:var(--red-d);}
+.missions{list-style:none;margin:0;padding:0;display:grid;gap:8px;}
+.missions li{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-s);background:#fff;
+  border:2px solid var(--line);font-weight:700;}
+.missions li .st{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--soft);
+  border:2px solid var(--line);flex:none;font-size:15px;}
+.missions li.cur{border-color:var(--cyan);}
+.missions li.done{border-color:var(--green-b);background:var(--green-l);}
+.missions li.done .st{background:var(--green);border-color:var(--green);color:#fff;}
+
+/* 3D canvas wrapper (Kit.orbit) */
+.view3d{position:relative;border-radius:var(--r);background:radial-gradient(ellipse at 50% 40%,#2d1670 0%,#160038 75%);
+  overflow:hidden;touch-action:none;cursor:grab;aspect-ratio:4/3;width:100%;}
+.view3d canvas{display:block;width:100%;height:100%;}
+.view3d .hint3d{position:absolute;bottom:10px;inset-inline-start:10px;font-size:13px;font-weight:700;color:#d9d2ff;
+  background:rgba(255,255,255,.1);border-radius:999px;padding:4px 12px;pointer-events:none;}
+
+/* nav footer */
+.navbar{position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);
+  border-top:1.5px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));}
+.navbar .in{max-width:1120px;margin:0 auto;display:flex;gap:10px;align-items:center;justify-content:space-between;}
+.navbar .where{font-weight:800;color:var(--muted);font-size:14.5px;text-align:center;flex:1;}
+
+/* summary card */
+.sum{display:grid;gap:10px;}
+.sum li{background:var(--green-l);border:1.5px solid var(--green-b);border-radius:var(--r-s);padding:10px 14px;font-weight:700;list-style:none;}
+.sum{padding:0;margin:0;}
+
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:998;}
+@keyframes rise{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+@keyframes shake{0%,100%{transform:none;}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+@keyframes pop{0%{transform:scale(.6);opacity:0;}70%{transform:scale(1.08);}100%{transform:scale(1);opacity:1;}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;scroll-behavior:auto !important;}}
+@media (max-width:560px){.stage-b{padding:16px 14px 20px;}.stage-h{padding:12px 14px;}.dots li{width:28px;height:28px;font-size:12.5px;}.btn{padding:0 16px;}}
+</style>
+<style>
+/* ================= ACTIVITY-SPECIFIC CSS ================= */
+.board{background:linear-gradient(180deg,#fffaf0,#fdf1dc);border:1.5px solid #f0dfbd;border-radius:var(--r);padding:8px;position:relative;}
+.board svg{display:block;width:100%;height:auto;}
+.board .cnt{position:absolute;top:10px;inset-inline-start:10px;}
+.eyehot{cursor:pointer;outline:none;}
+.eyehot .ring{fill:transparent;stroke:transparent;stroke-width:4;}
+.eyehot:focus-visible .ring{stroke:var(--cyan);stroke-dasharray:6 5;}
+.eyehot.found .ring{stroke:var(--green);fill:rgba(18,160,106,.12);}
+.eyehot.hint .ring{stroke:var(--orange);stroke-dasharray:5 5;animation:pulse 1s ease-in-out infinite;}
+@keyframes pulse{50%{stroke-width:7;}}
+.zoomcard{display:none;margin-top:12px;animation:pop .4s ease both;}
+.zoomcard.show{display:block;}
+#cutSvg{touch-action:none;cursor:crosshair;user-select:none;-webkit-user-select:none;}
+.pcs{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+.smallcard{display:grid;grid-template-columns:120px minmax(0,1fr);gap:10px;align-items:center;}
+.smallcard svg{width:120px;height:auto;}
+@media (max-width:420px){.smallcard{grid-template-columns:90px minmax(0,1fr);}.smallcard svg{width:90px;}}
+.decide{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:12px;}
+.decide .choice{display:flex;gap:12px;align-items:center;min-height:72px;}
+.decide .choice .big{font-size:30px;flex:none;}
+.timebar{display:flex;align-items:center;gap:10px;margin:10px 0;}
+.timebar .meter{flex:1;}
+.timebar .sky{font-size:24px;width:32px;text-align:center;}
+.garden svg{display:block;width:100%;height:auto;border-radius:var(--r);}
+.garden{border-radius:var(--r);overflow:hidden;border:1.5px solid var(--line);}
+.wkrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px;}
+.wkrow .wk{font-weight:900;font-size:18px;min-width:120px;}
+.wkrow input{flex:1;min-width:200px;}
+.results{list-style:none;padding:0;margin:10px 0 0;display:grid;gap:6px;}
+.results li{display:flex;gap:10px;align-items:flex-start;background:#fff;border:2px solid var(--line);border-radius:var(--r-s);padding:8px 12px;font-weight:700;font-size:15.5px;}
+.results li.ok{border-color:var(--green-b);background:var(--green-l);}
+.results li.bad{border-color:var(--red-b);background:var(--red-l);}
+.results li .n{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--navy);color:#fff;font-size:14px;}
+.sortz{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;}
+.sortz .zone{min-height:150px;}
+@media (max-width:420px){.sortz{grid-template-columns:1fr;}.sortz .zone{min-height:96px;}}
+.mini svg{display:block;width:100%;height:auto;}
+.mini{background:#fff;border:1.5px solid var(--line);border-radius:var(--r);padding:8px;margin-bottom:10px;}
+.mini .row{justify-content:center;}
+.garlic-c{transition:transform .6s cubic-bezier(.3,1.4,.5,1);}
+.onion-cut,.onion-whole{transition:opacity .4s;}
+.stat{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0;}
+.lbltag rect{fill:#fff;stroke:var(--navy);stroke-width:1.5;}
+.lbltag text{fill:var(--navy);font-weight:800;}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <span class="ref">📘 <b>الفصلُ ١</b> · الدرسُ ٢: التكاثرُ الخضريُّ · <span>كتابُ النشاطِ ص ٩–١٢</span></span>
+    <h1>«مزرعةُ الدرناتِ»<small>كيفَ أزرعُ البطاطا بالدرناتِ؟</small></h1>
+    <ol class="dots" id="dots" aria-label="مراحلُ النشاطِ"></ol>
+  </header>
+
+  <main id="main">
+    <!-- shared SVG defs -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+      <defs>
+        <radialGradient id="gSkin" cx="40%" cy="35%" r="75%">
+          <stop offset="0" stop-color="#f1cf8f"/><stop offset=".6" stop-color="#d9a660"/><stop offset="1" stop-color="#b17a36"/>
+        </radialGradient>
+        <radialGradient id="gOnion" cx="40%" cy="40%" r="70%">
+          <stop offset="0" stop-color="#f6d48f"/><stop offset=".7" stop-color="#d79a4a"/><stop offset="1" stop-color="#a86a2a"/>
+        </radialGradient>
+        <pattern id="corkPat" width="10" height="10" patternUnits="userSpaceOnUse">
+          <rect width="10" height="10" fill="#b98a4e"/>
+          <circle cx="2.5" cy="3" r="1.4" fill="#7a5226"/><circle cx="7.5" cy="7" r="1.2" fill="#8d6230"/>
+          <path d="M0 8 L4 6 M6 2 L10 0" stroke="#6b451c" stroke-width=".9"/>
+        </pattern>
+        <linearGradient id="gSoil" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#8a5a32"/><stop offset="1" stop-color="#5c3a1f"/>
+        </linearGradient>
+        <linearGradient id="gSky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#cdefff"/><stop offset="1" stop-color="#f3fbff"/>
+        </linearGradient>
+      </defs>
+    </svg>
+
+    <!-- ============ STAGE 1 ============ -->
+    <section class="stage" data-stage="0" aria-labelledby="s0h">
+      <div class="stage-h"><span class="kind">أستكشفُ</span><h2 id="s0h">أفحصُ الدرنةَ</h2></div>
+      <div class="stage-b">
+        <p class="book">التكاثرُ الخضريُّ نوعٌ من التكاثرِ الطبيعيِّ في النباتاتِ يحدثُ دونَ الحاجةِ إلى البذورِ، عن طريقِ أجزاءٍ أخرى من النباتِ كالجذورِ والسيقانِ والأوراقِ.</p>
+        <p class="task">أنتَ مزارعٌ صغيرٌ! انقرْ على كلِّ مجموعةٍ من الانخفاضاتِ الصغيرةِ على سطحِ الدرنةِ — هذه هي «العيونُ».</p>
+        <div class="grid2">
+          <div>
+            <div class="board">
+              <span class="badge cnt" id="eyeCount">العيونُ: ٠ / ٧</span>
+              <svg id="eyeSvg" viewBox="0 0 600 400" role="group" aria-label="درنةُ بطاطا كبيرةٌ. ابحثْ عن مجموعاتِ العيونِ"></svg>
+            </div>
+            <div class="row" style="margin-top:10px">
+              <button class="btn ghost sm" id="eyeHint" type="button" hidden>💡 أرني مكانَ العيونِ</button>
+            </div>
+            <div class="fb" id="fbEye"></div>
+          </div>
+          <div class="panel">
+            <h3>مهامّي</h3>
+            <ul class="missions" id="m1">
+              <li id="m1a" class="cur"><span class="st">١</span>أجدُ كلَّ مجموعاتِ العيونِ</li>
+              <li id="m1b"><span class="st">٢</span>أجيبُ: هل البطاطا جذرٌ أم ساقٌ؟</li>
+            </ul>
+            <div class="zoomcard panel" id="zoomEye" style="background:#fff">
+              <h3>عينٌ مكبّرةٌ 🔍</h3>
+              <svg viewBox="0 0 320 190" role="img" aria-label="جزءٌ مكبّرٌ من الدرنةِ: عينٌ يخرجُ منها ساقٌ وجذرٌ">
+                <path d="M0 130 Q160 95 320 130 L320 190 L0 190Z" fill="url(#gSkin)" stroke="#8a5a22" stroke-width="2"/>
+                <ellipse cx="160" cy="114" rx="16" ry="7" fill="#6b4318"/>
+                <path d="M160 112 C158 85 168 60 160 30" stroke="#5cae4a" stroke-width="6" fill="none" stroke-linecap="round"/>
+                <ellipse cx="172" cy="52" rx="12" ry="6" fill="#6cc25a" transform="rotate(-30 172 52)"/>
+                <ellipse cx="148" cy="70" rx="11" ry="5.5" fill="#6cc25a" transform="rotate(30 148 70)"/>
+                <path d="M152 114 q-20 6 -36 22 M150 116 q-8 14 -24 30 M168 114 q22 4 34 22 M170 116 q10 14 26 26" stroke="#f3ecd5" stroke-width="3" fill="none" stroke-linecap="round"/>
+                <path d="M152 114 q-20 6 -36 22 M150 116 q-8 14 -24 30 M168 114 q22 4 34 22 M170 116 q10 14 26 26" stroke="#b9a77a" stroke-width="1" fill="none"/>
+                <g class="lbltag" font-size="15">
+                  <line x1="218" y1="34" x2="166" y2="44" stroke="#200058" stroke-width="1.5"/><rect x="218" y="20" width="62" height="28" rx="8"/><text x="249" y="40" text-anchor="middle">ساقٌ</text>
+                  <line x1="82" y1="104" x2="150" y2="113" stroke="#200058" stroke-width="1.5"/><rect x="24" y="90" width="58" height="28" rx="8"/><text x="53" y="110" text-anchor="middle">عينٌ</text>
+                  <line x1="236" y1="168" x2="200" y2="150" stroke="#200058" stroke-width="1.5"/><rect x="236" y="154" width="62" height="28" rx="8"/><text x="267" y="174" text-anchor="middle">جذرٌ</text>
+                </g>
+              </svg>
+              <p class="book" style="margin-bottom:0">الدرنةُ ساقٌ أرضيةٌ متحوّرةٌ لخزنِ الغذاءِ، على سطحِها انتفاخاتٌ تسمّى العيونَ.</p>
+            </div>
+            <div id="qRoot" style="margin-top:12px">
+              <h3>هل البطاطا جذرٌ أم ساقٌ؟</h3>
+              <div class="choices" id="qRootCh">
+                <button type="button" class="choice" data-a="root">🌱 جذرٌ، لأنها تحتَ الأرضِ</button>
+                <button type="button" class="choice" data-a="stem">🥔 ساقٌ أرضيةٌ متحوّرةٌ</button>
+                <button type="button" class="choice" data-a="leaf">🍃 ورقةٌ</button>
+              </div>
+              <div class="fb" id="fbRoot"></div>
+              <button class="btn ghost sm" id="rootShow" type="button" hidden style="margin-top:8px">أرني الحلَّ</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ STAGE 2 ============ -->
+    <section class="stage" data-stage="1" aria-labelledby="s1h">
+      <div class="stage-h"><span class="kind">أجرّبُ</span><h2 id="s1h">أقطّعُ الدرنةَ</h2></div>
+      <div class="stage-b">
+        <p class="book">الدرنةُ الكبيرةُ تُقطّعُ إلى أجزاءٍ عدّةٍ، ويجبُ أن يحتويَ كلُّ جزءٍ على مجموعتينِ من العيونِ.</p>
+        <p class="task">اسحبْ خطّاً مستقيماً عبرَ الدرنةِ لتقطيعِها (حتى ٤ قطعاتٍ). الرقمُ على كلِّ قطعةٍ = عددُ مجموعاتِ العيونِ فيها.</p>
+        <div class="grid2">
+          <div>
+            <div class="board">
+              <span class="badge cnt" id="cutCount">القطعاتُ: ٠ / ٤</span>
+              <svg id="cutSvg" viewBox="0 0 600 400" role="img" aria-label="درنةٌ كبيرةٌ للتقطيعِ. اسحبْ خطّاً عبرَها"></svg>
+            </div>
+            <div class="row" style="margin-top:10px">
+              <button class="btn ghost sm" id="undoBtn" type="button">↩ تراجعْ</button>
+              <button class="btn ghost sm" id="resetBtn" type="button">⟲ ابدأْ من جديدٍ</button>
+              <button class="btn cyan sm" id="checkBtn" type="button">✔ افحصْ خطّتي</button>
+              <button class="btn ghost sm" id="cutShow" type="button" hidden>أرني الحلَّ</button>
+            </div>
+            <div class="pcs" id="pcsList" aria-live="polite"></div>
+            <div class="fb" id="fbCut"></div>
+          </div>
+          <div class="panel">
+            <h3>درنةٌ صغيرةٌ 🥔</h3>
+            <div class="smallcard">
+              <svg id="smallSvg" viewBox="150 110 300 180" role="img" aria-label="درنةٌ صغيرةٌ عليها ثلاثُ مجموعاتٍ من العيونِ"></svg>
+              <div>
+                <p style="margin:0 0 8px;font-weight:700">وجدتَ أيضاً درنةً صغيرةً. ماذا تفعلُ بها؟</p>
+                <div class="choices" id="smallCh" style="grid-template-columns:1fr">
+                  <button type="button" class="choice" data-a="cut">🔪 أقطّعُها</button>
+                  <button type="button" class="choice" data-a="whole">🌱 ازرعْها كاملةً</button>
+                </div>
+              </div>
+            </div>
+            <div class="fb" id="fbSmall"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ STAGE 3 ============ -->
+    <section class="stage" data-stage="2" aria-labelledby="s2h">
+      <div class="stage-h"><span class="kind">أقرّرُ</span><h2 id="s2h">أنتظرُ أم أزرعُ فوراً؟</h2></div>
+      <div class="stage-b">
+        <p class="task">قطعُك جاهزةٌ على الصينيةِ. اخترْ قرارَكَ، ثمَّ شاهدْ النتيجةَ في الحديقةِ.</p>
+        <div class="decide" id="decide">
+          <button type="button" class="choice" data-a="wait"><span class="big" aria-hidden="true">⏳</span><span>اتركِ القطعَ حتى تتكوّنَ الطبقةُ الفلّينيةُ</span></button>
+          <button type="button" class="choice" data-a="now"><span class="big" aria-hidden="true">⚡</span><span>ازرعْها الآنَ</span></button>
+        </div>
+        <div class="board">
+          <svg id="traySvg" viewBox="0 0 600 420" role="img" aria-label="قطعُ الدرنةِ على صينيةٍ"></svg>
+        </div>
+        <div class="timebar" id="timebar" hidden>
+          <span class="sky" id="sky" aria-hidden="true">☀️</span>
+          <div class="meter" role="progressbar" aria-label="مرورُ الوقتِ" aria-valuemin="0" aria-valuemax="100" id="dryMeter"><i id="dryBar" style="width:0%"></i></div>
+          <b id="dryTxt">يمرُّ الوقتُ…</b>
+        </div>
+        <div class="fb" id="fbDec"></div>
+        <p class="extra">لونُ الطبقةِ ونقوشُها رسمٌ توضيحيٌّ. الكتابُ يقولُ «تُتركُ مدةً» ولا يحدّدُ عددَ الأيامِ.</p>
+      </div>
+    </section>
+
+    <!-- ============ STAGE 4 ============ -->
+    <section class="stage" data-stage="3" aria-labelledby="s3h">
+      <div class="stage-h"><span class="kind">أراقبُ</span><h2 id="s3h">أزرعُ وأراقبُ</h2></div>
+      <div class="stage-b">
+        <p class="task">حرّكِ المؤشّرَ من الأسبوعِ ٠ إلى الأسبوعِ ٤ (أو اضغطْ ▶) وراقبْ كلَّ قطعةٍ تحتَ الترابِ.</p>
+        <div class="garden"><svg id="gardenSvg" viewBox="0 0 800 470" role="img" aria-label="مقطعٌ في التربةِ يُظهرُ القطعَ المزروعةَ"></svg></div>
+        <div class="wkrow">
+          <button class="btn cyan" id="playBtn" type="button" aria-label="شغّلْ مرورَ الأسابيعِ">▶ شغّلْ</button>
+          <span class="wk" id="wkTxt">الأسبوعُ ٠</span>
+          <input type="range" id="wk" min="0" max="4" step="0.05" value="0" aria-label="الأسبوعُ من ٠ إلى ٤">
+        </div>
+        <div class="slider-lbl" aria-hidden="true"><span>٠</span><span>١</span><span>٢</span><span>٣</span><span>٤</span></div>
+        <div class="row" style="margin-top:8px">
+          <button class="btn ghost sm" id="lblBtn" type="button" aria-pressed="true">🏷️ الأسماءُ</button>
+          <button class="btn sm" id="fixBtn" type="button">🔧 أصلحُ خطّتي</button>
+        </div>
+        <ul class="results" id="results"></ul>
+        <div class="fb" id="fbGrow"></div>
+        <p class="book">حقيقةٌ علميةٌ: البطاطا الواحدةُ يمكنُ أن تنتجَ ٣–٦ درناتٍ، وبعضُ الأصنافِ نحوَ ١٠–٢٠.</p>
+        <p class="extra">مشهدُ النموِّ أسبوعاً بعدَ أسبوعٍ رسمٌ توضيحيٌّ. الكتابُ يذكرُ دورَ الطبقةِ الفلّينيةِ في الحمايةِ من الأمراضِ الفطريةِ والتعفّنِ، وشرطَ المجموعتينِ من العيونِ؛ شكلُ العفنِ في الرسمِ للتوضيحِ.</p>
+      </div>
+    </section>
+
+    <!-- ============ STAGE 5 ============ -->
+    <section class="stage" data-stage="4" aria-labelledby="s4h">
+      <div class="stage-h"><span class="kind">أطبّقُ</span><h2 id="s4h">درنةٌ أم بصلةٌ؟</h2></div>
+      <div class="stage-b">
+        <div class="grid2">
+          <div>
+            <p class="task">اسحبْ كلَّ نباتٍ إلى مجموعتِه (أو انقرْه ثمَّ انقرِ المجموعةَ).</p>
+            <div class="chips" id="sortChips"></div>
+            <div class="sortz">
+              <div class="zone" data-k="t" aria-label="مجموعةُ الدرناتِ"><span class="zt">🥔 درناتٌ</span></div>
+              <div class="zone" data-k="b" aria-label="مجموعةُ الأبصالِ"><span class="zt">🧅 أبصالٌ</span></div>
+            </div>
+            <div class="row" style="margin-top:8px"><button class="btn ghost sm" id="sortShow" type="button" hidden>أرني الحلَّ</button></div>
+            <div class="fb" id="fbSort"></div>
+            <p class="book">التكاثرُ الخضريُّ الطبيعيُّ (لا دورَ للإنسانِ فيه): الدرناتُ والأبصالُ. أمّا الاصطناعيُّ: الأقلامُ والتطعيمُ والفسائلُ (تُدرسُ في الفصلِ القادمِ).</p>
+          </div>
+          <div>
+            <div class="mini">
+              <svg id="onionSvg" viewBox="0 0 380 260" role="img" aria-label="بصلةٌ كاملةٌ"></svg>
+              <div class="row"><button class="btn sm" id="onionBtn" type="button">🔪 اقطعِ البصلةَ</button></div>
+            </div>
+            <div class="mini">
+              <svg id="garlicSvg" viewBox="0 0 360 200" role="img" aria-label="بصلةُ ثومٍ كاملةٌ"></svg>
+              <div class="row"><button class="btn sm" id="garlicBtn" type="button">✋ افصلْ فصوصَ الثومِ</button></div>
+            </div>
+            <div class="panel">
+              <h3>أيُّ جزءٍ في البصلةِ هو الساقُ؟</h3>
+              <div class="choices" id="qOnion" style="grid-template-columns:1fr">
+                <button type="button" class="choice" data-a="rings">الحلقاتُ الشحميةُ</button>
+                <button type="button" class="choice" data-a="disc">القرصُ في القاعدةِ</button>
+                <button type="button" class="choice" data-a="roots">الجذورُ الليفيةُ</button>
+              </div>
+              <div class="fb" id="fbOnion"></div>
+              <button class="btn ghost sm" id="onionShow" type="button" hidden style="margin-top:8px">أرني الحلَّ</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ STAGE 6 ============ -->
+    <section class="stage" data-stage="5" aria-labelledby="s5h">
+      <div class="stage-h"><span class="kind">أُلخّصُ</span><h2 id="s5h">خلاصةٌ</h2></div>
+      <div class="stage-b">
+        <div class="stat" id="myStats"></div>
+        <ul class="sum">
+          <li>🌱 التكاثرُ الخضريُّ يحدثُ دونَ بذورٍ، عن طريقِ أجزاءٍ من النباتِ كالجذورِ والسيقانِ والأوراقِ.</li>
+          <li>🥔 الدرنةُ <b>ساقٌ</b> أرضيةٌ متحوّرةٌ لخزنِ الغذاءِ — وليستْ جذراً. على سطحِها انتفاخاتٌ تسمّى العيونَ.</li>
+          <li>✂️ الدرنةُ الصغيرةُ تُزرعُ كاملةً، والكبيرةُ تُقطّعُ؛ ويجبُ أن يحتويَ كلُّ جزءٍ على <b>مجموعتينِ من العيونِ</b>.</li>
+          <li>⏳ نتركُ القطعَ مدةً حتى تتكوّنَ <b>الطبقةُ الفلّينيةُ</b>؛ فهي تحمي الدرنةَ من الأمراضِ الفطريةِ والتعفّنِ بعدَ الزراعةِ.</li>
+          <li>🧅 البصلةُ ساقٌ قرصيةٌ تخرجُ من قاعدتِها جذورٌ عرضيةٌ ليفيةٌ، وتحملُ أوراقاً ذاتَ قواعدَ شحميةٍ. والثومُ مقسّمٌ إلى فصوصٍ، وكلُّ فصٍّ بصلةٌ.</li>
+          <li>⚡ التكاثرُ الخضريُّ يعطي نباتاتٍ ناضجةً في وقتٍ قصيرٍ مقارنةً بالبذورِ، وهو طريقةٌ للتغلّبِ على الظروفِ المناخيةِ غيرِ الملائمةِ لنموِّ البذورِ.</li>
+        </ul>
+        <div class="row" style="margin-top:14px"><button class="btn ghost" id="againBtn" type="button">🔁 أزرعُ مرةً أخرى</button></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<nav class="navbar" aria-label="التنقلُ بينَ المراحلِ">
+  <div class="in">
+    <button class="btn ghost" id="prevBtn" type="button">→ السابقُ</button>
+    <div class="where" id="where" aria-live="polite"></div>
+    <button class="btn" id="nextBtn" type="button">التالي ←</button>
+  </div>
+</nav>
+
+<script>
+/* ================= KIT (shared helpers) ================= */
+const Kit = (() => {
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const $ = (s, r=document) => r.querySelector(s);
+  const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+  const AR = '٠١٢٣٤٥٦٧٨٩';
+  const ar = n => String(n).replace(/[0-9]/g, d => AR[d]).replace('-', '−');
+  const shuffle = a => { a = a.slice(); for (let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; };
+  const el = (tag, attrs={}, html) => { const e=document.createElement(tag);
+    for (const k in attrs){ if(k==='class') e.className=attrs[k]; else if(k.startsWith('on')) e.addEventListener(k.slice(2),attrs[k]); else e.setAttribute(k,attrs[k]); }
+    if (html!=null) e.innerHTML=html; return e; };
+
+  /* ---- feedback: Kit.say(box, 'ok'|'bad'|'info'|'warn', html) ---- */
+  const ICON = {ok:'✅', bad:'🤔', info:'💡', warn:'⚠️'};
+  function say(box, type, html){
+    if (typeof box==='string') box=$(box);
+    box.className='fb show '+type; box.setAttribute('role','status'); box.setAttribute('aria-live','polite');
+    box.innerHTML='<span class="ic" aria-hidden="true">'+ICON[type]+'</span><div>'+html+'</div>';
+  }
+  function hush(box){ if (typeof box==='string') box=$(box); box.className='fb'; box.innerHTML=''; }
+
+  /* ---- stages + nav. canLeave(i) may return false or a message string to block "next". ---- */
+  let stages=[], cur=0, names=[], hooks={};
+  function setupStages(stageNames, opts={}){
+    names=stageNames; hooks=opts; stages=$$('.stage');
+    const dots=$('#dots'); dots.innerHTML='';
+    names.forEach((n,i)=>{ const li=el('li',{title:n,'aria-label':'المرحلة '+ar(i+1)+': '+n},ar(i+1)); dots.appendChild(li); });
+    $('#prevBtn').onclick=()=>go(cur-1); $('#nextBtn').onclick=()=>go(cur+1);
+    go(0, true);
+  }
+  function go(i, first){
+    if (i<0||i>=stages.length) return;
+    if (!first && i>cur && hooks.canLeave){ const r=hooks.canLeave(cur); if (r!==true && r!==undefined){ toast(r||'أكملِ المهمةَ أولاً'); return; } }
+    stages.forEach((s,k)=>s.classList.toggle('on',k===i));
+    $$('#dots li').forEach((d,k)=>{ d.classList.toggle('on',k===i); d.classList.toggle('done',k<i); });
+    cur=i; $('#where').textContent=ar(i+1)+' / '+ar(stages.length)+' · '+names[i];
+    $('#prevBtn').disabled=i===0; $('#nextBtn').style.visibility=i===stages.length-1?'hidden':'visible';
+    if(!first) window.scrollTo({top:0,behavior:reduced?'auto':'smooth'});
+    hooks.onEnter && hooks.onEnter(i);
+  }
+  let toastT;
+  function toast(msg){
+    let t=$('#kitToast'); if(!t){ t=el('div',{id:'kitToast',role:'alert'}); Object.assign(t.style,{position:'fixed',bottom:'86px',left:'50%',
+      transform:'translateX(-50%)',background:'#200058',color:'#fff',padding:'12px 20px',borderRadius:'999px',fontWeight:'800',
+      zIndex:1000,boxShadow:'0 10px 30px rgba(0,0,0,.25)',maxWidth:'90vw',textAlign:'center'}); document.body.appendChild(t); }
+    t.textContent=msg; t.style.display='block'; clearTimeout(toastT); toastT=setTimeout(()=>t.style.display='none',2600);
+  }
+
+  /* ---- drag & drop with tap-to-place + keyboard.
+     Kit.dnd({ chips:[chipEls], zones:[zoneEls], accept:(chip,zone)=>bool|string, onDrop:(chip,zone,ok)=>{} , lockCorrect:true })
+     chips need data-id. zone gets the chip appended when accepted (or always, if place:'always'). ---- */
+  function dnd(cfg){
+    let sel=null;
+    const zones=cfg.zones;
+    const clear=()=>{ if(sel){sel.classList.remove('sel'); sel.setAttribute('aria-pressed','false');} sel=null; };
+    function drop(chip, zone){
+      const ok = cfg.accept ? cfg.accept(chip, zone) : true;
+      if (ok===true || cfg.place==='always'){ zone.appendChild(chip); }
+      if (ok===true){ chip.classList.remove('bad'); if(cfg.lockCorrect!==false){ chip.classList.add('ok'); chip.dataset.locked='1'; chip.setAttribute('tabindex','-1'); chip.setAttribute('aria-disabled','true'); } }
+      else { chip.classList.remove('bad'); void chip.offsetWidth; chip.classList.add('bad'); }
+      cfg.onDrop && cfg.onDrop(chip, zone, ok===true, ok);
+    }
+    zones.forEach(z=>{
+      z.setAttribute('tabindex', z.getAttribute('tabindex')||'0'); z.setAttribute('role','button');
+      const act=()=>{ if(sel){ const c=sel; clear(); drop(c,z);} };
+      z.addEventListener('click', e=>{ if(e.target.closest('.chip') && !sel) return; act(); });
+      z.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); act(); } });
+    });
+    cfg.chips.forEach(chip=>{
+      chip.setAttribute('tabindex','0'); chip.setAttribute('role','button'); chip.setAttribute('aria-pressed','false');
+      chip.addEventListener('keydown', e=>{ if(chip.dataset.locked) return; if(e.key==='Enter'||e.key===' '){ e.preventDefault(); const was=sel===chip; clear(); if(!was){sel=chip;chip.classList.add('sel');chip.setAttribute('aria-pressed','true');} } });
+      let start=null, ghost=null, moved=false, overZ=null;
+      chip.addEventListener('pointerdown', e=>{
+        if (chip.dataset.locked || e.button>0) return;
+        start={x:e.clientX,y:e.clientY}; moved=false; chip.setPointerCapture(e.pointerId);
+      });
+      chip.addEventListener('pointermove', e=>{
+        if(!start) return;
+        if(!moved && Math.hypot(e.clientX-start.x,e.clientY-start.y)>7){
+          moved=true; clear(); ghost=chip.cloneNode(true); ghost.classList.add('ghost'); ghost.classList.remove('sel','bad');
+          document.body.appendChild(ghost); chip.classList.add('dragging');
+        }
+        if(moved){
+          ghost.style.left=(e.clientX-ghost.offsetWidth/2)+'px'; ghost.style.top=(e.clientY-ghost.offsetHeight/2)+'px';
+          const under=document.elementFromPoint(e.clientX,e.clientY); const z=under&&under.closest('.zone');
+          const zz = z && zones.includes(z) ? z : null;
+          if(zz!==overZ){ overZ&&overZ.classList.remove('hot'); overZ=zz; overZ&&overZ.classList.add('hot'); }
+        }
+      });
+      const end=e=>{
+        if(!start) return; start=null;
+        if(moved){ ghost.remove(); ghost=null; chip.classList.remove('dragging'); if(overZ){ overZ.classList.remove('hot'); drop(chip,overZ); overZ=null; } }
+        else if(e.type==='pointerup'){ const was=sel===chip; clear(); if(!was){ sel=chip; chip.classList.add('sel'); chip.setAttribute('aria-pressed','true'); } }
+      };
+      chip.addEventListener('pointerup', end); chip.addEventListener('pointercancel', end);
+    });
+    return { clear, reset(home){ cfg.chips.forEach(c=>{ c.classList.remove('ok','bad','sel'); delete c.dataset.locked; c.setAttribute('tabindex','0'); c.removeAttribute('aria-disabled'); home.appendChild(c); }); } };
+  }
+
+  /* ---- 3D orbit view: Kit.orbit(container, draw(ctx, cam, w, h, t), {yaw,pitch,zoom,auto}) ----
+     cam.project(x,y,z) -> {x,y,s,z}  (s = perspective scale, z = depth: larger = closer to viewer) */
+  function orbit(box, draw, o={}){
+    const cv=document.createElement('canvas'); box.prepend(cv);
+    const ctx=cv.getContext('2d');
+    const cam={yaw:o.yaw??0.6, pitch:o.pitch??0.35, zoom:o.zoom??1, dist:o.dist??900, auto:o.auto??true, vy:0, vp:0};
+    let W=0,H=0,dpr=1, drag=null, last=performance.now(), userTouched=false;
+    function size(){ const r=box.getBoundingClientRect(); dpr=Math.min(2,devicePixelRatio||1); W=r.width; H=r.height; cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
+    new ResizeObserver(size).observe(box); size();
+    cam.project=(x,y,z)=>{
+      const cy=Math.cos(cam.yaw), sy=Math.sin(cam.yaw), cp=Math.cos(cam.pitch), sp=Math.sin(cam.pitch);
+      let X=x*cy - z*sy, Z=x*sy + z*cy;           // yaw around Y
+      let Y=y*cp - Z*sp; Z=y*sp + Z*cp;            // pitch around X
+      const unit=Math.min(W,H)/520*cam.zoom;
+      const s=cam.dist/(cam.dist - Z);
+      return {x:W/2 + X*s*unit, y:H/2 - Y*s*unit, s:s*unit, z:Z};
+    };
+    box.addEventListener('pointerdown',e=>{ drag={x:e.clientX,y:e.clientY}; userTouched=true; box.setPointerCapture(e.pointerId); box.style.cursor='grabbing'; });
+    box.addEventListener('pointermove',e=>{ if(!drag) return; const dx=e.clientX-drag.x, dy=e.clientY-drag.y; drag={x:e.clientX,y:e.clientY};
+      cam.vy=-dx*0.008; cam.vp=dy*0.006; cam.yaw+=cam.vy; cam.pitch=Math.max(-1.3,Math.min(1.3,cam.pitch+cam.vp)); });
+    const up=()=>{ drag=null; box.style.cursor='grab'; };
+    box.addEventListener('pointerup',up); box.addEventListener('pointercancel',up);
+    box.addEventListener('wheel',e=>{ e.preventDefault(); cam.zoom=Math.max(.6,Math.min(2.2,cam.zoom*(e.deltaY<0?1.08:.92))); },{passive:false});
+    box.tabIndex=0; box.setAttribute('role','img');
+    box.addEventListener('keydown',e=>{ const k=e.key; if(k==='ArrowLeft'){cam.yaw+=.15;} else if(k==='ArrowRight'){cam.yaw-=.15;}
+      else if(k==='ArrowUp'){cam.pitch=Math.max(-1.3,cam.pitch-.12);} else if(k==='ArrowDown'){cam.pitch=Math.min(1.3,cam.pitch+.12);}
+      else if(k==='+'||k==='='){cam.zoom=Math.min(2.2,cam.zoom*1.1);} else if(k==='-'){cam.zoom=Math.max(.6,cam.zoom*.9);} else return; e.preventDefault(); userTouched=true; });
+    function frame(now){
+      const dt=Math.min(50,now-last); last=now;
+      if(!drag){ cam.vy*=0.93; cam.vp*=0.9; cam.yaw+=cam.vy; cam.pitch=Math.max(-1.3,Math.min(1.3,cam.pitch+cam.vp));
+        if(cam.auto && !reduced && Math.abs(cam.vy)<0.002) cam.yaw+=dt*0.00018*(userTouched?0.4:1); }
+      ctx.clearRect(0,0,W,H); draw(ctx,cam,W,H,reduced?0:now,dt);
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+    return cam;
+  }
+  /* shaded sphere */
+  function ball(ctx,x,y,r,color,label,labelColor){
+    if(r<=0.5) return;
+    const g=ctx.createRadialGradient(x-r*.35,y-r*.4,r*.15,x,y,r);
+    g.addColorStop(0,'#ffffff'); g.addColorStop(.25,color); g.addColorStop(1,shade(color,-0.45));
+    ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+    if(label && r>8){ ctx.fillStyle=labelColor||'#fff'; ctx.font='900 '+Math.round(r*1.05)+'px '+getComputedStyle(document.body).fontFamily;
+      ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(label,x,y+r*.05); }
+  }
+  function shade(hex,p){ const n=parseInt(hex.slice(1),16); let r=n>>16,g=n>>8&255,b=n&255;
+    const f=v=>Math.max(0,Math.min(255,Math.round(p<0?v*(1+p):v+(255-v)*p))); return 'rgb('+f(r)+','+f(g)+','+f(b)+')'; }
+
+  /* small celebration */
+  function celebrate(){
+    if(reduced) return;
+    const c=document.createElement('canvas'); c.className='confetti'; document.body.appendChild(c);
+    const x=c.getContext('2d'); c.width=innerWidth; c.height=innerHeight;
+    const cols=['#00c3fe','#12a06a','#ffd15c','#7b5cff','#e8425a'];
+    const P=Array.from({length:90},()=>({x:innerWidth/2+(Math.random()-.5)*200,y:innerHeight*.35,vx:(Math.random()-.5)*9,vy:-Math.random()*9-3,
+      s:5+Math.random()*6,c:cols[Math.random()*5|0],r:Math.random()*6}));
+    let t=0; (function f(){ t++; x.clearRect(0,0,c.width,c.height);
+      P.forEach(p=>{ p.vy+=.28; p.x+=p.vx; p.y+=p.vy; p.r+=.15; x.save(); x.translate(p.x,p.y); x.rotate(p.r); x.fillStyle=p.c; x.fillRect(-p.s/2,-p.s/4,p.s,p.s/2); x.restore(); });
+      if(t<110) requestAnimationFrame(f); else c.remove(); })();
+  }
+
+  return {$, $$, ar, el, shuffle, say, hush, setupStages, go, toast, dnd, orbit, ball, shade, celebrate, reduced, get cur(){return cur;}};
+})();
+</script>
+<script>
+/* ================= ACTIVITY JS ================= */
+(() => {
+const {$, $$, ar, say, hush, toast} = Kit;
+const cl = v => Math.max(0, Math.min(1, v));
+function rng(seed){ return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+  t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const f1 = n => Math.round(n * 10) / 10;
+const tlen = t => t.replace(/[\u064B-\u0652]/g,'').length;
+
+/* ---------- geometry ---------- */
+function hull(P){
+  const p = P.slice().sort((a,b)=>a.x-b.x||a.y-b.y);
+  const cr = (o,a,b)=>(a.x-o.x)*(b.y-o.y)-(a.y-o.y)*(b.x-o.x);
+  const lo=[], up=[];
+  for (const q of p){ while(lo.length>=2 && cr(lo[lo.length-2],lo[lo.length-1],q)<=0) lo.pop(); lo.push(q); }
+  for (let i=p.length-1;i>=0;i--){ const q=p[i]; while(up.length>=2 && cr(up[up.length-2],up[up.length-1],q)<=0) up.pop(); up.push(q); }
+  up.pop(); lo.pop(); return lo.concat(up);
+}
+function makePotato(cx, cy, rx, ry, rot, n, seed){
+  const pts=[], c=Math.cos(rot), s=Math.sin(rot);
+  for (let i=0;i<n;i++){
+    const t=2*Math.PI*i/n, r=1+0.035*Math.sin(2*t+seed)+0.02*Math.cos(3*t+seed*2);
+    const x=rx*Math.cos(t)*r, y=ry*Math.sin(t)*r;
+    pts.push({x:cx+x*c-y*s, y:cy+x*s+y*c});
+  }
+  return hull(pts).map(p=>({x:f1(p.x), y:f1(p.y), cut:false}));
+}
+const area = p => { let a=0; for (let i=0;i<p.length;i++){ const q=p[i], r=p[(i+1)%p.length]; a+=q.x*r.y-r.x*q.y; } return a/2; };
+function centroid(p){ let a=0,cx=0,cy=0; for (let i=0;i<p.length;i++){ const q=p[i], r=p[(i+1)%p.length], f=q.x*r.y-r.x*q.y; a+=f; cx+=(q.x+r.x)*f; cy+=(q.y+r.y)*f; }
+  a/=2; return {x:cx/(6*a), y:cy/(6*a)}; }
+function inside(pt, p){ let c=false; for (let i=0,j=p.length-1;i<p.length;j=i++){ const a=p[i], b=p[j];
+  if (((a.y>pt.y)!==(b.y>pt.y)) && pt.x < (b.x-a.x)*(pt.y-a.y)/(b.y-a.y)+a.x) c=!c; } return c; }
+function bbox(p){ let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9; p.forEach(q=>{x0=Math.min(x0,q.x);y0=Math.min(y0,q.y);x1=Math.max(x1,q.x);y1=Math.max(y1,q.y);}); return {x0,y0,x1,y1,w:x1-x0,h:y1-y0}; }
+function segX(a,b,c,d){
+  const rx=b.x-a.x, ry=b.y-a.y, sx=d.x-c.x, sy=d.y-c.y, den=rx*sy-ry*sx;
+  if (Math.abs(den)<1e-9) return null;
+  const t=((c.x-a.x)*sy-(c.y-a.y)*sx)/den, u=((c.x-a.x)*ry-(c.y-a.y)*rx)/den;
+  return (t>=0&&t<=1&&u>=0&&u<=1) ? {x:a.x+t*rx, y:a.y+t*ry} : null;
+}
+function crossCount(poly,a,b){
+  const hits=[];
+  for (let i=0;i<poly.length;i++){ const q=segX(a,b,poly[i],poly[(i+1)%poly.length]);
+    if (q && !hits.some(z=>Math.hypot(z.x-q.x,z.y-q.y)<0.5)) hits.push(q); }
+  return hits.length;
+}
+/* clip a convex polygon to one side of line a-b. Each vertex carries `cut` = flag of the edge leaving it. */
+function clipHalf(poly,a,b,sign){
+  const side=p=>{ const v=sign*((b.x-a.x)*(p.y-a.y)-(b.y-a.y)*(p.x-a.x)); return Math.abs(v)<1e-7?0:v; };
+  const out=[];
+  for (let i=0;i<poly.length;i++){
+    const P=poly[i], Q=poly[(i+1)%poly.length], sP=side(P), sQ=side(Q);
+    const I=()=>{ const t=sP/(sP-sQ); return {x:P.x+t*(Q.x-P.x), y:P.y+t*(Q.y-P.y)}; };
+    if (sP>=0){
+      if (sQ>=0) out.push({x:P.x,y:P.y,cut:P.cut});
+      else if (sP>0){ out.push({x:P.x,y:P.y,cut:P.cut}); const q=I(); out.push({x:q.x,y:q.y,cut:true}); }
+      else out.push({x:P.x,y:P.y,cut:true});
+    } else if (sQ>0){ const q=I(); out.push({x:q.x,y:q.y,cut:P.cut}); }
+  }
+  const res=[];
+  out.forEach(v=>{ const l=res[res.length-1]; if (l && Math.hypot(l.x-v.x,l.y-v.y)<0.05) res[res.length-1]=v; else res.push(v); });
+  while (res.length>1 && Math.hypot(res[0].x-res[res.length-1].x,res[0].y-res[res.length-1].y)<0.05) res.pop();
+  return res;
+}
+
+/* ---------- the potatoes ---------- */
+const BIG = makePotato(300,200,232,138,-0.06,44,0.8);
+const GROUPS = [
+  {x:132,y:178,d:[[-9,-6,5],[7,-2,4.5],[-1,9,4]]},
+  {x:212,y:112,d:[[-8,2,5],[8,-3,4.5]]},
+  {x:332,y:96, d:[[-10,0,4.5],[4,-5,5],[6,8,4]]},
+  {x:452,y:128,d:[[-6,-6,5],[8,4,4.5]]},
+  {x:494,y:232,d:[[-7,-7,4.5],[6,0,5],[-4,10,4]]},
+  {x:382,y:270,d:[[-9,0,5],[8,-4,4.5]]},
+  {x:236,y:268,d:[[-8,-5,4.5],[7,3,5],[-6,10,4]]}
+];
+const SMALL = makePotato(300,200,108,70,0.08,32,2.1);
+const SMALL_G = [
+  {x:240,y:185,d:[[-6,-3,4],[6,3,4]]},
+  {x:330,y:160,d:[[-6,0,4],[5,-5,3.6],[4,6,3.6]]},
+  {x:350,y:236,d:[[-5,-4,4],[6,3,4]]}
+];
+const SPECK = (()=>{ const R=rng(7), a=[]; for (let i=0;i<70;i++){ const p={x:70+R()*460,y:60+R()*280,r:1.2+R()*2.2}; if (inside(p,BIG)) a.push(p);} return a; })();
+const SPECK_S = (()=>{ const R=rng(9), a=[]; for (let i=0;i<30;i++){ const p={x:190+R()*220,y:130+R()*140,r:1+R()*1.6}; if (inside(p,SMALL)) a.push(p);} return a; })();
+
+const pts = p => p.map(q=>f1(q.x)+','+f1(q.y)).join(' ');
+function eyeSVG(g){
+  return g.d.map(([dx,dy,r])=>{ r*=1.3; const x=g.x+dx*1.3, y=g.y+dy*1.3;
+    return `<ellipse cx="${x}" cy="${y}" rx="${r*1.35}" ry="${r}" fill="#6b4318"/><ellipse cx="${x+r*.2}" cy="${y+r*.2}" rx="${r*.7}" ry="${r*.45}" fill="#4a2c0c"/>`+
+      `<path d="M${x-r*1.3} ${y-r*.4} q${r*1.3} ${-r*1.3} ${r*2.6} 0" stroke="#f6dca8" stroke-width="1.3" fill="none" opacity=".9"/>`; }).join('');
+}
+const countEyes = pc => pc.groups.filter(g=>inside(g,pc.pts)).length;
+
+/* draw one piece. o: {id, tf, s, dry(0..1), rot(0..1), badge} */
+function pieceSVG(pc, o){
+  const s=o.s||1, P=pc.pts, id=o.id;
+  let h=`<g transform="${o.tf||''}"><clipPath id="${id}"><polygon points="${pts(P)}"/></clipPath>`;
+  h+=`<polygon points="${pts(P)}" fill="url(#gSkin)"/>`;
+  h+=`<g clip-path="url(#${id})">`;
+  (pc.small?SPECK_S:SPECK).forEach(q=>{ h+=`<circle cx="${f1(q.x)}" cy="${f1(q.y)}" r="${f1(q.r)}" fill="#a8742f" opacity=".45"/>`; });
+  pc.groups.forEach(g=>{ if (inside(g,P)) h+=eyeSVG(g); });
+  // cut surfaces
+  const edges=[]; P.forEach((v,i)=>{ if (v.cut) edges.push([v,P[(i+1)%P.length]]); });
+  edges.forEach(([a,b])=>{
+    h+=`<line x1="${f1(a.x)}" y1="${f1(a.y)}" x2="${f1(b.x)}" y2="${f1(b.y)}" stroke="#fff3c9" stroke-width="${f1(26/s)}"/>`;
+    if (o.dry>0) h+=`<line x1="${f1(a.x)}" y1="${f1(a.y)}" x2="${f1(b.x)}" y2="${f1(b.y)}" stroke="url(#corkPat)" stroke-width="${f1(26/s)}" opacity="${f1(o.dry)}"/>`;
+  });
+  if (o.rot>0 && edges.length){
+    h+=`<polygon points="${pts(P)}" fill="#3b3320" opacity="${f1(.35*o.rot)}"/>`;
+    const R=rng(pc.seed||3);
+    for (let k=0;k<14;k++){
+      const [a,b]=edges[k%edges.length], t=R(), off=(R()*16)/s;
+      const c=centroid(P), x=a.x+(b.x-a.x)*t, y=a.y+(b.y-a.y)*t, d=Math.hypot(c.x-x,c.y-y)||1;
+      const px=x+(c.x-x)/d*off, py=y+(c.y-y)/d*off, r=(3+R()*5)/s*cl(o.rot*1.4-k*0.04);
+      if (r>0.1) h+=`<circle cx="${f1(px)}" cy="${f1(py)}" r="${f1(r)}" fill="${k%3?'#56603a':'#2b2616'}" opacity=".9"/><circle cx="${f1(px-r*.3)}" cy="${f1(py-r*.3)}" r="${f1(r*.35)}" fill="#e7eddc" opacity=".8"/>`;
+    }
+  }
+  h+=`</g><polygon points="${pts(P)}" fill="none" stroke="#7a4d1c" stroke-width="${f1(2.2/s)}" stroke-linejoin="round"/>`;
+  if (o.badge){
+    const c=centroid(P), n=countEyes(pc), ok=n>=2;
+    h+=`<g aria-hidden="true"><circle cx="${f1(c.x)}" cy="${f1(c.y)}" r="27" fill="#fff" stroke="${ok?'#12a06a':'#e8425a'}" stroke-width="4"/>`+
+       `<text x="${f1(c.x)}" y="${f1(c.y+8)}" text-anchor="middle" font-size="23" font-weight="900" fill="${ok?'#0b7a50':'#c22b43'}">${ok?'✓':'⚠'}${ar(n)}</text></g>`;
+  }
+  return h+'</g>';
+}
+
+/* ================= STAGE 1: find the eyes ================= */
+const found=new Set(); let eyeMiss=0, rootOK=false, rootWrong=0;
+function drawEyeStage(){
+  const svg=$('#eyeSvg');
+  let h=pieceSVG({pts:BIG,groups:GROUPS},{id:'e-cp'});
+  h=`<rect x="0" y="0" width="600" height="400" fill="transparent" id="eyeBg"/><ellipse cx="305" cy="352" rx="210" ry="18" fill="#000" opacity=".08"/>`+h;
+  GROUPS.forEach((g,i)=>{
+    h+=`<g class="eyehot${found.has(i)?' found':''}" data-i="${i}" role="button" tabindex="0" aria-label="مجموعةُ عيونٍ رقم ${ar(i+1)}${found.has(i)?' — وجدتَها':''}">`+
+       `<circle class="ring" cx="${g.x}" cy="${g.y}" r="42"/>`+
+       (found.has(i)?`<text x="${g.x+22}" y="${g.y-18}" font-size="20" font-weight="900" fill="#12a06a" text-anchor="middle">✓</text>`:'')+`</g>`;
+  });
+  svg.innerHTML=h;
+  $('#eyeCount').textContent='العيونُ: '+ar(found.size)+' / '+ar(GROUPS.length);
+}
+function findEye(i){
+  if (found.has(i)) { say('#fbEye','info','وجدتَ هذه المجموعةَ من قبلُ. ابحثْ عن غيرِها.'); return; }
+  found.add(i); drawEyeStage();
+  const left=GROUPS.length-found.size;
+  if (left>0) say('#fbEye','ok','أحسنتَ! هذه مجموعةٌ من <b>العيونِ</b>: انخفاضاتٌ صغيرةٌ متقاربةٌ. بقيَ '+ar(left)+'.');
+  else {
+    say('#fbEye','ok','رائعٌ! وجدتَ كلَّ مجموعاتِ العيونِ السبعِ. انظرْ إلى العينِ المكبّرةِ: منها يخرجُ ساقٌ وجذرٌ.');
+    $('#m1a').className='done'; $('#m1a .st').textContent='✓'; if(!rootOK) $('#m1b').className='cur';
+    $('#zoomEye').classList.add('show'); $('#eyeHint').hidden=true;
+    $$('#eyeSvg .eyehot').forEach(e=>e.classList.remove('hint'));
+  }
+}
+$('#eyeSvg').addEventListener('click',e=>{
+  const hot=e.target.closest('.eyehot');
+  if (hot) { findEye(+hot.dataset.i); const n=$(`#eyeSvg .eyehot[data-i="${hot.dataset.i}"]`); n&&n.focus(); return; }
+  if (found.size===GROUPS.length) return;
+  eyeMiss++;
+  say('#fbEye','info','هنا سطحٌ أملسُ. ابحثْ عن <b>انخفاضاتٍ صغيرةٍ داكنةٍ</b> متجمّعةً معاً — تلكَ هي العيونُ.');
+  if (eyeMiss>=2) $('#eyeHint').hidden=false;
+});
+$('#eyeSvg').addEventListener('keydown',e=>{ const hot=e.target.closest('.eyehot'); if(hot&&(e.key==='Enter'||e.key===' ')){ e.preventDefault(); const i=hot.dataset.i; findEye(+i); const n=$(`#eyeSvg .eyehot[data-i="${i}"]`); n&&n.focus(); } });
+$('#eyeHint').onclick=()=>{ $$('#eyeSvg .eyehot').forEach(e=>{ if(!found.has(+e.dataset.i)) e.classList.add('hint'); }); say('#fbEye','info','الدوائرُ البرتقاليةُ تُظهرُ أماكنَ العيونِ الباقيةِ. انقرْ عليها.'); };
+
+const rootMsg={
+  root:'حاولْ مرةً أخرى — وجودُ الدرنةِ تحتَ الأرضِ لا يجعلُها جذراً. الكتابُ يقولُ إنَّ الدرنةَ <b>ساقٌ</b> أرضيةٌ متحوّرةٌ لخزنِ الغذاءِ، وعلى سطحِها عيونٌ يخرجُ منها ساقٌ جديدٌ.',
+  leaf:'حاولْ مرةً أخرى — الدرنةُ ليستْ ورقةً؛ إنّها تنمو تحتَ الأرضِ وتخزنُ الغذاءَ. فكّرْ: من العينِ المكبّرةِ يخرجُ ساقٌ وجذرٌ… فما الدرنةُ نفسُها؟',
+  stem:'صحيحٌ! البطاطا <b>ساقٌ أرضيةٌ متحوّرةٌ</b> لخزنِ الغذاءِ، وليستْ جذراً، رغمَ أنّها تنمو تحتَ الأرضِ. العيونُ على سطحِها دليلٌ على ذلك.'
+};
+function answerRoot(a, btn){
+  if (rootOK) return;
+  $$('#qRootCh .choice').forEach(b=>b.classList.remove('bad'));
+  if (a==='stem'){ rootOK=true; btn.classList.add('ok'); say('#fbRoot','ok',rootMsg.stem); $('#rootShow').hidden=true;
+    $('#m1b').className='done'; $('#m1b .st').textContent='✓'; }
+  else { rootWrong++; btn.classList.add('bad'); say('#fbRoot','bad',rootMsg[a]); if (rootWrong>=2) $('#rootShow').hidden=false; }
+}
+$$('#qRootCh .choice').forEach(b=>b.onclick=()=>answerRoot(b.dataset.a,b));
+$('#rootShow').onclick=()=>answerRoot('stem',$('#qRootCh [data-a="stem"]'));
+
+/* ================= STAGE 2: cutting ================= */
+let pieces=[{pts:BIG,groups:GROUPS,seed:1}], hist=[], cuts=0, cutWrong=0, planVer=0, smallWhole=false, smallWrong=0;
+let drag=null;
+function drawCut(line){
+  let h='<ellipse cx="305" cy="352" rx="210" ry="18" fill="#000" opacity=".08"/>';
+  pieces.forEach((pc,i)=>{ h+=pieceSVG(pc,{id:'c-cp'+i,badge:cuts>0}); });
+  if (line) h+=`<line x1="${f1(line.a.x)}" y1="${f1(line.a.y)}" x2="${f1(line.b.x)}" y2="${f1(line.b.y)}" stroke="#e8425a" stroke-width="4" stroke-dasharray="12 8" stroke-linecap="round"/>`+
+    `<text x="${f1(line.b.x)}" y="${f1(line.b.y-12)}" font-size="28" text-anchor="middle">🔪</text>`;
+  $('#cutSvg').innerHTML=h;
+  $('#cutCount').textContent='القطعاتُ: '+ar(cuts)+' / ٤';
+  $('#undoBtn').disabled=!hist.length; $('#resetBtn').disabled=!hist.length;
+  const good=pieces.filter(p=>countEyes(p)>=2).length, bad=pieces.length-good;
+  $('#pcsList').innerHTML = cuts===0 ? '<span class="badge">لم تقطعْ بعدُ — اسحبْ خطّاً عبرَ الدرنةِ</span>' :
+    `<span class="badge">عددُ القطعِ: ${ar(pieces.length)}</span><span class="badge ok">✓ جاهزةٌ: ${ar(good)}</span>`+
+    (bad?`<span class="badge bad">⚠ تحتاجُ مجموعتينِ من العيونِ: ${ar(bad)}</span>`:'');
+}
+function toSvg(e){ const svg=$('#cutSvg'), pt=svg.createSVGPoint(); pt.x=e.clientX; pt.y=e.clientY; const m=svg.getScreenCTM(); if(!m) return {x:0,y:0}; const r=pt.matrixTransform(m.inverse()); return {x:r.x,y:r.y}; }
+function applyCut(a,b){
+  const L=Math.hypot(b.x-a.x,b.y-a.y);
+  if (L<30) return 'short';
+  if (cuts>=4) { say('#fbCut','info','استعملتَ ٤ قطعاتٍ. اضغطْ «تراجعْ» أو «ابدأْ من جديدٍ» إذا أردتَ خطّةً أخرى.'); return 'max'; }
+  const ux=(b.x-a.x)/L, uy=(b.y-a.y)/L, A={x:a.x-ux*10,y:a.y-uy*10}, B={x:b.x+ux*10,y:b.y+uy*10};
+  const next=[]; let n=0;
+  pieces.forEach(pc=>{
+    if (crossCount(pc.pts,A,B)>=2){
+      const l=clipHalf(pc.pts,A,B,1), r=clipHalf(pc.pts,A,B,-1);
+      if (l.length>=3 && r.length>=3 && Math.abs(area(l))>500 && Math.abs(area(r))>500){
+        next.push({pts:l,groups:pc.groups,seed:pc.seed*3+1},{pts:r,groups:pc.groups,seed:pc.seed*3+2}); n++; return; }
+    }
+    next.push(pc);
+  });
+  if (!n){ say('#fbCut','warn','لم تُقطَعْ أيُّ قطعةٍ. اسحبِ الخطَّ <b>من خارجِ القطعةِ إلى خارجِها</b> ليمرَّ عبرَها كلِّها.'); return 'miss'; }
+  hist.push(pieces); pieces=next; cuts++; planVer++;
+  return 'ok';
+}
+function afterCut(){
+  drawCut();
+  const good=pieces.filter(p=>countEyes(p)>=2).length;
+  if (good===pieces.length) say('#fbCut','ok','كلُّ القطعِ فيها مجموعتانِ من العيونِ أو أكثرُ. ✓ جاهزةٌ!');
+  else say('#fbCut','info','بعضُ القطعِ عليها ⚠ : فيها أقلُّ من مجموعتينِ من العيونِ. يمكنُكَ التراجعُ، أو المتابعةُ لترى ماذا يحدثُ لها في الحديقةِ.');
+}
+const cs=$('#cutSvg');
+cs.addEventListener('pointerdown',e=>{ if(e.button>0) return; e.preventDefault(); cs.setPointerCapture(e.pointerId); const p=toSvg(e); drag={a:p,b:p}; });
+cs.addEventListener('pointermove',e=>{ if(!drag) return; drag.b=toSvg(e); drawCut(drag); });
+const endCut=e=>{ if(!drag) return; const d=drag; drag=null; if (e.type==='pointercancel'){ drawCut(); return; }
+  const r=applyCut(d.a,d.b); if (r==='ok') afterCut(); else { drawCut(); if (r==='short') say('#fbCut','info','اسحبْ خطّاً أطولَ عبرَ الدرنةِ كلِّها.'); } };
+cs.addEventListener('pointerup',endCut); cs.addEventListener('pointercancel',endCut);
+$('#undoBtn').onclick=()=>{ if(!hist.length) return; pieces=hist.pop(); cuts--; planVer++; drawCut(); hush('#fbCut'); };
+$('#resetBtn').onclick=()=>{ if(!hist.length) return; pieces=hist[0]; hist=[]; cuts=0; planVer++; drawCut(); hush('#fbCut'); };
+$('#checkBtn').onclick=()=>{
+  if (cuts===0){ say('#fbCut','info','ابدأْ بالتقطيعِ: اسحبْ خطّاً مستقيماً عبرَ الدرنةِ.'); return; }
+  const bad=pieces.filter(p=>countEyes(p)<2).length;
+  if (!bad) say('#fbCut','ok','خطّةٌ ممتازةٌ! كلُّ قطعةٍ فيها مجموعتانِ من العيونِ على الأقلِّ، كما يقولُ الكتابُ.');
+  else { cutWrong++; say('#fbCut','bad',`حاولْ مرةً أخرى — ${ar(bad)} من القطعِ فيها أقلُّ من مجموعتينِ من العيونِ، لأنَّ كلَّ جزءٍ <b>يجبُ أن يحتويَ على مجموعتينِ من العيونِ</b>. جرّبْ قطعاتٍ أقلَّ أو في مكانٍ آخرَ.`);
+    if (cutWrong>=2) $('#cutShow').hidden=false; }
+};
+$('#cutShow').onclick=()=>{
+  pieces=[{pts:BIG,groups:GROUPS,seed:1}]; hist=[]; cuts=0; planVer++;
+  applyCut({x:282,y:20},{x:282,y:385}); applyCut({x:272,y:184},{x:590,y:176});
+  drawCut(); say('#fbCut','ok','هذه خطّةٌ صحيحةٌ: قطعتانِ فقط تعطيانِ ٣ قطعٍ، في كلٍّ منها مجموعتانِ من العيونِ أو أكثرُ. لاحظْ أنَّ الكثيرَ من القطعِ الصغيرةِ يتركُ قطعاً بلا عيونٍ كافيةٍ.');
+};
+// small tuber
+$('#smallSvg').innerHTML=pieceSVG({pts:SMALL,groups:SMALL_G,small:true},{id:'s-cp'});
+$$('#smallCh .choice').forEach(b=>b.onclick=()=>{
+  if (smallWhole) return;
+  $$('#smallCh .choice').forEach(x=>x.classList.remove('bad'));
+  if (b.dataset.a==='whole'){ smallWhole=true; b.classList.add('ok'); planVer++;
+    say('#fbSmall','ok','صحيحٌ! <b>الدرنةُ الصغيرةُ تُزرعُ كاملةً</b>. ستُزرعُ مع قطعِكَ في الحديقةِ.'); }
+  else { smallWrong++; b.classList.add('bad'); say('#fbSmall','bad','حاولْ مرةً أخرى — الكتابُ يقولُ: الدرنةُ الصغيرةُ تُزرعُ كاملةً؛ أمّا التقطيعُ فللدرنةِ الكبيرةِ. لو قطّعناها لكانتْ كلُّ قطعةٍ صغيرةً جدّاً.'); }
+});
+
+/* ================= STAGE 3: wait or plant now ================= */
+let decision=null, decVer=-1, dry=0, dryAnim=null;
+function trayPieces(){
+  const list=pieces.map(p=>p);
+  return list;
+}
+function drawTray(){
+  const svg=$('#traySvg');
+  let h='<rect x="20" y="20" width="560" height="380" rx="30" fill="#dfe7ee" stroke="#9fb2c3" stroke-width="4"/><rect x="38" y="38" width="524" height="344" rx="22" fill="#eef3f7"/>';
+  const k = smallWhole ? 0.78 : 0.86;
+  const ox = smallWhole ? -40 : 0;
+  pieces.forEach((pc,i)=>{
+    const c=centroid(pc.pts), dx=(c.x-300)*0.16, dy=(c.y-200)*0.2;
+    const tf=`translate(${f1(300+ox)} 210) scale(${k}) translate(-300 -200) translate(${f1(dx)} ${f1(dy)})`;
+    h+=pieceSVG(pc,{id:'t-cp'+i,tf,s:k,dry});
+  });
+  if (smallWhole) h+=pieceSVG({pts:SMALL,groups:SMALL_G,small:true},{id:'t-cps',tf:'translate(500 330) scale(.42) translate(-300 -200)',s:.42});
+  svg.innerHTML=h;
+}
+function chooseDec(a){
+  cancelAnimationFrame(dryAnim);
+  decision=a; decVer=planVer;
+  $$('#decide .choice').forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.a===a)));
+  if (a==='now'){ dry=0; drawTray(); $('#timebar').hidden=true;
+    say('#fbDec','info','قرارُكَ: <b>الزراعةُ فوراً</b>. سطوحُ القطعِ ما زالتْ طريّةً ومكشوفةً. انتقلْ إلى الحديقةِ لترى النتيجةَ!'); return; }
+  $('#timebar').hidden=false; hush('#fbDec');
+  const T=Kit.reduced?1:2600, t0=performance.now();
+  const step=now=>{
+    const p=cl((now-t0)/T); dry=p; drawTray();
+    $('#dryBar').style.width=(p*100)+'%'; $('#dryMeter').setAttribute('aria-valuenow',Math.round(p*100));
+    $('#sky').textContent = (Math.floor(p*8)%2)?'🌙':'☀️';
+    if (p<1) dryAnim=requestAnimationFrame(step);
+    else { $('#dryTxt').textContent='مرّتْ مدةٌ ✓'; $('#sky').textContent='☀️';
+      say('#fbDec','ok','تكوّنتْ على سطوحِ القطعِ <b>طبقةٌ فلّينيةٌ</b>. الطبقةُ الفلّينيةُ تحمي الدرنةَ من الأمراضِ الفطريةِ والتعفّنِ بعدَ الزراعةِ. انتقلْ إلى الحديقةِ!'); }
+  };
+  $('#dryTxt').textContent='يمرُّ الوقتُ…';
+  dryAnim=requestAnimationFrame(step);
+}
+$$('#decide .choice').forEach(b=>b.onclick=()=>chooseDec(b.dataset.a));
+function enterDecide(){
+  if (decVer!==planVer){ decision=null; dry=0; $$('#decide .choice').forEach(b=>b.setAttribute('aria-pressed','false')); $('#timebar').hidden=true; hush('#fbDec'); }
+  drawTray();
+}
+
+/* ================= STAGE 4: garden ================= */
+const SOIL=190, Y0=300;
+let LS=1, planted=[], week=0, reachedEnd=false, celebrated=-1, showLbl=true, playAnim=null;
+function buildPlan(){
+  planted=pieces.map((pc,i)=>({pc, eyes:countEyes(pc), cutp:pc.pts.some(v=>v.cut), whole:false}));
+  if (smallWhole) planted.push({pc:{pts:SMALL,groups:SMALL_G,small:true,seed:99}, eyes:SMALL_G.length, cutp:false, whole:true});
+  planted.forEach((p,i)=>{ p.rot = p.cutp && decision!=='wait'; p.grow = !p.rot && p.eyes>=2; p.nT = 3 + ((i*7+p.eyes*3)%4); });
+}
+function plantSVG(sx, k, w, nT, seed, labels){
+  const R=rng(seed); let h='';
+  const g1=cl((w-0.4)/3.0), g2=cl((w-0.6)/2.4), g3=cl((w-2.2)/1.8), gs=cl((w-1.8)/1.2);
+  const H=118*Math.max(.6,Math.min(1,k));
+  const top=(Y0-16) - g1*((Y0-16-SOIL)+H);
+  // roots
+  if (g2>0) for (let r=0;r<6;r++){ const ang=-1.1+r*0.44+(R()-.5)*.2, len=(38+R()*26)*g2*Math.max(.7,k);
+    const ex=sx+Math.sin(ang)*len, ey=Y0+14+Math.cos(ang)*len*0.9;
+    h+=`<path d="M${f1(sx)} ${Y0+10} Q${f1(sx+Math.sin(ang)*len*.3+(R()-.5)*10)} ${f1(Y0+14+len*.5)} ${f1(ex)} ${f1(ey)}" stroke="#f1e6c4" stroke-width="${f1(2.2*Math.max(.7,k))}" fill="none" stroke-linecap="round"/>`; }
+  // underground stems + new tubers
+  const tub=[];
+  if (gs>0) for (let t=0;t<nT;t++){
+    const side=t%2?1:-1, row=t>>1, tx=sx+side*(16+row*13)*Math.max(.55,k), ty=Y0-30+row*24+(t%3)*6;
+    tub.push({tx,ty});
+    h+=`<path d="M${f1(sx)} ${Y0-26} Q${f1(sx+side*8)} ${f1(ty-18)} ${f1(tx)} ${f1(ty)}" stroke="#d9cf9a" stroke-width="${f1(3*Math.max(.7,k))}" fill="none" stroke-linecap="round" pathLength="1" stroke-dasharray="${f1(gs)} 2"/>`;
+  }
+  if (g3>0) tub.forEach(({tx,ty})=>{ const rx=11*g3*Math.max(.6,k), ry=8*g3*Math.max(.6,k);
+    h+=`<ellipse cx="${f1(tx)}" cy="${f1(ty)}" rx="${f1(rx)}" ry="${f1(ry)}" fill="url(#gSkin)" stroke="#7a4d1c" stroke-width="1.2"/>`; });
+  // stem
+  if (g1>0){
+    const ug=Math.max(top,SOIL);
+    h+=`<path d="M${f1(sx)} ${Y0-14} L${f1(sx)} ${f1(ug)}" stroke="#c9d98e" stroke-width="${f1(5*Math.max(.7,k))}" stroke-linecap="round"/>`;
+    if (top<SOIL){
+      h+=`<path d="M${f1(sx)} ${SOIL} Q${f1(sx-5)} ${f1((SOIL+top)/2)} ${f1(sx)} ${f1(top)}" stroke="#2f9a4a" stroke-width="${f1(5*Math.max(.7,k))}" fill="none" stroke-linecap="round"/>`;
+      for (let l=0;l<6;l++){ const ly=SOIL-14-l*19; if (ly<=top+4) break;
+        const sz=cl((ly-top)/34)*15*Math.max(.6,k), side=l%2?1:-1;
+        h+=`<ellipse cx="${f1(sx+side*sz*.9)}" cy="${f1(ly)}" rx="${f1(sz)}" ry="${f1(sz*.5)}" fill="#4fb85a" stroke="#2f8a3f" stroke-width="1" transform="rotate(${side*-28} ${f1(sx+side*sz*.9)} ${f1(ly)})"/>`; }
+      h+=`<circle cx="${f1(sx)}" cy="${f1(top)}" r="${f1(4*Math.max(.7,k))}" fill="#6fd17a"/>`;
+    }
+  }
+  if (labels && w>=3.6){
+    const t0=tub[0]||{tx:sx,ty:Y0};
+    const tag=(x,y,px,py,txt)=>{ const W=(tlen(txt)*9.5+20)*LS; x=Math.max(W/2+4,Math.min(796-W/2,x));
+      return `<g class="lbltag" font-size="${f1(15*LS)}"><line x1="${f1(x)}" y1="${f1(y)}" x2="${f1(px)}" y2="${f1(py)}" stroke="#200058" stroke-width="${f1(1.6*LS)}"/>`+
+      `<rect x="${f1(x-W/2)}" y="${f1(y-15*LS)}" width="${f1(W)}" height="${f1(28*LS)}" rx="8"/><text x="${f1(x)}" y="${f1(y+5*LS)}" text-anchor="middle">${txt}</text></g>`; };
+    const dir = sx>400 ? -1 : 1;
+    h+=tag(sx+dir*120, SOIL-70, sx+3*dir, SOIL-60, 'ساقٌ هوائيٌّ');
+    h+=tag(sx+dir*125, SOIL+30, sx, SOIL+40, 'ساقٌ تحتَ الأرضِ');
+    h+=tag(sx+dir*130, Y0+30, t0.tx, t0.ty, 'درناتٌ');
+    h+=tag(sx-dir*0+dir*95, Y0+105, sx+dir*12, Y0+52, 'جذرٌ');
+  }
+  return h;
+}
+function drawGarden(){
+  const n=planted.length, slot=760/Math.max(n,1);
+  LS=Math.min(2.2,Math.max(1,800/($('#gardenSvg').getBoundingClientRect().width||800)*0.72));
+  let h=`<rect width="800" height="${SOIL}" fill="url(#gSky)"/><circle cx="70" cy="60" r="30" fill="#ffd15c"/><circle cx="70" cy="60" r="40" fill="#ffd15c" opacity=".25"/>`+
+        `<rect y="${SOIL}" width="800" height="${470-SOIL}" fill="url(#gSoil)"/>`+
+        `<path d="M0 ${SOIL} Q200 ${SOIL-6} 400 ${SOIL} T800 ${SOIL}" stroke="#4d7a2c" stroke-width="6" fill="none"/>`;
+  const R=rng(5); for (let i=0;i<60;i++) h+=`<circle cx="${f1(R()*800)}" cy="${f1(SOIL+10+R()*270)}" r="${f1(1+R()*2.5)}" fill="#3e2714" opacity=".5"/>`;
+  const labIdx=planted.findIndex(p=>p.grow);
+  planted.forEach((p,i)=>{
+    const sx=780-slot*(i+.5), k=Math.min(1,slot/120);
+    if (p.grow) h+=plantSVG(sx,k,week,p.nT,i+11, showLbl && i===labIdx);
+  });
+  planted.forEach((p,i)=>{
+    const sx=780-slot*(i+.5), b=bbox(p.pc.pts), c=centroid(p.pc.pts);
+    const s=Math.min(0.3, slot*0.78/b.w, 54/b.h);
+    const rot = p.rot ? cl((week-0.3)/2.2) : 0;
+    h+=pieceSVG(p.pc,{id:'g-cp'+i, tf:`translate(${f1(sx)} ${Y0}) scale(${f1(s)}) translate(${f1(-c.x)} ${f1(-c.y)})`, s, dry: decision==='wait'&&p.cutp?1:0, rot});
+    const st = week<1 ? '' : (p.grow?'✓':'✗');
+    const L=Math.min(LS,slot/34), cy=468-17*L;
+    h+=`<g aria-hidden="true"><circle cx="${f1(sx)}" cy="${f1(cy)}" r="${f1(15*L)}" fill="#fff" stroke="${p.grow?'#12a06a':(week<1?'#200058':'#e8425a')}" stroke-width="3"/>`+
+       `<text x="${f1(sx)}" y="${f1(cy+6*L)}" text-anchor="middle" font-size="${f1(16*L)}" font-weight="900" fill="#200058">${ar(i+1)}</text>`+
+       (st?`<text x="${f1(sx+16*L)}" y="${f1(cy-14*L)}" text-anchor="middle" font-size="${f1(18*L)}" font-weight="900" fill="${p.grow?'#bff5d6':'#ffc2cc'}">${st}</text>`:'')+`</g>`;
+  });
+  $('#gardenSvg').innerHTML=h;
+  $('#wkTxt').textContent='الأسبوعُ '+ar(Math.floor(week+1e-6));
+}
+function reason(p){
+  if (p.grow) return `نمتْ! خرجَ ساقٌ هوائيٌّ وجذورٌ، وتكوّنتْ ${ar(p.nT)} درناتٍ جديدةٍ تحتَ الأرضِ.`+(p.whole?' (الدرنةُ الصغيرةُ زُرعتْ كاملةً.)':'');
+  if (p.rot) return 'تعفّنتْ — زُرعتْ دونَ أن تتكوّنَ الطبقةُ الفلّينيةُ. الطبقةُ الفلّينيةُ تحمي من الأمراضِ الفطريةِ والتعفّنِ.'+(p.eyes<2?' وفيها أيضاً أقلُّ من مجموعتينِ من العيونِ.':'');
+  return p.eyes===1 ? 'لم تنبتْ — هذه القطعةُ فيها مجموعةُ عيونٍ واحدةٌ فقط، والكتابُ يقولُ: يجبُ أن يحتويَ كلُّ جزءٍ على مجموعتينِ من العيونِ.'
+                    : 'لم تنبتْ — هذه القطعةُ ليسَ فيها أيُّ مجموعةٍ من العيونِ. كلُّ جزءٍ يجبُ أن يحتويَ على مجموعتينِ من العيونِ.';
+}
+function updateResults(){
+  const ul=$('#results');
+  if (week<1){ ul.innerHTML=''; hush('#fbGrow'); return; }
+  ul.innerHTML=planted.map((p,i)=>`<li class="${p.grow?'ok':'bad'}"><span class="n">${ar(i+1)}</span><span>${p.grow?'✓':'✗'} ${reason(p)}</span></li>`).join('');
+  if (week>=3.99){
+    reachedEnd=true;
+    const g=planted.filter(p=>p.grow).length, tubers=planted.filter(p=>p.grow).reduce((a,p)=>a+p.nT,0);
+    if (g===planted.length){
+      say('#fbGrow','ok',`ممتازٌ! نمتْ كلُّ القطعِ (${ar(g)}). بعدَ ٤ أسابيعَ تكوّنتْ ${ar(tubers)} درنةً جديدةً تحتَ الأرضِ. لاحظْ الأسماءَ على النبتةِ: ساقٌ هوائيٌّ، ساقٌ تحتَ الأرضِ، درناتٌ، جذرٌ.`);
+      if (celebrated!==planVer*10+(decision==='wait'?1:0)){ celebrated=planVer*10+(decision==='wait'?1:0); Kit.celebrate(); }
+    } else {
+      const anyRot=planted.some(p=>p.rot);
+      say('#fbGrow','warn',`نمتْ ${ar(g)} من ${ar(planted.length)} فقط. `+(anyRot?'القطعُ المقطوعةُ تعفّنتْ لأنّها زُرعتْ فوراً — جرّبِ الانتظارَ حتى تتكوّنَ الطبقةُ الفلّينيةُ. ':'')+
+        (planted.some(p=>!p.rot&&p.eyes<2)?'وبعضُ القطعِ فيها أقلُّ من مجموعتينِ من العيونِ. ':'')+'اضغطْ «أصلحُ خطّتي» وجرّبْ مرةً أخرى.');
+    }
+  } else hush('#fbGrow');
+}
+function setWeek(w){ week=w; $('#wk').value=w; drawGarden(); updateResults(); }
+$('#wk').addEventListener('input',e=>{ cancelAnimationFrame(playAnim); setWeek(+e.target.value); });
+$('#playBtn').onclick=()=>{
+  cancelAnimationFrame(playAnim);
+  let from=week>=3.99?0:week; if (Kit.reduced){ setWeek(4); return; }
+  const t0=performance.now();
+  const step=now=>{ const w=Math.min(4, from+(now-t0)/1100); setWeek(w); if (w<4) playAnim=requestAnimationFrame(step); };
+  playAnim=requestAnimationFrame(step);
+};
+$('#lblBtn').onclick=()=>{ showLbl=!showLbl; $('#lblBtn').setAttribute('aria-pressed',String(showLbl)); drawGarden(); };
+$('#fixBtn').onclick=()=>{ cancelAnimationFrame(playAnim); Kit.go(1); };
+function enterGarden(){
+  if (decVer!==planVer) decision=null;
+  buildPlan(); cancelAnimationFrame(playAnim); setWeek(0);
+  if (!decision) say('#fbGrow','info','لم تخترْ قرارَكَ بعدُ في المرحلةِ ٣ — سنفترضُ أنّكَ زرعتَ القطعَ فوراً.');
+}
+
+/* ================= STAGE 5: sort + onion ================= */
+const ITEMS=[['potato','البطاطا','t'],['ginger','الزنجبيلُ','t'],['licorice','السوسُ','t'],['onion','البصلُ','b'],['garlic','الثومُ','b'],
+  ['lily','الزنبقُ','b'],['narc','النرجسُ','b'],['saffron','الزعفرانُ','b'],['lav','الخزامى','b']];
+const WHY={
+  potato:'البطاطا درنةٌ: ساقٌ أرضيةٌ متحوّرةٌ لخزنِ الغذاءِ، وعلى سطحِها عيونٌ.',
+  ginger:'الزنجبيلُ من أمثلةِ الدرناتِ في الكتابِ.',
+  licorice:'السوسُ من أمثلةِ الدرناتِ في الكتابِ.',
+  onion:'البصلُ بصلةٌ: ساقٌ قرصيةٌ تحملُ أوراقاً ذاتَ قواعدَ شحميةٍ.',
+  garlic:'الثومُ بصلةٌ مقسّمةٌ إلى فصوصٍ، وكلُّ فصٍّ بصلةٌ.',
+  lily:'الزنبقُ من نباتاتِ الزينةِ التي تتكاثرُ بالأبصالِ.',
+  narc:'النرجسُ من نباتاتِ الزينةِ التي تتكاثرُ بالأبصالِ.',
+  saffron:'الزعفرانُ من نباتاتِ الزينةِ التي تتكاثرُ بالأبصالِ.',
+  lav:'الخزامى من نباتاتِ الزينةِ التي تتكاثرُ بالأبصالِ.'
+};
+let sortWrong=0, sortDone=0;
+const sc=$('#sortChips');
+Kit.shuffle(ITEMS).forEach(([id,name,k])=>sc.appendChild(Kit.el('span',{class:'chip','data-id':id,'data-k':k},name)));
+const chips=$$('#sortChips .chip'), zones=$$('.sortz .zone');
+const dd=Kit.dnd({chips, zones,
+  accept:(c,z)=>c.dataset.k===z.dataset.k,
+  onDrop:(c,z,ok)=>{
+    if (ok){ sortDone++; say('#fbSort','ok','صحيحٌ! '+WHY[c.dataset.id]); if (sortDone===ITEMS.length){ say('#fbSort','ok','أحسنتَ! صنّفتَ كلَّ النباتاتِ: الدرناتُ (البطاطا، الزنجبيلُ، السوسُ) والأبصالُ (البصلُ، الثومُ، الزنبقُ، النرجسُ، الزعفرانُ، الخزامى).'); $('#sortShow').hidden=true; } }
+    else { sortWrong++; say('#fbSort','bad','حاولْ مرةً أخرى — '+WHY[c.dataset.id]); if (sortWrong>=2 && sortDone<ITEMS.length) $('#sortShow').hidden=false; }
+  }});
+$('#sortShow').onclick=()=>{
+  chips.forEach(c=>{ if (!c.dataset.locked){ const z=zones.find(z=>z.dataset.k===c.dataset.k); z.appendChild(c); c.classList.remove('bad','sel'); c.classList.add('ok'); c.dataset.locked='1'; c.setAttribute('tabindex','-1'); sortDone++; } });
+  dd.clear(); $('#sortShow').hidden=true;
+  say('#fbSort','info','هذا هو الحلُّ: البطاطا والزنجبيلُ والسوسُ <b>درناتٌ</b> (سيقانٌ أرضيةٌ متحوّرةٌ لخزنِ الغذاءِ). البصلُ والثومُ والزنبقُ والنرجسُ والزعفرانُ والخزامى <b>أبصالٌ</b>.');
+};
+
+// onion drawing
+const ONION='M230 34 C222 66 150 86 150 150 C150 196 192 212 230 212 C268 212 310 196 310 150 C310 86 238 66 230 34Z';
+let onionCut=false, garlicOpen=false;
+function drawOnion(){
+  let roots=''; for (let i=0;i<9;i++){ const x=206+i*6; roots+=`<path d="M${x} 212 q${(i-4)*3} 16 ${(i-4)*5} 34" stroke="#e9dcb6" stroke-width="2.4" fill="none" stroke-linecap="round"/>`; }
+  let h='<g transform="translate(24 0)">'+roots;
+  if (!onionCut){
+    h+=`<path d="${ONION}" fill="url(#gOnion)" stroke="#8a5320" stroke-width="2.5"/>`;
+    for (let i=-2;i<=2;i++) h+=`<path d="M230 40 Q${230+i*34} 120 ${230+i*22} 208" stroke="#a7692b" stroke-width="1.3" fill="none" opacity=".7"/>`;
+    h+=`<text x="80" y="130" text-anchor="middle" font-size="16" font-weight="800" fill="#200058">بصلةٌ كاملةٌ</text><text x="80" y="156" text-anchor="middle" font-size="14" fill="#5f5a85">اضغطْ «اقطعْ» 🔪</text>`;
+    h+='</g>';
+  } else {
+    h+=`<path d="${ONION}" fill="#fbf4ff" stroke="#8a5320" stroke-width="2.5"/>`;
+    for (let k=1;k<=5;k++){ const s=1-k*0.15; h+=`<path d="${ONION}" fill="${k%2?'#f3e6fb':'#fbf4ff'}" stroke="#b58ad0" stroke-width="${f1(2.2/s)}" transform="translate(230 204) scale(${f1(s)}) translate(-230 -204)"/>`; }
+    h+=`<rect x="198" y="198" width="64" height="16" rx="7" fill="#d8b77a" stroke="#8a5320" stroke-width="2"/></g>`;
+    const tag=(x,y,px,py,t1)=>{ const W=tlen(t1)*7.4+18; x=Math.max(x,W/2+3); px+=24; return `<g class="lbltag" font-size="14"><line x1="${x+W/2}" y1="${y}" x2="${px}" y2="${py}" stroke="#200058" stroke-width="1.5"/><rect x="${x-W/2}" y="${y-14}" width="${W}" height="26" rx="8"/><text x="${x}" y="${y+4}" text-anchor="middle">${t1}</text></g>`; };
+    h+=tag(78,80,196,120,'أوراقٌ ذاتُ قواعدَ شحميةٍ');
+    h+=tag(82,170,200,206,'ساقٌ قرصيةٌ');
+    h+=tag(82,232,206,236,'جذورٌ عرضيةٌ ليفيةٌ');
+  }
+  $('#onionSvg').innerHTML=h;
+  $('#onionSvg').setAttribute('aria-label', onionCut?'مقطعٌ في البصلةِ: ساقٌ قرصيةٌ في القاعدةِ، أوراقٌ ذاتُ قواعدَ شحميةٍ، جذورٌ عرضيةٌ ليفيةٌ':'بصلةٌ كاملةٌ');
+  $('#onionBtn').textContent = onionCut ? '↺ أعدِ البصلةَ كاملةً' : '🔪 اقطعِ البصلةَ';
+}
+function drawGarlic(){
+  const CL='M0 -38 C14 -30 18 0 12 22 C8 34 -8 34 -12 22 C-18 0 -14 -30 0 -38Z';
+  let h='';
+  const n=7;
+  for (let i=0;i<n;i++){
+    const a=(i-(n-1)/2)*0.32, x=garlicOpen? 230+(i-(n-1)/2)*30 : 230+(i-(n-1)/2)*9, y=garlicOpen?110+Math.abs(i-(n-1)/2)*6:104;
+    const r=garlicOpen?(i-(n-1)/2)*8:a*40;
+    h+=`<g class="garlic-c" style="transform:translate(${f1(x)}px,${f1(y)}px) rotate(${f1(r)}deg)"><path d="${CL}" fill="#fbf7ec" stroke="#b7a98a" stroke-width="2"/><path d="M0 -36 L0 26" stroke="#e5dcc6" stroke-width="1.5"/></g>`;
+  }
+  if (!garlicOpen) h=`<path d="M230 52 C200 60 180 80 180 112 C180 140 204 152 230 152 C256 152 280 140 280 112 C280 80 260 60 230 52Z" fill="#fbf7ec" stroke="#b7a98a" stroke-width="2.5"/>`+
+     `<path d="M230 52 L226 28 M230 52 L235 30" stroke="#b7a98a" stroke-width="4" stroke-linecap="round"/>`+
+     [-30,-15,0,15,30].map(d=>`<path d="M230 56 Q${230+d*1.6} 104 ${230+d} 150" stroke="#d9ccb0" stroke-width="1.4" fill="none"/>`).join('')+
+     `<text x="80" y="100" text-anchor="middle" font-size="16" font-weight="800" fill="#200058">بصلةُ ثومٍ</text>`;
+  else h+=`<g class="lbltag" font-size="14"><rect x="10" y="22" width="150" height="28" rx="8"/><text x="85" y="42" text-anchor="middle">كلُّ فصٍّ بصلةٌ</text><line x1="160" y1="40" x2="${230-90}" y2="80" stroke="#200058" stroke-width="1.5"/></g>`+
+     `<text x="230" y="182" text-anchor="middle" font-size="15" font-weight="800" fill="#200058">فصوصُ الثومِ</text>`;
+  $('#garlicSvg').innerHTML=h;
+  $('#garlicSvg').setAttribute('aria-label', garlicOpen?'فصوصُ الثومِ منفصلةً: كلُّ فصٍّ بصلةٌ':'بصلةُ ثومٍ كاملةٌ');
+  $('#garlicBtn').textContent = garlicOpen ? '↺ أعدِ الثومَ' : '✋ افصلْ فصوصَ الثومِ';
+}
+$('#onionBtn').onclick=()=>{ onionCut=!onionCut; drawOnion(); if(onionCut) say('#fbOnion','info','انظرْ إلى المقطعِ: في القاعدةِ <b>ساقٌ قرصيةٌ</b> تخرجُ منها جذورٌ عرضيةٌ ليفيةُ الشكلِ، وتحملُ أوراقاً ذاتَ قواعدَ شحميةٍ تخزنُ كمياتٍ كبيرةً من الماءِ.'); };
+$('#onionSvg').addEventListener('click',()=>$('#onionBtn').click());
+$('#garlicBtn').onclick=()=>{ garlicOpen=!garlicOpen; drawGarlic(); if(garlicOpen) say('#fbOnion','info','الثومُ: كلُّ بصلةٍ مقسّمةٌ إلى أجزاءٍ صغيرةٍ تسمّى <b>فصوصاً</b>، وكلُّ فصٍّ بصلةٌ.'); };
+$('#garlicSvg').addEventListener('click',()=>$('#garlicBtn').click());
+let onionOK=false, onionWrong=0;
+const onionMsg={
+  rings:'حاولْ مرةً أخرى — الحلقاتُ الشحميةُ هي <b>قواعدُ الأوراقِ</b> التي تخزنُ الماءَ. الساقُ هو الجزءُ الذي يحملُ هذه الأوراقَ.',
+  roots:'حاولْ مرةً أخرى — الخيوطُ الرفيعةُ في الأسفلِ هي <b>جذورٌ عرضيةٌ ليفيةٌ</b> تخرجُ من قاعدةِ الساقِ.',
+  disc:'صحيحٌ! البصلةُ <b>ساقٌ قرصيةٌ</b> في القاعدةِ: تخرجُ منها الجذورُ، وتحملُ الأوراقَ ذاتَ القواعدِ الشحميةِ. إذنْ البصلةُ — مثلُ الدرنةِ — ساقٌ متحوّرةٌ وليستْ جذراً.'
+};
+function answerOnion(a,b){
+  if (onionOK) return; $$('#qOnion .choice').forEach(x=>x.classList.remove('bad'));
+  if (a==='disc'){ onionOK=true; b.classList.add('ok'); say('#fbOnion','ok',onionMsg.disc); $('#onionShow').hidden=true; if(!onionCut){ onionCut=true; drawOnion(); } }
+  else { onionWrong++; b.classList.add('bad'); say('#fbOnion','bad',onionMsg[a]); if(onionWrong>=2) $('#onionShow').hidden=false; }
+}
+$$('#qOnion .choice').forEach(b=>b.onclick=()=>answerOnion(b.dataset.a,b));
+$('#onionShow').onclick=()=>answerOnion('disc',$('#qOnion [data-a="disc"]'));
+drawOnion(); drawGarlic();
+
+/* ================= STAGE 6 ================= */
+let sumCele=false;
+function enterSummary(){
+  const g=planted.filter(p=>p.grow), t=g.reduce((a,p)=>a+p.nT,0);
+  $('#myStats').innerHTML = planted.length ?
+    `<span class="badge">🔪 قطعاتُكَ: ${ar(cuts)}</span><span class="badge ok">🌱 نباتاتٌ نمتْ: ${ar(g.length)} / ${ar(planted.length)}</span><span class="badge ok">🥔 درناتٌ جديدةٌ: ${ar(t)}</span>`+
+    `<span class="badge">${decision==='wait'?'⏳ انتظرتَ الطبقةَ الفلّينيةَ':'⚡ زرعتَ فوراً'}</span>` : '';
+  if (!sumCele){ sumCele=true; Kit.celebrate(); }
+}
+$('#againBtn').onclick=()=>Kit.go(1);
+
+/* ================= stages ================= */
+Kit.setupStages(['أفحصُ الدرنةَ','أقطّعُ الدرنةَ','أنتظرُ أم أزرعُ؟','أزرعُ وأراقبُ','درنةٌ أم بصلةٌ؟','خلاصةٌ'],{
+  canLeave(i){
+    if (i===0){ if (found.size<GROUPS.length) return 'ابحثْ عن كلِّ مجموعاتِ العيونِ أولاً'; if (!rootOK) return 'أجبْ عن السؤالِ: جذرٌ أم ساقٌ؟'; }
+    if (i===1){ if (cuts<1) return 'قطّعِ الدرنةَ الكبيرةَ أولاً (اسحبْ خطّاً عبرَها)'; if (!smallWhole) return 'قرّرْ ماذا تفعلُ بالدرنةِ الصغيرةِ'; }
+    if (i===2){ if (!decision || decVer!==planVer) return 'اخترْ: تنتظرُ أم تزرعُ فوراً؟'; }
+    if (i===3){ if (!reachedEnd) return 'حرّكِ المؤشّرَ حتى الأسبوعِ ٤'; }
+    if (i===4){ if (sortDone<ITEMS.length) return 'صنّفْ كلَّ النباتاتِ أولاً'; }
+    return true;
+  },
+  onEnter(i){
+    if (i===1) drawCut();
+    if (i===2) enterDecide();
+    if (i===3) enterGarden();
+    if (i===5) enterSummary();
+  }
+});
+drawEyeStage(); drawCut();
+window.__potato={get pieces(){return pieces;}, get planted(){return planted;}, applyCut, countEyes};
+})();
+</script>
+</body>
+</html>
