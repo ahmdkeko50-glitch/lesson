@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>مختبرُ التغيّرِ</title>
+<!--
+  BASE TEMPLATE — copy this whole file, then:
+  1. change <title>, the header (.ref chip, h1), and the STAGES list
+  2. write each stage inside <main> as <section class="stage" data-stage="i">
+  3. put activity CSS in the second <style> block and activity JS in the last <script>
+  Everything (CSS + JS) stays inline. No external files, fonts or CDNs.
+-->
+<style>
+/* ================= DESIGN TOKENS (from the book's brand) ================= */
+:root{
+  --navy:#200058; --navy-2:#3a1f7a; --ink:#200058; --muted:#5f5a85;
+  --cyan:#00c3fe; --cyan-d:#0a8fc0; --cyan-l:#e3f8ff; --cyan-b:#b8ebff;
+  --green:#12a06a; --green-d:#0b7a50; --green-l:#e4f6ee; --green-b:#9cd9bd;
+  --red:#e8425a; --red-d:#c22b43; --red-l:#fde8ec; --red-b:#f5b3bf;
+  --yellow:#ffd15c; --orange:#f6a723; --yellow-l:#fff6dc;
+  --purple:#7b5cff; --purple-l:#efeaff;
+  --bg:#f1f0fb; --bg-2:#e3f8ff; --card:#ffffff; --line:#e0ddf0; --soft:#faf9fe;
+  --r-s:12px; --r:18px; --r-l:26px;
+  --sh:0 6px 18px rgba(32,0,88,.08); --sh-l:0 18px 50px rgba(32,0,88,.14);
+  --font: "Segoe UI","Noto Sans Arabic","Noto Naskh Arabic","Geeza Pro","Arial",Tahoma,system-ui,sans-serif;
+  --tap:48px;
+}
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{margin:0;min-height:100vh;font-family:var(--font);color:var(--ink);
+  background:linear-gradient(180deg,var(--bg) 0%,var(--bg-2) 100%) fixed;line-height:1.7;}
+button,input,select,textarea{font-family:inherit;color:inherit;}
+img,svg,canvas{max-width:100%;}
+:focus-visible{outline:3px solid var(--cyan);outline-offset:3px;border-radius:8px;}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+
+/* ================= SHELL ================= */
+.app{max-width:1120px;margin:0 auto;padding:14px 16px 110px;}
+.topbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--card);border:1.5px solid var(--line);
+  border-radius:var(--r);box-shadow:var(--sh);padding:10px 14px;}
+.ref{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13.5px;font-weight:700;color:var(--cyan-d);
+  background:var(--cyan-l);border:1.5px solid var(--cyan-b);border-radius:999px;padding:6px 14px;}
+.ref b{color:var(--navy);}
+.topbar h1{flex:1;min-width:200px;margin:0;font-size:clamp(19px,2.6vw,26px);font-weight:900;line-height:1.3;}
+.topbar h1 small{display:block;font-size:13px;font-weight:600;color:var(--muted);}
+.dots{display:flex;gap:6px;align-items:center;list-style:none;margin:0;padding:0;}
+.dots li{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:14px;
+  background:var(--soft);border:2px solid var(--line);color:var(--muted);transition:all .25s;}
+.dots li.on{background:var(--navy);border-color:var(--navy);color:#fff;transform:scale(1.08);}
+.dots li.done{background:var(--green);border-color:var(--green);color:#fff;}
+
+.stage{display:none;margin-top:16px;background:var(--card);border-radius:var(--r-l);box-shadow:var(--sh-l);overflow:hidden;
+  animation:rise .4s ease both;}
+.stage.on{display:block;}
+.stage-h{background:var(--navy);color:#fff;padding:14px 22px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.stage-h .kind{font-size:13px;font-weight:800;background:rgba(255,255,255,.14);border-radius:999px;padding:4px 12px;}
+.stage-h h2{margin:0;font-size:clamp(18px,2.4vw,23px);font-weight:900;}
+.stage-b{padding:20px 22px 24px;}
+.lead{font-size:17px;margin:0 0 14px;}
+.task{display:flex;gap:10px;align-items:flex-start;background:var(--yellow-l);border:1.5px solid #f3dc97;border-radius:var(--r-s);
+  padding:10px 14px;font-weight:700;margin:0 0 14px;}
+.task::before{content:"👆";font-size:20px;line-height:1.4;}
+.book{font-size:15px;background:var(--purple-l);border-inline-start:5px solid var(--purple);border-radius:var(--r-s);padding:10px 14px;margin:10px 0;}
+.book::before{content:"📘 من الكتاب: ";font-weight:800;color:var(--purple);}
+.extra{font-size:13.5px;color:var(--muted);background:var(--soft);border:1.5px dashed var(--line);border-radius:var(--r-s);padding:8px 12px;margin:10px 0;}
+.extra::before{content:"ℹ️ توضيح للنشاط وليس من الكتاب: ";font-weight:800;}
+.grid2{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:20px;align-items:start;}
+@media (max-width:820px){.grid2{grid-template-columns:minmax(0,1fr);}}
+.panel{background:var(--soft);border:1.5px solid var(--line);border-radius:var(--r);padding:14px;}
+.panel h3{margin:0 0 8px;font-size:17px;font-weight:900;}
+
+/* ================= CONTROLS ================= */
+.btn{min-height:var(--tap);min-width:var(--tap);display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:0 20px;border-radius:999px;border:2px solid transparent;font-size:16px;font-weight:800;cursor:pointer;
+  background:var(--navy);color:#fff;transition:transform .12s,background .2s,box-shadow .2s;touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;user-select:none;}
+.btn:active{transform:scale(.96);}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+.btn.cyan{background:var(--cyan);color:var(--navy);}
+.btn.green{background:var(--green);}
+.btn.red{background:var(--red);}
+.btn.ghost{background:#fff;color:var(--navy);border-color:var(--line);}
+.btn.ghost[aria-pressed="true"]{background:var(--navy);color:#fff;border-color:var(--navy);}
+.btn.sm{min-height:40px;font-size:14.5px;padding:0 14px;}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;}
+.choice{min-height:56px;text-align:start;padding:10px 14px;border-radius:var(--r-s);border:2px solid var(--line);background:#fff;
+  font-size:16px;font-weight:700;cursor:pointer;transition:all .15s;}
+.choice:hover{border-color:var(--cyan);}
+.choice[aria-pressed="true"]{border-color:var(--navy);background:var(--purple-l);}
+.choice.ok{border-color:var(--green);background:var(--green-l);}
+.choice.bad{border-color:var(--red);background:var(--red-l);}
+input[type=range]{width:100%;height:44px;accent-color:var(--cyan-d);cursor:pointer;}
+.slider-lbl{display:flex;justify-content:space-between;font-size:13.5px;font-weight:700;color:var(--muted);}
+
+/* chips + drop zones (Kit.dnd) */
+.chips{display:flex;flex-wrap:wrap;gap:8px;min-height:56px;padding:8px;border-radius:var(--r-s);background:var(--soft);
+  border:1.5px dashed var(--line);}
+.chip{min-height:46px;display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;background:#fff;
+  border:2px solid var(--cyan-b);font-weight:800;font-size:15.5px;cursor:grab;touch-action:none;user-select:none;
+  -webkit-user-select:none;box-shadow:0 2px 0 var(--cyan-b);transition:transform .12s,box-shadow .12s,border-color .2s;}
+.chip.sel{border-color:var(--navy);box-shadow:0 0 0 4px rgba(0,195,254,.35);transform:translateY(-2px);}
+.chip.dragging{opacity:.35;}
+.chip.ghost{position:fixed;z-index:999;pointer-events:none;opacity:.95;transform:rotate(-3deg) scale(1.05);box-shadow:var(--sh-l);}
+.chip.ok{border-color:var(--green);background:var(--green-l);box-shadow:0 2px 0 var(--green-b);cursor:default;}
+.chip.bad{border-color:var(--red);background:var(--red-l);animation:shake .4s;}
+.zone{min-height:64px;border:2.5px dashed var(--cyan-b);border-radius:var(--r-s);padding:8px;background:#fff;
+  transition:background .15s,border-color .15s;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;}
+.zone.hot{background:var(--cyan-l);border-color:var(--cyan);border-style:solid;}
+.zone .zt{width:100%;font-weight:900;font-size:15px;color:var(--navy);}
+
+/* feedback */
+.fb{display:none;margin-top:12px;border-radius:var(--r-s);padding:12px 14px 12px 14px;font-size:16px;font-weight:600;
+  border:2px solid;animation:rise .25s ease both;}
+.fb.show{display:flex;gap:10px;align-items:flex-start;}
+.fb .ic{font-size:22px;line-height:1.3;flex:none;}
+.fb.ok{background:var(--green-l);border-color:var(--green-b);color:#064b31;}
+.fb.bad{background:var(--red-l);border-color:var(--red-b);color:#7a1426;}
+.fb.info{background:var(--cyan-l);border-color:var(--cyan-b);color:#06456a;}
+.fb.warn{background:var(--yellow-l);border-color:#f3dc97;color:#5a4200;}
+
+/* meters & badges */
+.meter{height:16px;border-radius:999px;background:#ece9f8;overflow:hidden;}
+.meter>i{display:block;height:100%;border-radius:999px;background:var(--cyan);transition:width .4s;}
+.badge{display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:14px;border-radius:999px;padding:4px 12px;
+  background:var(--soft);border:1.5px solid var(--line);}
+.badge.ok{background:var(--green-l);border-color:var(--green-b);color:var(--green-d);}
+.badge.bad{background:var(--red-l);border-color:var(--red-b);color:var(--red-d);}
+.missions{list-style:none;margin:0;padding:0;display:grid;gap:8px;}
+.missions li{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-s);background:#fff;
+  border:2px solid var(--line);font-weight:700;}
+.missions li .st{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--soft);
+  border:2px solid var(--line);flex:none;font-size:15px;}
+.missions li.cur{border-color:var(--cyan);}
+.missions li.done{border-color:var(--green-b);background:var(--green-l);}
+.missions li.done .st{background:var(--green);border-color:var(--green);color:#fff;}
+
+/* 3D canvas wrapper (Kit.orbit) */
+.view3d{position:relative;border-radius:var(--r);background:radial-gradient(ellipse at 50% 40%,#2d1670 0%,#160038 75%);
+  overflow:hidden;touch-action:none;cursor:grab;aspect-ratio:4/3;width:100%;}
+.view3d canvas{display:block;width:100%;height:100%;}
+.view3d .hint3d{position:absolute;bottom:10px;inset-inline-start:10px;font-size:13px;font-weight:700;color:#d9d2ff;
+  background:rgba(255,255,255,.1);border-radius:999px;padding:4px 12px;pointer-events:none;}
+
+/* nav footer */
+.navbar{position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);
+  border-top:1.5px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));}
+.navbar .in{max-width:1120px;margin:0 auto;display:flex;gap:10px;align-items:center;justify-content:space-between;}
+.navbar .where{font-weight:800;color:var(--muted);font-size:14.5px;text-align:center;flex:1;}
+
+/* summary card */
+.sum{display:grid;gap:10px;}
+.sum li{background:var(--green-l);border:1.5px solid var(--green-b);border-radius:var(--r-s);padding:10px 14px;font-weight:700;list-style:none;}
+.sum{padding:0;margin:0;}
+
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:998;}
+@keyframes rise{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+@keyframes shake{0%,100%{transform:none;}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+@keyframes pop{0%{transform:scale(.6);opacity:0;}70%{transform:scale(1.08);}100%{transform:scale(1);opacity:1;}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;scroll-behavior:auto !important;}}
+@media (max-width:560px){.stage-b{padding:16px 14px 20px;}.stage-h{padding:12px 14px;}.dots li{width:28px;height:28px;font-size:12.5px;}.btn{padding:0 16px;}}
+</style>
+<style>
+/* ================= ACTIVITY-SPECIFIC CSS ================= */
+.lab{background:linear-gradient(180deg,#f7f6ff 0%,#e6ecf8 100%);border:1.5px solid var(--line);border-radius:var(--r);padding:6px;position:relative;}
+.lab svg{display:block;width:100%;height:auto;}
+.lab svg text{font-family:var(--font);font-weight:800;fill:var(--muted);}
+.touchsvg{touch-action:none;}
+.ctrls{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;align-items:center;}
+.seg{display:inline-flex;border:2px solid var(--line);border-radius:999px;overflow:hidden;background:#fff;}
+.seg button{min-height:44px;padding:0 14px;border:0;background:transparent;font-weight:800;font-size:15px;cursor:pointer;color:var(--navy);}
+.seg button[aria-pressed="true"]{background:var(--navy);color:#fff;}
+.seg .sl{font-size:13.5px;font-weight:800;color:var(--muted);padding:0 10px;display:flex;align-items:center;}
+.mats{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px;padding:0;list-style:none;}
+.mats li{font-size:13.5px;font-weight:700;background:#fff;border:1.5px solid var(--line);border-radius:999px;padding:3px 10px;}
+.mats li:first-child{background:var(--navy);color:#fff;border-color:var(--navy);}
+.qq{font-weight:900;font-size:17px;margin:14px 0 8px;}
+.quiz{margin-top:6px;}
+.quiz .btn{margin-top:8px;}
+.choice:disabled{cursor:default;}
+.choice:disabled:not(.ok):not(.bad){opacity:.55;}
+.meterrow{display:flex;align-items:center;gap:10px;margin-top:10px;font-weight:800;font-size:14px;color:var(--muted);}
+.meterrow .meter{flex:1;}
+.missions li{font-size:15px;}
+.missions li .st{font-size:13px;font-weight:900;}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:6px 0 16px;}
+.duo figure{margin:0;background:var(--soft);border:1.5px solid var(--line);border-radius:var(--r);padding:10px;text-align:center;}
+.duo figure svg{width:100%;max-width:230px;height:auto;display:block;margin:0 auto;}
+.duo figcaption{font-weight:800;font-size:15.5px;margin-top:6px;}
+@media (max-width:520px){.duo{gap:8px;}.duo figcaption{font-size:14px;}}
+.flick{transform-box:fill-box;transform-origin:50% 100%;animation:flick .22s ease-in-out infinite alternate;}
+@keyframes flick{from{transform:scale(1,1);}to{transform:scale(.93,1.08);}}
+#cup{transition:transform .8s cubic-bezier(.4,.1,.2,1);}
+.hot-hint{animation:pulse 1.2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+[role="button"].svgbtn{cursor:pointer;outline:none;}
+.svgbtn:focus-visible .ring{stroke:var(--cyan);stroke-width:4;opacity:1;}
+.svgbtn .ring{opacity:0;}
+.svgbtn.sel .ring{opacity:1;stroke:var(--cyan-d);}
+.btn.big{min-height:52px;font-size:17px;}
+
+/* word equation builder */
+.eqwrap{margin-top:12px;}
+.eq{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:center;gap:8px 6px;padding:14px 8px;background:#fff;
+  border:2px solid var(--line);border-radius:var(--r);}
+.eq .grp{display:flex;align-items:flex-end;gap:6px;}
+.slot.zone{min-width:96px;min-height:58px;justify-content:center;align-items:center;align-content:center;padding:5px;}
+.slot.plus{min-width:50px;}
+.slot.cond{min-height:50px;min-width:118px;border-color:#f0cf74;background:var(--yellow-l);}
+.slot:empty::before{content:"؟";color:#b7b2d6;font-size:22px;font-weight:900;}
+.slot .chip{box-shadow:none;}
+.arrowbox{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.arrowbox svg{width:118px;height:22px;display:block;}
+.eqlegend{display:none;font-size:14px;font-weight:700;color:var(--muted);text-align:center;margin-top:8px;}
+.eqwrap.done .eqlegend{display:block;}
+.eqwrap.done .eq{border-color:var(--green-b);background:var(--green-l);}
+.eqrules{margin:0 0 8px;padding-inline-start:20px;font-size:15px;}
+.eqrules li{margin:2px 0;}
+@media (max-width:560px){.slot.zone{min-width:74px;}.slot.cond{min-width:96px;}.arrowbox svg{width:96px;}.eq .chip{font-size:14px;padding:4px 9px;min-height:42px;}}
+
+/* static equation */
+.eqs{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:center;gap:6px;font-weight:900;font-size:16px;margin:8px 0 0;}
+.eqs .m{background:#fff;border:2px solid var(--cyan-b);border-radius:999px;padding:2px 12px;}
+.eqs .ar{display:inline-flex;flex-direction:column;align-items:center;font-size:13px;color:var(--orange);line-height:1.2;}
+.eqs .ar svg{width:74px;height:16px;}
+.eqs b{font-size:20px;}
+.eqs .pg{display:inline-flex;align-items:flex-end;gap:6px;}
+
+/* classify */
+.sortz{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;}
+@media (max-width:640px){.sortz{grid-template-columns:1fr;}}
+.sortz .zone{min-height:150px;}
+.zone .zt small{display:block;font-size:13px;color:var(--muted);font-weight:700;}
+#zPhys{border-color:var(--cyan-b);} #zChem{border-color:#f0b58a;}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;}
+@media (max-width:560px){.cmp{grid-template-columns:1fr;}}
+.cmp div{border-radius:var(--r-s);padding:10px 14px;font-weight:700;border:2px solid var(--line);background:#fff;}
+.cmp div b{display:block;color:var(--muted);font-size:13.5px;}
+.hidden{display:none !important;}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <span class="ref">📘 <b>الفصلُ ٦: التفاعلاتُ الكيميائيةُ</b> · الدرسُ ١ (+ الدرسُ ٢) · <span>كتابُ النشاطِ ص ٤٣–٤٥</span></span>
+    <h1>مختبرُ التغيّرِ<small>هل تكوّنتْ مادةٌ جديدةٌ؟</small></h1>
+    <ol class="dots" id="dots" aria-label="مراحلُ النشاطِ"></ol>
+  </header>
+
+  <main id="main">
+    <!-- ============ 0. PREDICT ============ -->
+    <section class="stage" data-stage="0" aria-labelledby="s0h">
+      <div class="stage-h"><span class="kind">أتوقّعُ</span><h2 id="s0h">سكرٌ في الشايِ… وسكرٌ على اللهبِ</h2></div>
+      <div class="stage-b">
+        <p class="lead">في هذا المختبرِ ستجرّبُ بنفسِك. وفي كلِّ محطةٍ سؤالٌ واحدٌ: <b>هل تكوّنتْ مادةٌ جديدةٌ؟</b></p>
+        <div class="duo">
+          <figure>
+            <svg viewBox="0 0 200 150" aria-hidden="true">
+              <rect x="0" y="132" width="200" height="18" fill="#e9e4f7"/>
+              <ellipse cx="110" cy="130" rx="52" ry="8" fill="#fff" stroke="#c9c3e6" stroke-width="2"/>
+              <path d="M82,42 C82,70 97,80 98,96 C99,112 90,122 93,128 L127,128 C130,122 121,112 122,96 C123,80 138,70 138,42 Z" fill="#a8441a" opacity=".9"/>
+              <path d="M80,36 C80,70 97,80 98,96 C99,112 90,122 93,128 L127,128 C130,122 121,112 122,96 C123,80 140,70 140,36" fill="rgba(230,245,255,.3)" stroke="#a9c7da" stroke-width="2.5"/>
+              <path d="M87,46 C88,66 98,78 100,92" stroke="#fff" stroke-width="3" opacity=".55" fill="none" stroke-linecap="round"/>
+              <line x1="40" y1="20" x2="95" y2="60" stroke="#9aa6b2" stroke-width="5" stroke-linecap="round"/>
+              <ellipse cx="38" cy="18" rx="13" ry="8" fill="#cfd6dd" stroke="#8a96a3" stroke-width="1.5"/>
+              <ellipse cx="38" cy="15" rx="9" ry="4.5" fill="#fff"/>
+            </svg>
+            <figcaption>🍵 نضعُ السكرَ في الشايِ ونحرّكُه</figcaption>
+          </figure>
+          <figure>
+            <svg viewBox="0 0 200 150" aria-hidden="true">
+              <rect x="0" y="138" width="200" height="12" fill="#e9e4f7"/>
+              <path d="M100,124 C88,120 89,102 100,88 C111,102 112,120 100,124Z" fill="#ff9a1f"/>
+              <path d="M100,124 C95,121 95,112 100,104 C105,112 105,121 100,124Z" fill="#bfe3ff"/>
+              <path d="M78,138 Q76,128 88,124 L112,124 Q124,128 122,138 Z" fill="#cfe6f3" stroke="#9cbbd0" stroke-width="1.5"/>
+              <path d="M89,10 L89,88 A11,11 0 0 0 111,88 L111,10" fill="rgba(225,242,255,.5)" stroke="#8fb3c9" stroke-width="2.5"/>
+              <path d="M91,78 L109,78 L109,88 A9,9 0 0 1 91,88 Z" fill="#fff" stroke="#ddd" stroke-width="1"/>
+              <rect x="40" y="26" width="48" height="10" rx="5" fill="#c58b4f"/>
+              <rect x="86" y="23" width="28" height="16" rx="5" fill="none" stroke="#6d7a86" stroke-width="4"/>
+            </svg>
+            <figcaption>🔥 نسخّنُ السكرَ في أنبوبِ اختبارٍ</figcaption>
+          </figure>
+        </div>
+        <p class="task">توقّعْ: ماذا يحدثُ للسكرِ في الحالتينِ؟ اخترْ إجابةً واحدةً.</p>
+        <div class="choices" id="predCh"></div>
+        <div class="fb" id="predFb"></div>
+        <p class="book">عندما يحدثُ تغيّرٌ على مادةٍ أو موادَّ فتتكوّنُ مادةٌ أو موادُّ جديدةٌ يسمّى ذلك التفاعلَ الكيميائيَّ.</p>
+      </div>
+    </section>
+
+    <!-- ============ 1. SUGAR IN TEA ============ -->
+    <section class="stage" data-stage="1" aria-labelledby="s1h">
+      <div class="stage-h"><span class="kind">المحطةُ ١</span><h2 id="s1h">سكرٌ في الشايِ</h2></div>
+      <div class="stage-b">
+        <div class="grid2">
+          <div>
+            <p class="task" id="teaTask">اسحبِ الملعقةَ المليئةَ بالسكرِ إلى كأسِ الشايِ.</p>
+            <div class="lab">
+              <svg id="teaSvg" class="touchsvg" viewBox="0 0 400 300" role="img" aria-label="كأسُ شايٍ على صحنٍ، وسكّريةٌ فيها ملعقةٌ">
+                <defs>
+                  <linearGradient id="gTea" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#c8561c"/><stop offset="1" stop-color="#7a2a0c"/></linearGradient>
+                  <linearGradient id="gGlass" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity=".6"/><stop offset=".45" stop-color="#e8f6ff" stop-opacity=".12"/><stop offset="1" stop-color="#fff" stop-opacity=".45"/></linearGradient>
+                  <clipPath id="cGlass"><path d="M208,108 C208,150 229,166 231,190 C233,214 220,234 224,250 L276,250 C280,234 267,214 269,190 C271,166 292,150 292,108 Z"/></clipPath>
+                </defs>
+                <rect x="0" y="266" width="400" height="34" fill="#e3def5"/>
+                <ellipse cx="250" cy="262" rx="80" ry="13" fill="#fff" stroke="#c9c3e6" stroke-width="2"/>
+                <ellipse cx="250" cy="259" rx="52" ry="6" fill="#efeefa"/>
+                <g clip-path="url(#cGlass)">
+                  <rect x="190" y="122" width="120" height="140" fill="url(#gTea)"/>
+                  <ellipse cx="250" cy="122" rx="40" ry="4" fill="#d9712f"/>
+                  <g id="teaSwirl" opacity="0" fill="none" stroke="#ffd7b0" stroke-width="2" stroke-linecap="round">
+                    <path d="M222,150 Q250,140 278,150"/><path d="M228,175 Q250,166 272,175"/><path d="M232,205 Q250,198 268,205"/>
+                  </g>
+                  <g id="teaCrys"></g>
+                </g>
+                <path d="M206,104 C206,150 229,166 231,190 C233,214 220,234 224,251 L276,251 C280,234 267,214 269,190 C271,166 294,150 294,104" fill="url(#gGlass)" stroke="#a9c7da" stroke-width="2.5"/>
+                <ellipse cx="250" cy="104" rx="44" ry="5" fill="none" stroke="#a9c7da" stroke-width="2"/>
+                <path d="M215,116 C216,146 230,162 234,184" stroke="#fff" stroke-width="4" opacity=".55" fill="none" stroke-linecap="round"/>
+                <!-- sugar bowl -->
+                <path d="M38,214 Q40,262 95,262 Q150,262 152,214 Z" fill="#fff" stroke="#c9c3e6" stroke-width="2"/>
+                <path d="M46,236 Q95,250 144,236" stroke="#00c3fe" stroke-width="3" fill="none" opacity=".7"/>
+                <ellipse cx="95" cy="214" rx="57" ry="9" fill="#fbfbff" stroke="#c9c3e6" stroke-width="2"/>
+                <g fill="#fff" stroke="#d6d3e8" stroke-width="1">
+                  <rect x="60" y="208" width="6" height="6"/><rect x="76" y="211" width="6" height="6" transform="rotate(20 79 214)"/><rect x="112" y="209" width="6" height="6"/><rect x="128" y="212" width="5" height="5" transform="rotate(35 130 214)"/>
+                </g>
+                <text x="95" y="288" text-anchor="middle" font-size="15">سكرُ المائدةِ</text>
+                <text x="250" y="288" text-anchor="middle" font-size="15">شايٌ</text>
+                <g id="spoon" class="svgbtn" role="button" tabindex="0" aria-label="ملعقةُ سكرٍ: اسحبْها إلى الكأسِ أو اضغطْ Enter" style="cursor:grab">
+                  <circle class="ring" r="22" fill="none" stroke-width="3"/>
+                  <line x1="0" y1="0" x2="36" y2="-108" stroke="#9aa6b2" stroke-width="6" stroke-linecap="round"/>
+                  <line x1="2" y1="-8" x2="34" y2="-104" stroke="#e6ebf0" stroke-width="2" stroke-linecap="round"/>
+                  <ellipse cx="0" cy="0" rx="15" ry="8.5" fill="#cfd6dd" stroke="#8a96a3" stroke-width="1.5"/>
+                  <ellipse id="spoonLoad" cx="0" cy="-3" rx="11" ry="5.5" fill="#fff" stroke="#e1def0"/>
+                  <rect x="-30" y="-120" width="80" height="140" fill="transparent"/>
+                </g>
+              </svg>
+            </div>
+            <div class="ctrls">
+              <button class="btn cyan" id="pourBtn" type="button">🥄 ضعْ ملعقةَ سكرٍ</button>
+              <button class="btn" id="stirBtn" type="button" disabled>🔄 حرّكْ (اضغطْ مطوّلاً)</button>
+            </div>
+            <div class="meterrow"><span>ذوبانُ السكرِ</span><div class="meter" role="progressbar" aria-label="ذوبانُ السكرِ" aria-valuemin="0" aria-valuemax="100" id="stirMeterBox"><i id="stirMeter" style="width:0%"></i></div></div>
+            <p class="extra" style="margin-top:8px">يمكنُك أيضاً أن تحرّكَ بإصبعِك داخلَ الكأسِ حركةً دائريةً.</p>
+          </div>
+          <div class="panel">
+            <h3>🔎 ملاحظاتي</h3>
+            <div class="fb" id="teaFb"></div>
+            <div id="teaQ"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 2. HEATING SUGAR ============ -->
+    <section class="stage" data-stage="2" aria-labelledby="s2h">
+      <div class="stage-h"><span class="kind">المحطةُ ٢</span><h2 id="s2h">تسخينُ السكرِ</h2></div>
+      <div class="stage-b">
+        <ul class="mats" aria-label="الموادُّ"><li>الموادُّ</li><li>مصدرٌ حراريٌّ</li><li>حاملٌ حديديٌّ</li><li>سكرُ المائدةِ</li><li>أنبوبُ اختبارٍ</li><li>ماسكٌ</li><li>ملعقةٌ صغيرةٌ</li><li>مناديلُ ورقيةٌ</li><li>قدحٌ زجاجيٌّ صغيرٌ</li></ul>
+        <div class="grid2">
+          <div>
+            <div class="lab">
+              <svg id="heatSvg" viewBox="0 0 420 380" role="img" aria-label="أنبوبُ اختبارٍ فيه سكرٌ يمسكُه ماسكٌ على حاملٍ حديديٍّ فوقَ مصدرٍ حراريٍّ، وقدحٌ زجاجيٌّ">
+                <defs>
+                  <clipPath id="cTube"><path d="M215,100 L215,273 A15,15 0 0 0 245,273 L245,100 Z"/></clipPath>
+                  <radialGradient id="gGlow"><stop offset="0" stop-color="#ffb347" stop-opacity=".75"/><stop offset="1" stop-color="#ffb347" stop-opacity="0"/></radialGradient>
+                  <linearGradient id="gFlame" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#3d7bff"/><stop offset=".3" stop-color="#ff8a1f"/><stop offset="1" stop-color="#ffd15c"/></linearGradient>
+                  <linearGradient id="gRod" x1="0" x2="1"><stop offset="0" stop-color="#6b7682"/><stop offset=".45" stop-color="#d3d9e0"/><stop offset="1" stop-color="#5f6a76"/></linearGradient>
+                  <linearGradient id="gLamp" x1="0" x2="1"><stop offset="0" stop-color="#cfe6f3"/><stop offset=".4" stop-color="#f4fbff"/><stop offset="1" stop-color="#b8d6e8"/></linearGradient>
+                  <linearGradient id="gCupG" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity=".7"/><stop offset=".4" stop-color="#e6f5ff" stop-opacity=".18"/><stop offset="1" stop-color="#fff" stop-opacity=".5"/></linearGradient>
+                </defs>
+                <rect x="0" y="360" width="420" height="20" fill="#e3def5"/>
+                <!-- stand -->
+                <rect x="28" y="346" width="150" height="14" rx="4" fill="#4a4f6a"/>
+                <rect x="74" y="56" width="10" height="292" rx="4" fill="url(#gRod)"/>
+                <rect x="88" y="134" width="40" height="10" fill="url(#gRod)"/>
+                <rect x="67" y="127" width="24" height="24" rx="4" fill="#3d4256"/>
+                <circle cx="79" cy="139" r="4" fill="#9aa3b5"/>
+                <!-- lamp -->
+                <path d="M188,358 Q184,326 205,318 L255,318 Q276,326 272,358 Z" fill="url(#gLamp)" stroke="#9cbbd0" stroke-width="2"/>
+                <path d="M192,350 Q190,336 200,332 L260,332 Q270,336 268,350 Q268,356 262,356 L198,356 Q192,356 192,350Z" fill="#7fc3ea" opacity=".55"/>
+                <rect x="217" y="308" width="26" height="12" rx="3" fill="#8b95a1"/>
+                <rect x="227" y="300" width="6" height="10" rx="2" fill="#f2efe6" stroke="#cfc8b4"/>
+                <ellipse id="glow" cx="230" cy="282" rx="44" ry="30" fill="url(#gGlow)" opacity="0"/>
+                <g id="flameG" opacity="0" transform="translate(230,303) scale(.75)">
+                  <g class="flick">
+                    <path d="M0,0 C-16,-6 -14,-28 0,-50 C14,-28 16,-6 0,0Z" fill="url(#gFlame)"/>
+                    <path d="M0,0 C-7,-4 -7,-15 0,-26 C7,-15 7,-4 0,0Z" fill="#cfe9ff" opacity=".9"/>
+                  </g>
+                </g>
+                <!-- tube contents -->
+                <g clip-path="url(#cTube)">
+                  <rect id="liq" x="210" y="262" width="40" height="40" fill="#f4e6a6" opacity="0"/>
+                  <ellipse id="liqTop" cx="230" cy="262" rx="15" ry="2.5" fill="#fff" opacity="0"/>
+                  <g id="crys"></g>
+                  <g id="charTex" opacity="0" fill="#000"></g>
+                  <g id="liqBub"></g>
+                </g>
+                <!-- tube glass -->
+                <path d="M213,98 L213,273 A17,17 0 0 0 247,273 L247,98" fill="rgba(225,242,255,.28)" stroke="#8fb3c9" stroke-width="2.5"/>
+                <ellipse cx="230" cy="98" rx="19" ry="3.2" fill="none" stroke="#8fb3c9" stroke-width="2"/>
+                <line x1="219" y1="110" x2="219" y2="268" stroke="#fff" stroke-width="3" opacity=".6" stroke-linecap="round"/>
+                <!-- tongs -->
+                <rect x="124" y="131" width="86" height="16" rx="7" fill="#c58b4f" stroke="#9a6a38" stroke-width="1.5"/>
+                <line x1="134" y1="139" x2="200" y2="139" stroke="#e0b07c" stroke-width="2" opacity=".8"/>
+                <rect x="208" y="128" width="44" height="22" rx="6" fill="none" stroke="#6d7a86" stroke-width="5"/>
+                <!-- vapour -->
+                <g id="vap"></g>
+                <g id="vapStatic" opacity="0" fill="#aab1cc">
+                  <ellipse cx="226" cy="84" rx="7" ry="5" opacity=".45"/><ellipse cx="236" cy="70" rx="9" ry="6" opacity=".35"/><ellipse cx="228" cy="56" rx="10" ry="6" opacity=".25"/>
+                </g>
+                <!-- cup -->
+                <g id="cup" style="transform:translate(360px,286px)">
+                  <path d="M-33,0 L-28,70 Q-27.5,74 -24,74 L24,74 Q27.5,74 28,70 L33,0" fill="url(#gCupG)" stroke="#8fb3c9" stroke-width="2.5"/>
+                  <ellipse cx="0" cy="0" rx="33" ry="3.5" fill="none" stroke="#8fb3c9" stroke-width="2"/>
+                  <line x1="-24" y1="10" x2="-21" y2="62" stroke="#fff" stroke-width="3" opacity=".7" stroke-linecap="round"/>
+                  <g id="drops"></g>
+                </g>
+                <!-- labels -->
+                <text x="79" y="46" text-anchor="middle" font-size="14">حاملٌ حديديٌّ</text>
+                <text x="160" y="124" text-anchor="middle" font-size="14">ماسكٌ</text>
+                <text x="305" y="200" text-anchor="middle" font-size="14">أنبوبُ اختبارٍ</text>
+                <text x="230" y="376" text-anchor="middle" font-size="14">مصدرٌ حراريٌّ</text>
+                <text id="cupLbl" x="360" y="376" text-anchor="middle" font-size="14">قدحٌ</text>
+              </svg>
+            </div>
+            <div class="ctrls">
+              <button class="btn red" id="flameBtn" type="button" aria-pressed="false">🔥 أشعلِ اللهبَ</button>
+              <div class="seg" role="group" aria-label="قوّةُ التسخينِ"><span class="sl">التسخينُ:</span><button type="button" id="lvl1" aria-pressed="true">هادئٌ</button><button type="button" id="lvl2" aria-pressed="false">قويٌّ</button></div>
+              <button class="btn ghost" id="cupBtn" type="button">🥛 ضعِ القدحَ مقلوباً</button>
+            </div>
+            <div class="meterrow"><span>مدّةُ التسخينِ</span><div class="meter"><i id="heatMeter" style="width:0%;background:linear-gradient(90deg,#ffd15c,#e8425a)"></i></div></div>
+            <div class="fb" id="heatHint"></div>
+          </div>
+          <div class="panel">
+            <h3>🧪 خطواتُ التجربةِ</h3>
+            <ol class="missions" id="hSteps">
+              <li><span class="st">١</span>أشعلِ اللهبَ وسخّنْ بهدوءٍ.</li>
+              <li><span class="st">٢</span>انصهرَ السكرُ: هل هو مادةٌ جديدةٌ؟</li>
+              <li><span class="st">٣</span>ضعِ القدحَ مقلوباً فوقَ الأنبوبِ: ما القطراتُ؟</li>
+              <li><span class="st">٤</span>أبعدِ القدحَ وتابعِ التسخينَ حتى تظهرَ مادةٌ سوداءُ.</li>
+              <li><span class="st">٥</span>أطفئِ اللهبَ وافحصِ المادةَ المتبقيةَ.</li>
+              <li><span class="st">٦</span>اكتبِ المعادلةَ اللفظيةَ.</li>
+            </ol>
+            <div id="heatQ"></div>
+          </div>
+        </div>
+        <div id="heatEq" class="hidden"></div>
+      </div>
+    </section>
+
+    <!-- ============ 3. ELECTROLYSIS ============ -->
+    <section class="stage" data-stage="3" aria-labelledby="s3h">
+      <div class="stage-h"><span class="kind">المحطةُ ٣</span><h2 id="s3h">التحليلُ الكهربائيُّ للماءِ</h2></div>
+      <div class="stage-b">
+        <ul class="mats" aria-label="الموادُّ"><li>الموادُّ</li><li>مشابكُ ورقٍ</li><li>رأسا قلمِ رصاصٍ</li><li>قدحٌ بلاستيكيٌّ كبيرٌ فيه ماءٌ وقليلٌ من عصيرِ الليمونِ</li><li>سلكٌ نحاسيٌّ</li><li>بطاريةٌ جافةٌ (٩ أو ٦ فولت)</li></ul>
+        <div class="grid2">
+          <div>
+            <p class="task" id="elTask">صِلِ الأسلاكَ: اضغطْ على أحدِ طرفيِ البطاريةِ ثم على أحدِ رأسَيِ القلمِ (أو اسحبْ بينهما).</p>
+            <div class="lab">
+              <svg id="elSvg" class="touchsvg" viewBox="0 0 420 340" role="img" aria-label="بطاريةٌ وقدحُ ماءٍ فيه رأسا قلمِ رصاصٍ">
+                <defs>
+                  <clipPath id="cCup2"><path d="M172,112 L388,112 L368,323 L192,323 Z"/></clipPath>
+                  <linearGradient id="gWater" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bfe8ff"/><stop offset="1" stop-color="#8fd0f2"/></linearGradient>
+                  <linearGradient id="gBat" x1="0" x2="1"><stop offset="0" stop-color="#2a1268"/><stop offset=".5" stop-color="#4a2a9a"/><stop offset="1" stop-color="#200058"/></linearGradient>
+                  <linearGradient id="gLead" x1="0" x2="1"><stop offset="0" stop-color="#2d2d38"/><stop offset=".4" stop-color="#7d7f8f"/><stop offset="1" stop-color="#26262f"/></linearGradient>
+                </defs>
+                <rect x="0" y="325" width="420" height="15" fill="#e3def5"/>
+                <!-- cup -->
+                <g clip-path="url(#cCup2)">
+                  <rect id="water" x="160" y="140" width="240" height="200" fill="url(#gWater)" opacity=".9"/>
+                  <rect id="waterTop" x="160" y="140" width="240" height="3" fill="#fff" opacity=".7"/>
+                  <g id="elBub"></g>
+                </g>
+                <line x1="178" y1="140" x2="384" y2="140" stroke="#0a8fc0" stroke-width="1.5" stroke-dasharray="5 4"/>
+                <text x="194" y="134" text-anchor="middle" font-size="11" style="fill:#0a8fc0">البدايةُ</text>
+                <path d="M170,108 L390,108 L369,324 L191,324 Z" fill="rgba(240,248,255,.25)" stroke="#9fb4c8" stroke-width="2.5"/>
+                <line x1="181" y1="122" x2="198" y2="312" stroke="#fff" stroke-width="4" opacity=".55" stroke-linecap="round"/>
+                <text x="280" y="314" text-anchor="middle" font-size="12.5">ماءٌ + قليلٌ من عصيرِ الليمونِ</text>
+                <!-- leads -->
+                <g id="leadL1" class="svgbtn" role="button" tabindex="0" aria-label="رأسُ قلمِ الرصاصِ الأولُ" data-lead="L1">
+                  <rect class="ring" x="232" y="50" width="36" height="84" rx="10" fill="none" stroke-width="3"/>
+                  <rect x="246" y="66" width="8" height="226" rx="3" fill="url(#gLead)"/>
+                  <path d="M243,98 L243,122 Q243,128 250,128 Q257,128 257,122 L257,94" fill="none" stroke="#b5bec8" stroke-width="2.5"/>
+                  <rect x="228" y="46" width="44" height="100" fill="transparent"/>
+                </g>
+                <g id="leadL2" class="svgbtn" role="button" tabindex="0" aria-label="رأسُ قلمِ الرصاصِ الثاني" data-lead="L2">
+                  <rect class="ring" x="302" y="50" width="36" height="84" rx="10" fill="none" stroke-width="3"/>
+                  <rect x="316" y="66" width="8" height="226" rx="3" fill="url(#gLead)"/>
+                  <path d="M313,98 L313,122 Q313,128 320,128 Q327,128 327,122 L327,94" fill="none" stroke="#b5bec8" stroke-width="2.5"/>
+                  <rect x="298" y="46" width="44" height="100" fill="transparent"/>
+                </g>
+                <text x="285" y="40" text-anchor="middle" font-size="12.5">رأسا قلمِ رصاصٍ ومشبكا ورقٍ</text>
+                <!-- battery -->
+                <rect x="28" y="208" width="100" height="116" rx="10" fill="url(#gBat)"/>
+                <rect x="28" y="244" width="100" height="40" fill="#00c3fe"/>
+                <text x="78" y="270" text-anchor="middle" font-size="14" style="fill:#200058">بطاريةٌ</text>
+                <rect x="34" y="202" width="88" height="10" rx="3" fill="#2c2f45"/>
+                <g id="termP" class="svgbtn" role="button" tabindex="0" aria-label="الطرفُ الموجبُ للبطاريةِ" data-term="+">
+                  <circle class="ring" cx="58" cy="196" r="17" fill="none" stroke-width="3"/>
+                  <circle cx="58" cy="196" r="9" fill="#d9dee5" stroke="#7a8592" stroke-width="2"/>
+                  <text x="38" y="190" text-anchor="middle" font-size="20" style="fill:#e8425a">+</text>
+                  <circle cx="58" cy="190" r="24" fill="transparent"/>
+                </g>
+                <g id="termN" class="svgbtn" role="button" tabindex="0" aria-label="الطرفُ السالبُ للبطاريةِ" data-term="-">
+                  <circle class="ring" cx="98" cy="196" r="17" fill="none" stroke-width="3"/>
+                  <path d="M90,196 L94,189 L102,189 L106,196 L102,203 L94,203Z" fill="#d9dee5" stroke="#7a8592" stroke-width="2"/>
+                  <text x="120" y="190" text-anchor="middle" font-size="22" style="fill:#200058">−</text>
+                  <circle cx="98" cy="190" r="24" fill="transparent"/>
+                </g>
+                <g id="wires" fill="none" stroke-linecap="round" pointer-events="none"></g>
+                <path id="tmpWire" d="" fill="none" stroke="#c46a2b" stroke-width="4" stroke-dasharray="6 6" stroke-linecap="round" pointer-events="none"/>
+                <text x="150" y="168" text-anchor="middle" font-size="12.5">سلكٌ نحاسيٌّ</text>
+              </svg>
+            </div>
+            <div class="ctrls">
+              <button class="btn green" id="runBtn" type="button" disabled>⚡ شغّلْ</button>
+              <button class="btn ghost sm" id="unwireBtn" type="button">✂️ افصلِ الأسلاكَ</button>
+            </div>
+            <label for="elTime" class="meterrow" style="margin-top:12px"><span>⏱️ الوقتُ</span></label>
+            <input type="range" id="elTime" min="0" max="100" value="0" aria-label="الوقتُ منذُ التشغيلِ">
+            <div class="slider-lbl"><span>البدايةُ</span><span>وقتٌ أطولُ</span></div>
+            <p class="extra">انخفاضُ مستوى الماءِ في الرسمِ مكبَّرٌ لتلاحظَه، والوقتُ هنا بلا وحداتٍ.</p>
+            <div class="fb" id="elHint"></div>
+          </div>
+          <div class="panel">
+            <h3>🔎 ملاحظاتي</h3>
+            <div id="elQ"><p class="extra" style="margin:0">ستظهرُ الأسئلةُ بعدَ أن تشغّلَ الدائرةَ وتراقبَ قليلاً.</p></div>
+          </div>
+        </div>
+        <div id="elEq" class="hidden"></div>
+      </div>
+    </section>
+
+    <!-- ============ 4. STEEL PADS ============ -->
+    <section class="stage" data-stage="4" aria-labelledby="s4h">
+      <div class="stage-h"><span class="kind">المحطةُ ٤</span><h2 id="s4h">سلكانِ في كيسينِ</h2></div>
+      <div class="stage-b">
+        <ul class="mats" aria-label="الموادُّ"><li>الموادُّ</li><li>سلكا تنظيفِ الأواني</li><li>ماءٌ</li><li>كيسا نايلونٍ</li></ul>
+        <div class="grid2">
+          <div>
+            <p class="task" id="padTask">بلّلْ أحدَ السلكينِ بالماءِ، واتركِ الآخرَ جافّاً.</p>
+            <div class="lab">
+              <svg id="padSvg" viewBox="0 0 420 260" role="img" aria-label="سلكا تنظيفِ أوانٍ داخلَ كيسينِ">
+                <rect x="0" y="236" width="420" height="24" fill="#e3def5"/>
+                <g id="padA"></g><g id="padB"></g>
+                <text id="lblA" x="105" y="254" text-anchor="middle" font-size="14">السلكُ أ</text>
+                <text id="lblB" x="315" y="254" text-anchor="middle" font-size="14">السلكُ ب</text>
+              </svg>
+            </div>
+            <div class="ctrls" id="wetCtrls">
+              <button class="btn cyan" type="button" id="wetA">💧 بلّلِ السلكَ أ</button>
+              <button class="btn cyan" type="button" id="wetB">💧 بلّلِ السلكَ ب</button>
+            </div>
+            <div class="ctrls"><button class="btn" type="button" id="sealBtn" disabled>👜 ضعْهما في الكيسينِ وأغلقْهما</button></div>
+            <label for="days" class="meterrow" style="margin-top:12px"><span>📅 الأيامُ: <b id="dayLbl">اليومُ ١</b></span></label>
+            <input type="range" id="days" min="1" max="6" step="1" value="1" disabled aria-label="عددُ الأيامِ">
+            <div class="slider-lbl"><span>اليومُ ١</span><span>بعدَ عدّةِ أيامٍ</span></div>
+            <p class="extra">الرسمُ يوضّحُ ما قد تلاحظُه بمرورِ الأيامِ؛ جرّبْ في البيتِ وسجّلْ ملاحظتَك بنفسِك.</p>
+          </div>
+          <div class="panel">
+            <h3>🔎 ملاحظاتي</h3>
+            <div class="fb" id="padFb"></div>
+            <div id="padQ"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 5. CLASSIFY ============ -->
+    <section class="stage" data-stage="5" aria-labelledby="s5h">
+      <div class="stage-h"><span class="kind">أصنّفُ</span><h2 id="s5h">تغيّرٌ فيزيائيٌّ أم تفاعلٌ كيميائيٌّ؟</h2></div>
+      <div class="stage-b">
+        <p class="task">اسحبْ كلَّ بطاقةٍ إلى المكانِ المناسبِ (أو اضغطِ البطاقةَ ثم المكانَ). اسألْ نفسَك: هل تكوّنتْ مادةٌ جديدةٌ؟</p>
+        <div class="chips" id="sortTray" aria-label="البطاقاتُ"></div>
+        <div class="sortz">
+          <div class="zone" id="zPhys" data-k="phys" aria-label="تغيّرٌ فيزيائيٌّ"><div class="zt">🔵 تغيّرٌ فيزيائيٌّ<small>لا مادةَ جديدةَ</small></div></div>
+          <div class="zone" id="zChem" data-k="chem" aria-label="تفاعلٌ كيميائيٌّ"><div class="zt">🟠 تفاعلٌ كيميائيٌّ<small>مادةٌ جديدةٌ</small></div></div>
+        </div>
+        <div class="fb" id="sortFb"></div>
+        <div class="row" style="margin-top:8px"><button class="btn ghost sm hidden" id="sortShow" type="button">💡 أرني الحلَّ</button><span class="badge" id="sortCount">٠ / ٩</span></div>
+        <div id="cmpBox" class="hidden">
+          <h3 style="margin:16px 0 0">توقّعي في البدايةِ… وما وجدتُه</h3>
+          <div class="cmp"><div><b>توقّعي:</b><span id="cmpPred"></span></div><div><b>ما وجدتُه في المختبرِ:</b>إذابةُ السكرِ في الشايِ تغيّرٌ فيزيائيٌّ، أما تسخينُه حتى يسودَّ فتفاعلٌ كيميائيٌّ: تحلّلَ إلى ماءٍ وكاربونٍ.</div></div>
+          <div class="fb" id="cmpFb"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 6. SUMMARY ============ -->
+    <section class="stage" data-stage="6" aria-labelledby="s6h">
+      <div class="stage-h"><span class="kind">خلاصةٌ</span><h2 id="s6h">ماذا تعلّمتُ في المختبرِ؟</h2></div>
+      <div class="stage-b">
+        <ul class="sum">
+          <li>🧪 التفاعلُ الكيميائيُّ: تتكسّرُ الروابطُ بينَ ذراتِ الموادِّ المتفاعلةِ وتتكوّنُ روابطُ جديدةٌ، فتنتجُ موادُّ جديدةٌ تختلفُ في صفاتِها الفيزيائيةِ وخواصِّها الكيميائيةِ.</li>
+          <li>🍵 السكرُ في الشايِ مخلوطٌ متجانسٌ: تغيّرٌ فيزيائيٌّ لأنه لا تتكوّنُ موادُّ جديدةٌ.</li>
+          <li>💧 انصهارُ السكرِ وحدَه لا يكوّنُ مادةً جديدةً: ما زالَ سكراً.</li>
+          <li>🔥 تسخينُ السكرِ تفاعلُ تحلّلٍ: يتحلّلُ إلى ماءٍ وكاربونٍ.<div id="sumEq1"></div></li>
+          <li>⚡ التحليلُ الكهربائيُّ للماءِ تفاعلُ تحلّلٍ: يتحلّلُ الماءُ إلى غازيِ الأوكسجينِ والهيدروجينِ.<div id="sumEq2"></div></li>
+          <li>🟤 على السلكِ المبلّلِ تكوّنتْ مادةٌ جديدةٌ بلونٍ مختلفٍ؛ وصدأُ الحديدِ تفاعلٌ كيميائيٌّ.</li>
+          <li>✍️ في المعادلةِ اللفظيةِ: الموادُّ المتفاعلةُ على يسارِ السهمِ، والناتجةُ على يمينِه، وما يحتاجُه التفاعلُ فوقَ السهمِ، و(+) بينَ أكثرَ من مادةٍ.</li>
+        </ul>
+        <div class="row" style="margin-top:16px;justify-content:center"><button class="btn ghost" type="button" id="restartBtn">↺ أعدِ المختبرَ من البدايةِ</button></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<nav class="navbar" aria-label="التنقلُ بينَ المراحلِ">
+  <div class="in">
+    <button class="btn ghost" id="prevBtn" type="button">→ السابقُ</button>
+    <div class="where" id="where" aria-live="polite"></div>
+    <button class="btn" id="nextBtn" type="button">التالي ←</button>
+  </div>
+</nav>
+
+<script>
+/* ================= KIT (shared helpers) ================= */
+const Kit = (() => {
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const $ = (s, r=document) => r.querySelector(s);
+  const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+  const AR = '٠١٢٣٤٥٦٧٨٩';
+  const ar = n => String(n).replace(/[0-9]/g, d => AR[d]).replace('-', '−');
+  const shuffle = a => { a = a.slice(); for (let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; };
+  const el = (tag, attrs={}, html) => { const e=document.createElement(tag);
+    for (const k in attrs){ if(k==='class') e.className=attrs[k]; else if(k.startsWith('on')) e.addEventListener(k.slice(2),attrs[k]); else e.setAttribute(k,attrs[k]); }
+    if (html!=null) e.innerHTML=html; return e; };
+
+  /* ---- feedback: Kit.say(box, 'ok'|'bad'|'info'|'warn', html) ---- */
+  const ICON = {ok:'✅', bad:'🤔', info:'💡', warn:'⚠️'};
+  function say(box, type, html){
+    if (typeof box==='string') box=$(box);
+    box.className='fb show '+type; box.setAttribute('role','status'); box.setAttribute('aria-live','polite');
+    box.innerHTML='<span class="ic" aria-hidden="true">'+ICON[type]+'</span><div>'+html+'</div>';
+  }
+  function hush(box){ if (typeof box==='string') box=$(box); box.className='fb'; box.innerHTML=''; }
+
+  /* ---- stages + nav. canLeave(i) may return false or a message string to block "next". ---- */
+  let stages=[], cur=0, names=[], hooks={};
+  function setupStages(stageNames, opts={}){
+    names=stageNames; hooks=opts; stages=$$('.stage');
+    const dots=$('#dots'); dots.innerHTML='';
+    names.forEach((n,i)=>{ const li=el('li',{title:n,'aria-label':'المرحلة '+ar(i+1)+': '+n},ar(i+1)); dots.appendChild(li); });
+    $('#prevBtn').onclick=()=>go(cur-1); $('#nextBtn').onclick=()=>go(cur+1);
+    go(0, true);
+  }
+  function go(i, first){
+    if (i<0||i>=stages.length) return;
+    if (!first && i>cur && hooks.canLeave){ const r=hooks.canLeave(cur); if (r!==true && r!==undefined){ toast(r||'أكملِ المهمةَ أولاً'); return; } }
+    stages.forEach((s,k)=>s.classList.toggle('on',k===i));
+    $$('#dots li').forEach((d,k)=>{ d.classList.toggle('on',k===i); d.classList.toggle('done',k<i); });
+    cur=i; $('#where').textContent=ar(i+1)+' / '+ar(stages.length)+' · '+names[i];
+    $('#prevBtn').disabled=i===0; $('#nextBtn').style.visibility=i===stages.length-1?'hidden':'visible';
+    if(!first) window.scrollTo({top:0,behavior:reduced?'auto':'smooth'});
+    hooks.onEnter && hooks.onEnter(i);
+  }
+  let toastT;
+  function toast(msg){
+    let t=$('#kitToast'); if(!t){ t=el('div',{id:'kitToast',role:'alert'}); Object.assign(t.style,{position:'fixed',bottom:'86px',left:'50%',
+      transform:'translateX(-50%)',background:'#200058',color:'#fff',padding:'12px 20px',borderRadius:'999px',fontWeight:'800',
+      zIndex:1000,boxShadow:'0 10px 30px rgba(0,0,0,.25)',maxWidth:'90vw',textAlign:'center'}); document.body.appendChild(t); }
+    t.textContent=msg; t.style.display='block'; clearTimeout(toastT); toastT=setTimeout(()=>t.style.display='none',2600);
+  }
+
+  /* ---- drag & drop with tap-to-place + keyboard.
+     Kit.dnd({ chips:[chipEls], zones:[zoneEls], accept:(chip,zone)=>bool|string, onDrop:(chip,zone,ok)=>{} , lockCorrect:true })
+     chips need data-id. zone gets the chip appended when accepted (or always, if place:'always'). ---- */
+  function dnd(cfg){
+    let sel=null;
+    const zones=cfg.zones;
+    const clear=()=>{ if(sel){sel.classList.remove('sel'); sel.setAttribute('aria-pressed','false');} sel=null; };
+    function drop(chip, zone){
+      const ok = cfg.accept ? cfg.accept(chip, zone) : true;
+      if (ok===true || cfg.place==='always'){ zone.appendChild(chip); }
+      if (ok===true){ chip.classList.remove('bad'); if(cfg.lockCorrect!==false){ chip.classList.add('ok'); chip.dataset.locked='1'; chip.setAttribute('tabindex','-1'); chip.setAttribute('aria-disabled','true'); } }
+      else { chip.classList.remove('bad'); void chip.offsetWidth; chip.classList.add('bad'); }
+      cfg.onDrop && cfg.onDrop(chip, zone, ok===true, ok);
+    }
+    zones.forEach(z=>{
+      z.setAttribute('tabindex', z.getAttribute('tabindex')||'0'); z.setAttribute('role','button');
+      const act=()=>{ if(sel){ const c=sel; clear(); drop(c,z);} };
+      z.addEventListener('click', e=>{ if(e.target.closest('.chip') && !sel) return; act(); });
+      z.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); act(); } });
+    });
+    cfg.chips.forEach(chip=>{
+      chip.setAttribute('tabindex','0'); chip.setAttribute('role','button'); chip.setAttribute('aria-pressed','false');
+      chip.addEventListener('keydown', e=>{ if(chip.dataset.locked) return; if(e.key==='Enter'||e.key===' '){ e.preventDefault(); const was=sel===chip; clear(); if(!was){sel=chip;chip.classList.add('sel');chip.setAttribute('aria-pressed','true');} } });
+      let start=null, ghost=null, moved=false, overZ=null;
+      chip.addEventListener('pointerdown', e=>{
+        if (chip.dataset.locked || e.button>0) return;
+        start={x:e.clientX,y:e.clientY}; moved=false; chip.setPointerCapture(e.pointerId);
+      });
+      chip.addEventListener('pointermove', e=>{
+        if(!start) return;
+        if(!moved && Math.hypot(e.clientX-start.x,e.clientY-start.y)>7){
+          moved=true; clear(); ghost=chip.cloneNode(true); ghost.classList.add('ghost'); ghost.classList.remove('sel','bad');
+          document.body.appendChild(ghost); chip.classList.add('dragging');
+        }
+        if(moved){
+          ghost.style.left=(e.clientX-ghost.offsetWidth/2)+'px'; ghost.style.top=(e.clientY-ghost.offsetHeight/2)+'px';
+          const under=document.elementFromPoint(e.clientX,e.clientY); const z=under&&under.closest('.zone');
+          const zz = z && zones.includes(z) ? z : null;
+          if(zz!==overZ){ overZ&&overZ.classList.remove('hot'); overZ=zz; overZ&&overZ.classList.add('hot'); }
+        }
+      });
+      const end=e=>{
+        if(!start) return; start=null;
+        if(moved){ ghost.remove(); ghost=null; chip.classList.remove('dragging'); if(overZ){ overZ.classList.remove('hot'); drop(chip,overZ); overZ=null; } }
+        else if(e.type==='pointerup'){ const was=sel===chip; clear(); if(!was){ sel=chip; chip.classList.add('sel'); chip.setAttribute('aria-pressed','true'); } }
+      };
+      chip.addEventListener('pointerup', end); chip.addEventListener('pointercancel', end);
+    });
+    return { clear, reset(home){ cfg.chips.forEach(c=>{ c.classList.remove('ok','bad','sel'); delete c.dataset.locked; c.setAttribute('tabindex','0'); c.removeAttribute('aria-disabled'); home.appendChild(c); }); } };
+  }
+
+  /* ---- 3D orbit view: Kit.orbit(container, draw(ctx, cam, w, h, t), {yaw,pitch,zoom,auto}) ----
+     cam.project(x,y,z) -> {x,y,s,z}  (s = perspective scale, z = depth: larger = closer to viewer) */
+  function orbit(box, draw, o={}){
+    const cv=document.createElement('canvas'); box.prepend(cv);
+    const ctx=cv.getContext('2d');
+    const cam={yaw:o.yaw??0.6, pitch:o.pitch??0.35, zoom:o.zoom??1, dist:o.dist??900, auto:o.auto??true, vy:0, vp:0};
+    let W=0,H=0,dpr=1, drag=null, last=performance.now(), userTouched=false;
+    function size(){ const r=box.getBoundingClientRect(); dpr=Math.min(2,devicePixelRatio||1); W=r.width; H=r.height; cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
+    new ResizeObserver(size).observe(box); size();
+    cam.project=(x,y,z)=>{
+      const cy=Math.cos(cam.yaw), sy=Math.sin(cam.yaw), cp=Math.cos(cam.pitch), sp=Math.sin(cam.pitch);
+      let X=x*cy - z*sy, Z=x*sy + z*cy;           // yaw around Y
+      let Y=y*cp - Z*sp; Z=y*sp + Z*cp;            // pitch around X
+      const unit=Math.min(W,H)/520*cam.zoom;
+      const s=cam.dist/(cam.dist - Z);
+      return {x:W/2 + X*s*unit, y:H/2 - Y*s*unit, s:s*unit, z:Z};
+    };
+    box.addEventListener('pointerdown',e=>{ drag={x:e.clientX,y:e.clientY}; userTouched=true; box.setPointerCapture(e.pointerId); box.style.cursor='grabbing'; });
+    box.addEventListener('pointermove',e=>{ if(!drag) return; const dx=e.clientX-drag.x, dy=e.clientY-drag.y; drag={x:e.clientX,y:e.clientY};
+      cam.vy=-dx*0.008; cam.vp=dy*0.006; cam.yaw+=cam.vy; cam.pitch=Math.max(-1.3,Math.min(1.3,cam.pitch+cam.vp)); });
+    const up=()=>{ drag=null; box.style.cursor='grab'; };
+    box.addEventListener('pointerup',up); box.addEventListener('pointercancel',up);
+    box.addEventListener('wheel',e=>{ e.preventDefault(); cam.zoom=Math.max(.6,Math.min(2.2,cam.zoom*(e.deltaY<0?1.08:.92))); },{passive:false});
+    box.tabIndex=0; box.setAttribute('role','img');
+    box.addEventListener('keydown',e=>{ const k=e.key; if(k==='ArrowLeft'){cam.yaw+=.15;} else if(k==='ArrowRight'){cam.yaw-=.15;}
+      else if(k==='ArrowUp'){cam.pitch=Math.max(-1.3,cam.pitch-.12);} else if(k==='ArrowDown'){cam.pitch=Math.min(1.3,cam.pitch+.12);}
+      else if(k==='+'||k==='='){cam.zoom=Math.min(2.2,cam.zoom*1.1);} else if(k==='-'){cam.zoom=Math.max(.6,cam.zoom*.9);} else return; e.preventDefault(); userTouched=true; });
+    function frame(now){
+      const dt=Math.min(50,now-last); last=now;
+      if(!drag){ cam.vy*=0.93; cam.vp*=0.9; cam.yaw+=cam.vy; cam.pitch=Math.max(-1.3,Math.min(1.3,cam.pitch+cam.vp));
+        if(cam.auto && !reduced && Math.abs(cam.vy)<0.002) cam.yaw+=dt*0.00018*(userTouched?0.4:1); }
+      ctx.clearRect(0,0,W,H); draw(ctx,cam,W,H,reduced?0:now,dt);
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+    return cam;
+  }
+  /* shaded sphere */
+  function ball(ctx,x,y,r,color,label,labelColor){
+    if(r<=0.5) return;
+    const g=ctx.createRadialGradient(x-r*.35,y-r*.4,r*.15,x,y,r);
+    g.addColorStop(0,'#ffffff'); g.addColorStop(.25,color); g.addColorStop(1,shade(color,-0.45));
+    ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+    if(label && r>8){ ctx.fillStyle=labelColor||'#fff'; ctx.font='900 '+Math.round(r*1.05)+'px '+getComputedStyle(document.body).fontFamily;
+      ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(label,x,y+r*.05); }
+  }
+  function shade(hex,p){ const n=parseInt(hex.slice(1),16); let r=n>>16,g=n>>8&255,b=n&255;
+    const f=v=>Math.max(0,Math.min(255,Math.round(p<0?v*(1+p):v+(255-v)*p))); return 'rgb('+f(r)+','+f(g)+','+f(b)+')'; }
+
+  /* small celebration */
+  function celebrate(){
+    if(reduced) return;
+    const c=document.createElement('canvas'); c.className='confetti'; document.body.appendChild(c);
+    const x=c.getContext('2d'); c.width=innerWidth; c.height=innerHeight;
+    const cols=['#00c3fe','#12a06a','#ffd15c','#7b5cff','#e8425a'];
+    const P=Array.from({length:90},()=>({x:innerWidth/2+(Math.random()-.5)*200,y:innerHeight*.35,vx:(Math.random()-.5)*9,vy:-Math.random()*9-3,
+      s:5+Math.random()*6,c:cols[Math.random()*5|0],r:Math.random()*6}));
+    let t=0; (function f(){ t++; x.clearRect(0,0,c.width,c.height);
+      P.forEach(p=>{ p.vy+=.28; p.x+=p.vx; p.y+=p.vy; p.r+=.15; x.save(); x.translate(p.x,p.y); x.rotate(p.r); x.fillStyle=p.c; x.fillRect(-p.s/2,-p.s/4,p.s,p.s/2); x.restore(); });
+      if(t<110) requestAnimationFrame(f); else c.remove(); })();
+  }
+
+  return {$, $$, ar, el, shuffle, say, hush, setupStages, go, toast, dnd, orbit, ball, shade, celebrate, reduced, get cur(){return cur;}};
+})();
+</script>
+<script>
+/* ================= ACTIVITY JS ================= */
+(() => {
+const {$, $$, ar, el} = Kit;
+const NS = 'http://www.w3.org/2000/svg';
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, k) => a + (b - a) * k;
+const sv = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+function rng(seed) { return () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }; }
+function svgPt(svg, e) { const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY; return p.matrixTransform(svg.getScreenCTM().inverse()); }
+function tween(ms, fn, done) {
+  if (Kit.reduced || ms <= 0) { fn(1); done && done(); return; }
+  const t0 = performance.now();
+  (function f(now) { const k = clamp((now - t0) / ms); fn(k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2); if (k < 1) requestAnimationFrame(f); else done && done(); })(t0);
+}
+function hexToRgb(h) { const n = parseInt(h.slice(1), 16); return [n >> 16, n >> 8 & 255, n & 255]; }
+function colorAt(stops, p) {
+  if (p <= stops[0][0]) return stops[0][1];
+  for (let i = 1; i < stops.length; i++) {
+    if (p <= stops[i][0]) { const [p0, c0] = stops[i - 1], [p1, c1] = stops[i]; const k = (p - p0) / (p1 - p0);
+      const a = hexToRgb(c0), b = hexToRgb(c1); return 'rgb(' + a.map((v, j) => Math.round(lerp(v, b[j], k))).join(',') + ')'; }
+  }
+  return stops[stops.length - 1][1];
+}
+const keyAct = (node, fn) => { node.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(e); } }); };
+
+/* ---------- generic quiz: wrong -> explain; after 2 wrong -> "أرني الحلَّ" ---------- */
+function quiz(host, {q, opts, onDone}) {
+  const wrap = el('div', {class: 'quiz'});
+  wrap.appendChild(el('p', {class: 'qq'}, q));
+  const ch = el('div', {class: 'choices'}); const fb = el('div', {class: 'fb'});
+  let wrong = 0, done = false;
+  const show = el('button', {class: 'btn ghost sm', type: 'button'}, '💡 أرني الحلَّ');
+  const btns = opts.map(o => {
+    const b = el('button', {class: 'choice', type: 'button'}, o.t);
+    b.addEventListener('click', () => {
+      if (done) return;
+      if (o.ok) { finish(b, o, false); return; }
+      wrong++; b.classList.add('bad'); b.disabled = true;
+      Kit.say(fb, 'bad', 'حاولْ مرةً أخرى — ' + o.why);
+      if (wrong >= 2 && !show.isConnected) wrap.appendChild(show);
+    });
+    ch.appendChild(b); return b;
+  });
+  show.addEventListener('click', () => { const i = opts.findIndex(o => o.ok); finish(btns[i], opts[i], true); });
+  function finish(b, o, shown) {
+    done = true; btns.forEach(x => x.disabled = true); b.classList.remove('bad'); b.classList.add('ok'); b.setAttribute('aria-pressed', 'true');
+    show.remove(); Kit.say(fb, 'ok', (shown ? 'الإجابةُ: <b>' + o.t + '</b>. ' : '') + o.why); onDone && onDone();
+  }
+  wrap.append(ch, fb); host.appendChild(wrap);
+  if (!Kit.reduced) setTimeout(() => wrap.scrollIntoView({block: 'nearest', behavior: 'smooth'}), 60);
+  return wrap;
+}
+
+/* ---------- static word equation (LTR: reactant on the left, arrow to products on the right) ---------- */
+const ARROW = '<svg viewBox="0 0 100 16" aria-hidden="true"><line x1="2" y1="8" x2="90" y2="8" stroke="#200058" stroke-width="3"/><path d="M86,2 L98,8 L86,14Z" fill="#200058"/></svg>';
+function eqHTML(r, c, p1, p2) {
+  return '<div class="eqs" dir="ltr" role="img" aria-label="' + r + ' يتحوّلُ بوجودِ ' + c + ' إلى ' + p1 + ' و' + p2 + '"><span class="m">' + r + '</span><span class="ar"><span>' + c + '</span>' + ARROW + '</span><span class="pg"><span class="m">' + p1 + '</span><b>+</b><span class="m">' + p2 + '</span></span></div>';
+}
+
+/* ---------- word-equation builder ---------- */
+function eqBuilder(host, cfg) {
+  host.classList.remove('hidden');
+  host.innerHTML = '<h3 style="margin:18px 0 6px">✍️ ' + cfg.title + '</h3>' +
+    '<ul class="eqrules"><li>الموادُّ المتفاعلةُ على <b>يسارِ</b> السهمِ، والموادُّ الناتجةُ على <b>يمينِه</b>؛ رأسُ السهمِ يشيرُ دائماً إلى الموادِّ الناتجةِ.</li><li>(+) بينَ موادَّ أكثرَ من واحدةٍ.</li><li>ما يحتاجُه التفاعلُ (حرارةٌ، طاقةٌ، تيارٌ كهربائيٌّ، عواملُ مساعدةٌ) يُكتبُ <b>فوقَ</b> السهمِ.</li></ul>' +
+    '<p class="task">اسحبْ كلَّ بطاقةٍ إلى مكانِها في المعادلةِ (أو اضغطِ البطاقةَ ثم المكانَ).</p>';
+  const wrap = el('div', {class: 'eqwrap'});
+  const eq = el('div', {class: 'eq', dir: 'ltr'});
+  const mk = (role, lab, extra) => el('div', {class: 'slot zone' + (extra || ''), 'data-role': role, 'aria-label': lab});
+  const sR = mk('R', 'يسارُ السهمِ'), sC = mk('C', 'فوقَ السهمِ', ' cond'), sP1 = mk('P', 'يمينُ السهمِ: المادةُ الأولى'), sPl = mk('plus', 'بينَ المادتينِ', ' plus'), sP2 = mk('P', 'يمينُ السهمِ: المادةُ الثانية');
+  const ab = el('div', {class: 'arrowbox'}); ab.appendChild(sC); ab.insertAdjacentHTML('beforeend', ARROW.replace('viewBox="0 0 100 16"', 'viewBox="0 0 100 16" preserveAspectRatio="none"'));
+  const g1 = el('div', {class: 'grp'}); g1.append(sR, ab);
+  const g2 = el('div', {class: 'grp'}); g2.append(sP1, sPl, sP2);
+  eq.append(g1, g2);
+  const tray = el('div', {class: 'chips', 'aria-label': 'بطاقاتُ المعادلةِ'});
+  const fb = el('div', {class: 'fb'});
+  const legend = el('p', {class: 'eqlegend'}, '⬅️ يسارَ السهمِ: الموادُّ المتفاعلةُ · ⬆️ فوقَ السهمِ: ما يحتاجُه التفاعلُ · ➡️ يمينَ السهمِ: الموادُّ الناتجةُ');
+  const showB = el('button', {class: 'btn ghost sm hidden', type: 'button'}, '💡 أرني الحلَّ');
+  wrap.append(eq, legend, tray, fb, showB);
+  host.appendChild(wrap);
+  const chips = Kit.shuffle(cfg.cards).map(c => { const ch = el('div', {class: 'chip', 'data-id': c.id, 'data-role': c.role, dir: 'rtl'}, c.t); tray.appendChild(ch); return ch; });
+  const slots = [sR, sC, sP1, sPl, sP2];
+  let wrong = 0, finished = false;
+  const full = z => !!z.querySelector('.chip');
+  function why(chip, z) {
+    const r = chip.dataset.role, s = z.dataset.role, t = chip.textContent;
+    if (r === 'X') return cfg.xWhy;
+    if (r === 'plus') return 'علامةُ (+) ليستْ مادةً؛ نضعُها بينَ موادَّ أكثرَ من واحدةٍ (بينَ المادتينِ الناتجتينِ).';
+    if (s === 'plus') return 'هذا المكانُ لعلامةِ (+) التي نكتبُها بينَ موادَّ أكثرَ من واحدةٍ.';
+    if (r === 'C') return '«' + t + '» ليستْ مادةً متفاعلةً ولا ناتجةً؛ إنها ما يحتاجُه التفاعلُ، فتُكتبُ فوقَ السهمِ.';
+    if (s === 'C') return 'فوقَ السهمِ نكتبُ ما يحتاجُه التفاعلُ (حرارةٌ، طاقةٌ، تيارٌ كهربائيٌّ…)، لا الموادَّ.';
+    if (r === 'R' && s === 'P') return '«' + t + '» هو المادةُ المتفاعلةُ (قبلَ أن يتغيّرَ)، فمكانُه على يسارِ السهمِ.';
+    if (r === 'P' && s === 'R') return '«' + t + '» مادةٌ ناتجةٌ جديدةٌ؛ رأسُ السهمِ يشيرُ دائماً إلى الموادِّ الناتجةِ، فمكانُها على يمينِ السهمِ.';
+    return 'فكّرْ في القاعدةِ مرةً أخرى.';
+  }
+  function solve() {
+    slots.forEach(z => {
+      if (full(z)) return;
+      const c = chips.find(ch => !ch.dataset.locked && ch.dataset.role === z.dataset.role);
+      if (c) { z.appendChild(c); c.classList.remove('bad', 'sel'); c.classList.add('ok'); c.dataset.locked = '1'; c.setAttribute('tabindex', '-1'); c.setAttribute('aria-disabled', 'true'); }
+    });
+    check(true);
+  }
+  function check(shown) {
+    if (finished || !slots.every(full)) return;
+    finished = true; wrap.classList.add('done'); showB.classList.add('hidden'); tray.classList.add('hidden');
+    Kit.say(fb, 'ok', (shown ? 'هذه هي المعادلةُ. ' : 'أحسنتَ! ') + cfg.doneMsg);
+    cfg.onDone && cfg.onDone();
+  }
+  showB.addEventListener('click', solve);
+  Kit.dnd({
+    chips, zones: slots,
+    accept: (chip, z) => {
+      if (full(z)) return 'full';
+      return chip.dataset.role === z.dataset.role ? true : why(chip, z);
+    },
+    onDrop: (chip, z, ok, msg) => {
+      if (ok) { Kit.say(fb, 'info', '✔️ ' + cfg.okMsg(chip.dataset.role, chip.textContent)); check(false); return; }
+      if (msg === 'full') { Kit.say(fb, 'warn', 'هذا المكانُ فيه بطاقةٌ؛ اخترْ مكاناً فارغاً.'); return; }
+      wrong++; Kit.say(fb, 'bad', 'حاولْ مرةً أخرى — ' + msg);
+      if (wrong >= 2) showB.classList.remove('hidden');
+    }
+  });
+  return {solve};
+}
+const okMsgStd = (role, t) => ({R: '«' + t + '» مادةٌ متفاعلةٌ: على يسارِ السهمِ.', P: '«' + t + '» مادةٌ ناتجةٌ: على يمينِ السهمِ.', C: '«' + t + '» ما يحتاجُه التفاعلُ: فوقَ السهمِ.', plus: '(+) بينَ المادتينِ الناتجتينِ.'})[role];
+
+const done = {0: false, 1: false, 2: false, 3: false, 4: false, 5: false};
+let pred = null;
+
+/* ======================= STAGE 0: PREDICT ======================= */
+const PRED = [
+  {id: 'none', t: 'لا تتكوّنُ مادةٌ جديدةٌ في الحالتينِ'},
+  {id: 'both', t: 'تتكوّنُ مادةٌ جديدةٌ في الحالتينِ'},
+  {id: 'right', t: 'في الشايِ لا تتكوّنُ مادةٌ جديدةٌ، وعندَ التسخينِ تتكوّنُ'},
+  {id: 'rev', t: 'في الشايِ تتكوّنُ مادةٌ جديدةٌ، وعندَ التسخينِ لا تتكوّنُ'}
+];
+PRED.forEach(o => {
+  const b = el('button', {class: 'choice', type: 'button', 'aria-pressed': 'false'}, o.t);
+  b.addEventListener('click', () => {
+    $$('#predCh .choice').forEach(x => x.setAttribute('aria-pressed', 'false')); b.setAttribute('aria-pressed', 'true');
+    pred = o; done[0] = true;
+    Kit.say('#predFb', 'info', 'سجّلنا توقّعَك: «' + o.t + '». لا توجدُ إجابةٌ خاطئةٌ الآنَ؛ سنختبرُه في المحطاتِ ونعودُ إليه في النهايةِ.');
+  });
+  $('#predCh').appendChild(b);
+});
+
+/* ======================= STAGE 1: SUGAR IN TEA ======================= */
+const T = {sugar: false, ready: false, prog: 0, theta: 0, dissolved: false, holding: false, lastStir: -9, sp: {x: 95, y: 206, a: 0}, drag: null, stirDrag: null};
+const teaSvg = $('#teaSvg'), spoon = $('#spoon'), teaCrysG = $('#teaCrys');
+const setSpoon = (x, y, a) => { T.sp = {x, y, a}; spoon.setAttribute('transform', 'translate(' + x.toFixed(1) + ',' + y.toFixed(1) + ') rotate(' + a.toFixed(1) + ')'); };
+setSpoon(95, 206, 0);
+const teaCrys = [];
+(() => { const r = rng(7); for (let i = 0; i < 18; i++) {
+  const x = 230 + r() * 38, y = 236 + r() * 10;
+  const e = sv('rect', {x: x.toFixed(1), y: 110, width: 5, height: 5, fill: '#fff', stroke: '#e3d9cf', 'stroke-width': .8, opacity: 0, transform: 'rotate(' + Math.round(r() * 60) + ' ' + (x + 2.5).toFixed(1) + ' ' + (y + 2.5).toFixed(1) + ')'}, teaCrysG);
+  teaCrys.push({e, x, y, thr: i / 18 * 78});
+} })();
+function teaRender() {
+  teaCrys.forEach(c => { if (T.ready) c.e.setAttribute('opacity', clamp(1 - (T.prog - c.thr) / 22).toFixed(2)); });
+  $('#stirMeter').style.width = T.prog + '%'; $('#stirMeterBox').setAttribute('aria-valuenow', Math.round(T.prog));
+  const active = performance.now() / 1000 - T.lastStir < .5;
+  $('#teaSwirl').setAttribute('opacity', active && !T.dissolved ? .7 : 0);
+  $('#teaSwirl').setAttribute('transform', 'translate(' + (Math.cos(T.theta) * 5).toFixed(1) + ',0)');
+  if (T.ready && !T.dissolved) setSpoon(250 + Math.cos(T.theta) * 12, 152 + Math.sin(T.theta) * 3, Math.cos(T.theta) * 4);
+}
+function pour() {
+  if (T.sugar) return; T.sugar = true; $('#pourBtn').disabled = true; spoon.style.cursor = 'default'; spoon.setAttribute('aria-label', 'ملعقةٌ في الكأسِ');
+  const f = {...T.sp};
+  tween(450, k => setSpoon(lerp(f.x, 252, k), lerp(f.y, 92, k), lerp(f.a, -40, k)), () => {
+    $('#spoonLoad').style.display = 'none';
+    tween(800, k => teaCrys.forEach(c => { c.e.setAttribute('y', lerp(110, c.y, Math.min(1, k * (1 + c.thr / 160))).toFixed(1)); c.e.setAttribute('opacity', 1);
+      const tr = c.e.getAttribute('transform').replace(/ [\d.]+ [\d.]+\)$/, ' ' + (c.x + 2.5).toFixed(1) + ' ' + (lerp(110, c.y, k) + 2.5).toFixed(1) + ')'); c.e.setAttribute('transform', tr); }), () => {
+      teaCrys.forEach(c => c.e.setAttribute('y', c.y.toFixed(1)));
+      tween(400, k => setSpoon(lerp(252, 262, k), lerp(92, 152, k), lerp(-40, 0, k)), () => {
+        T.ready = true; $('#stirBtn').disabled = false;
+        $('#teaTask').textContent = 'حرّكِ الشايَ: اضغطْ مطوّلاً على «حرّكْ» أو حرّكْ بإصبعِك داخلَ الكأسِ.';
+        Kit.say('#teaFb', 'info', 'استقرّتْ بلّوراتُ السكرِ البيضاءُ في قاعِ الكأسِ. الآنَ حرّكْ ولاحظْ.');
+      });
+    });
+  });
+}
+function addStir(amount) {
+  if (!T.ready || T.dissolved) return;
+  T.prog = Math.min(100, T.prog + amount); T.lastStir = performance.now() / 1000;
+  if (T.prog >= 100) { T.dissolved = true; teaRender(); teaDone(); }
+}
+function teaDone() {
+  $('#stirBtn').disabled = true; T.holding = false;
+  $('#teaTask').textContent = 'أجبْ عن الأسئلةِ في «ملاحظاتي».';
+  Kit.say('#teaFb', 'info', 'اختفتْ بلّوراتُ السكرِ عن العينِ وهي في الشايِ.');
+  quiz($('#teaQ'), {q: 'هل تكوّنتْ مادةٌ جديدةٌ؟', opts: [
+    {t: 'لا، لم تتكوّنْ مادةٌ جديدةٌ', ok: true, why: 'صحيحٌ. السكرُ لم يتحوّلْ إلى مادةٍ أخرى؛ انتشرَ في الشايِ.'},
+    {t: 'نعم، تكوّنتْ مادةٌ جديدةٌ', why: 'اختفاءُ البلّوراتِ عن العينِ لا يعني أنَّ السكرَ صارَ مادةً أخرى؛ هو ما زالَ في الشايِ.'}
+  ], onDone: () => quiz($('#teaQ'), {q: 'ما الدليلُ؟', opts: [
+    {t: 'الشايُ صارَ حلواً: السكرُ ما زالَ موجوداً فيه', ok: true, why: 'أحسنتَ. ما زالَ سكراً؛ تكوّنَ <b>مخلوطٌ متجانسٌ</b>، وهذا <b>تغيّرٌ فيزيائيٌّ</b>.<p class="book" style="margin:8px 0 0">استعمالُ السكرِ لتحليةِ الشايِ يكوّنُ مخلوطاً متجانساً؛ هو تغيّرٌ فيزيائيٌّ لأنه لا تتكوّنُ موادُّ جديدةٌ.</p>'},
+    {t: 'لم نعدْ نرى البلّوراتِ، إذن صارتْ مادةً جديدةً', why: 'عدمُ رؤيتِها يعني أنها انتشرتْ في الشايِ، لا أنها تغيّرتْ إلى مادةٍ أخرى.'},
+    {t: 'تغيّرَ لونُ الشايِ إلى الأسودِ', why: 'لاحظِ الكأسَ: لم يتغيّرْ لونُ الشايِ.'}
+  ], onDone: () => { done[1] = true; Kit.toast('أنهيتَ المحطةَ ١ ✔'); }})});
+}
+// spoon drag
+spoon.addEventListener('pointerdown', e => {
+  if (T.sugar) return; e.stopPropagation(); e.preventDefault();
+  const p = svgPt(teaSvg, e); T.drag = {dx: p.x - T.sp.x, dy: p.y - T.sp.y}; teaSvg.setPointerCapture(e.pointerId); spoon.style.cursor = 'grabbing';
+});
+keyAct(spoon, () => pour());
+teaSvg.addEventListener('pointerdown', e => {
+  if (T.drag || !T.ready || T.dissolved) return;
+  const p = svgPt(teaSvg, e);
+  if (p.x > 196 && p.x < 304 && p.y > 90 && p.y < 260) { T.stirDrag = {a: Math.atan2(p.y - 180, p.x - 250)}; teaSvg.setPointerCapture(e.pointerId); }
+});
+teaSvg.addEventListener('pointermove', e => {
+  const p = svgPt(teaSvg, e);
+  if (T.drag) { setSpoon(clamp(p.x - T.drag.dx, 10, 390), clamp(p.y - T.drag.dy, 20, 280), 0); return; }
+  if (T.stirDrag) {
+    const a = Math.atan2(p.y - 180, p.x - 250); let d = a - T.stirDrag.a;
+    if (d > Math.PI) d -= 2 * Math.PI; if (d < -Math.PI) d += 2 * Math.PI;
+    T.stirDrag.a = a; T.theta += d; addStir(Math.abs(d) / (2 * Math.PI) * 22);
+  }
+});
+const teaUp = () => {
+  if (T.drag) {
+    T.drag = null; spoon.style.cursor = 'grab';
+    if (T.sp.x > 196 && T.sp.x < 310 && T.sp.y > 50 && T.sp.y < 230) pour();
+    else { const f = {...T.sp}; tween(300, k => setSpoon(lerp(f.x, 95, k), lerp(f.y, 206, k), 0)); Kit.say('#teaFb', 'warn', 'اسحبِ الملعقةَ حتى تصلَ فوقَ كأسِ الشايِ ثم اتركْها.'); }
+  }
+  T.stirDrag = null;
+};
+teaSvg.addEventListener('pointerup', teaUp); teaSvg.addEventListener('pointercancel', teaUp);
+$('#pourBtn').addEventListener('click', pour);
+const stirBtn = $('#stirBtn');
+stirBtn.addEventListener('pointerdown', () => { if (!stirBtn.disabled) T.holding = true; });
+['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => stirBtn.addEventListener(ev, () => T.holding = false));
+stirBtn.addEventListener('click', () => { addStir(6); T.theta += 1.2; });
+stirBtn.addEventListener('contextmenu', e => e.preventDefault());
+function teaTick(dt) {
+  if (T.holding) { T.theta += dt * 7; addStir(dt * 28); }
+  teaRender();
+}
+
+/* ======================= STAGE 2: HEATING SUGAR ======================= */
+const H = {on: false, lvl: 1, p: 0, cup: false, meltAsked: false, meltDone: false, dropT: 0, dropAsked: false, dropDone: false, cool: 0, resAsked: false, eqDone: false, hint: '', warnedStrong: false};
+const SUGAR = [[14, '#fbf7ea'], [30, '#f2e3a2'], [55, '#e0ad48'], [72, '#9a5a1e'], [88, '#3b2213'], [98, '#17110d']];
+const crysG = $('#crys'), charG = $('#charTex'), liqBubG = $('#liqBub'), vapG = $('#vap'), dropsG = $('#drops');
+(() => { const r = rng(3);
+  for (let i = 0; i < 26; i++) { const x = 216 + r() * 26, y = 254 + r() * 34; sv('rect', {x: x.toFixed(1), y: y.toFixed(1), width: 5, height: 5, fill: '#fff', stroke: '#d9d4e8', 'stroke-width': .8, transform: 'rotate(' + Math.round(r() * 80) + ' ' + (x + 2.5).toFixed(1) + ' ' + (y + 2.5).toFixed(1) + ')'}, crysG); }
+  for (let i = 0; i < 30; i++) sv('circle', {cx: (216 + r() * 28).toFixed(1), cy: (262 + r() * 28).toFixed(1), r: (0.8 + r() * 1.8).toFixed(1), opacity: .55}, charG);
+  const D = [[-27, 60], [25, 54], [-22, 40], [27, 30], [-29, 18], [12, 68], [-10, 68], [23, 66], [-25, 30], [28, 44], [0, 68], [-18, 64], [26, 16], [-28, 48]];
+  D.forEach(([x, y], i) => { const g = sv('g', {opacity: 0}, dropsG); sv('circle', {cx: x, cy: y, r: 2.6 + (i % 3) * .8, fill: '#8fd0f2', stroke: '#3c97c9', 'stroke-width': 1}, g); sv('circle', {cx: x - .8, cy: y - .8, r: .9, fill: '#fff'}, g); });
+})();
+const vapPool = Array.from({length: 40}, () => ({e: sv('ellipse', {rx: 0, ry: 0, fill: '#a7aecb', opacity: 0}, vapG), live: false}));
+const bubPool = Array.from({length: 10}, () => ({e: sv('circle', {r: 1.6, fill: 'none', stroke: '#fff', 'stroke-width': .8, opacity: 0}, liqBubG), live: false}));
+let vapAcc = 0, bubAcc = 0;
+function hint(type, html) { if (H.hint === html) return; H.hint = html; Kit.say('#heatHint', type, html); }
+function setStep(k) { $$('#hSteps li').forEach((li, i) => { li.classList.toggle('done', i < k); li.classList.toggle('cur', i === k); li.querySelector('.st').textContent = i < k ? '✔' : ar(i + 1); }); }
+setStep(0);
+function setFlame(on) {
+  H.on = on; const b = $('#flameBtn'); b.setAttribute('aria-pressed', on); b.textContent = on ? '🧯 أطفئِ اللهبَ' : '🔥 أشعلِ اللهبَ'; b.className = 'btn ' + (on ? 'ghost' : 'red');
+  if (on) H.cool = 0;
+}
+$('#flameBtn').addEventListener('click', () => setFlame(!H.on));
+function setLvl(l) { H.lvl = l; $('#lvl1').setAttribute('aria-pressed', l === 1); $('#lvl2').setAttribute('aria-pressed', l === 2);
+  if (l === 2 && !H.warnedStrong) { H.warnedStrong = true; Kit.toast('تذكّرْ: الكتابُ يطلبُ أن نسخّنَ بهدوءٍ.'); } }
+$('#lvl1').addEventListener('click', () => setLvl(1)); $('#lvl2').addEventListener('click', () => setLvl(2));
+function setCup(on) {
+  H.cup = on; $('#cup').style.transform = on ? 'translate(230px,124px) rotate(180deg)' : 'translate(360px,286px)';
+  $('#cupLbl').style.display = on ? 'none' : '';
+  $('#cupBtn').textContent = on ? '↩️ أبعدِ القدحَ' : '🥛 ضعِ القدحَ مقلوباً';
+}
+$('#cupBtn').addEventListener('click', () => setCup(!H.cup));
+
+function heatQuestions() {
+  const p = H.p;
+  if (p >= 30 && !H.meltAsked) {
+    H.meltAsked = true; setStep(1);
+    quiz($('#heatQ'), {q: 'انصهرَ السكرُ. هل تكوّنتْ مادةٌ جديدةٌ الآنَ؟', opts: [
+      {t: 'لا — ما زالَ سكراً؛ تغيّرتْ حالتُه فقط', ok: true, why: 'صحيحٌ. السكرُ المنصهرُ ما زالَ سكراً، فلم تتكوّنْ مادةٌ جديدةٌ بعدُ. تابعِ التسخينَ.'},
+      {t: 'نعم — صارَ سائلاً فهو مادةٌ جديدةٌ', why: 'تغيّرُ الحالةِ من صلبٍ إلى سائلٍ لا يعني مادةً جديدةً؛ ما زالَ سكراً. المادةُ الجديدةُ تختلفُ في صفاتِها عن المادةِ المتفاعلةِ.'}
+    ], onDone: () => { H.meltDone = true; setStep(2); }});
+  }
+  if (H.dropT > 1.6 && !H.dropAsked) {
+    H.dropAsked = true;
+    quiz($('#heatQ'), {q: 'توقّعْ: ما هذه القطراتُ داخلَ القدحِ؟', opts: [
+      {t: '💧 ماءٌ', ok: true, why: 'أحسنتَ. الكتابُ: السكرُ يتكوّنُ من الماءِ والكاربونِ، وعندَ تسخينِه يتحللُ إلى ماءٍ وكاربونٍ. الماءُ هنا مادةٌ جديدةٌ نتجتْ من السكرِ.'},
+      {t: '🍬 سكرٌ', why: 'السكرُ ما زالَ في أسفلِ الأنبوبِ. تذكّرْ: السكرُ يتكوّنُ من الماءِ والكاربونِ.'},
+      {t: '🫒 زيتٌ', why: 'لم نضعْ زيتاً في التجربةِ. تذكّرْ: السكرُ يتكوّنُ من الماءِ والكاربونِ.'}
+    ], onDone: () => { H.dropDone = true; setStep(3); }});
+  }
+  if (p >= 100 && !H.resAsked) setStep(4);
+  if (p >= 100 && !H.on && H.cool >= 1.5 && !H.resAsked) {
+    H.resAsked = true;
+    hint('info', 'بردَ الأنبوبُ. افحصِ المادةَ المتبقيةَ في قاعِه وأجبْ.');
+    $('#flameBtn').disabled = true; $('#cupBtn').disabled = true;
+    quiz($('#heatQ'), {q: 'ما المادةُ السوداءُ المتبقيةُ في الأنبوبِ؟', opts: [
+      {t: '⚫ كاربونٌ', ok: true, why: 'صحيحٌ. تحلّلَ السكرُ إلى <b>ماءٍ</b> (القطراتُ) و<b>كاربونٍ</b> (المادةُ السوداءُ): موادُّ جديدةٌ تختلفُ عن السكرِ ← <b>تفاعلٌ كيميائيٌّ</b>.'},
+      {t: '🍬 سكرٌ لم يتغيّرْ', why: 'قارنْ: السكرُ بلّوراتٌ بيضاءُ، وهذه مادةٌ سوداءُ مختلفةٌ في صفاتِها.'},
+      {t: '💧 ماءٌ', why: 'الماءُ تكاثفَ قطراتٍ في القدحِ؛ أما المادةُ في القاعِ فسوداءُ.'}
+    ], onDone: () => quiz($('#heatQ'), {q: 'ما نوعُ هذا التفاعلِ؟', opts: [
+      {t: 'احتراقٌ', why: 'الاحتراقُ تفاعلٌ بينَ أوكسجينِ الهواءِ والموادِّ. هنا مادةٌ واحدةٌ (السكرُ) انقسمتْ إلى مادتينِ.'},
+      {t: 'اتحادٌ', why: 'في الاتحادِ تكوّنُ مادتانِ أو أكثرُ مادةً واحدةً. هنا حدثَ العكسُ.'},
+      {t: 'تحلّلٌ (تفكّكٌ)', ok: true, why: 'صحيحٌ. مادةٌ واحدةٌ (السكرُ) تفكّكتْ إلى مادتينِ: ماءٍ وكاربونٍ.'}
+    ], onDone: () => { setStep(5); hint('ok', 'رائعٌ! الآنَ اكتبِ المعادلةَ اللفظيةَ للتفاعلِ في الأسفلِ ⬇️'); buildHeatEq(); }})});
+  }
+  if (H.resAsked) return;
+  let m;
+  if (H.meltAsked && !H.meltDone) m = ['warn', '⏸️ توقّفْ ولاحظْ: انصهرَ السكرُ وصارَ سائلاً. أجبْ عن السؤالِ لتتابعَ.'];
+  else if (H.dropAsked && !H.dropDone) m = ['warn', '⏸️ تكاثفتْ قطراتٌ داخلَ القدحِ! أجبْ عن السؤالِ لتتابعَ.'];
+  else if (p >= 100) m = H.on ? ['warn', '⚫ ظهرتْ مادةٌ سوداءُ! أطفئِ اللهبَ واتركِ الأنبوبَ يبردُ.'] : ['info', '❄️ الأنبوبُ يبردُ…'];
+  else if (!H.on) m = p === 0 ? ['info', 'ابدأْ: لاحظْ لونَ السكرِ (بلّوراتٌ بيضاءُ)، ثم أشعلِ اللهبَ.'] : ['info', '🔥 اللهبُ مطفأٌ. أشعلْه لتتابعَ التسخينَ.'];
+  else if (!H.meltDone) m = ['info', '🔥 يسخنُ السكرُ… راقبْه.'];
+  else if (!H.dropDone) m = H.cup ? (p < 32 ? ['info', 'وضعتَ القدحَ. لم تتصاعدْ أبخرةٌ بعدُ؛ تابعِ التسخينَ.'] : ['info', '💨 الأبخرةُ تصلُ إلى القدحِ… راقبْ جدرانَه من الداخلِ.'])
+    : (p >= 34 ? ['info', '💨 تتصاعدُ أبخرةٌ من الأنبوبِ. ضعِ القدحَ (بعدَ تجفيفِه بالمناديلِ) مقلوباً فوقَ الأنبوبِ.'] : ['info', '🔥 تابعِ التسخينَ ولاحظْ.']);
+  else if (H.cup) m = ['info', '↩️ أبعدِ القدحَ وتابعِ التسخينَ حتى تظهرَ مادةٌ سوداءُ.'];
+  else m = ['info', '🔥 تابعِ التسخينَ ولاحظْ لونَ السكرِ.'];
+  hint(m[0], m[1]);
+}
+function buildHeatEq() {
+  eqBuilder($('#heatEq'), {title: 'المعادلةُ اللفظيةُ لتسخينِ السكرِ',
+    cards: [{id: 's', t: 'سكرُ المائدةِ', role: 'R'}, {id: 'w', t: 'ماءٌ', role: 'P'}, {id: 'c', t: 'كاربونٌ', role: 'P'}, {id: 'h', t: 'حرارةٌ', role: 'C'}, {id: 'p', t: '+', role: 'plus'}],
+    okMsg: okMsgStd, doneMsg: 'هذه معادلةُ تحلّلِ السكرِ:' + eqHTML('سكرُ المائدةِ', 'حرارةٌ', 'ماءٌ', 'كاربونٌ'),
+    onDone: () => { H.eqDone = true; done[2] = true; setStep(6); Kit.toast('أنهيتَ المحطةَ ٢ ✔'); }});
+}
+function heatTick(dt, now) {
+  if (H.on) {
+    let cap = 100;
+    if (!H.meltDone) cap = 30; else if (!H.dropDone || H.cup) cap = 50;
+    H.p = Math.min(cap, H.p + (H.lvl === 1 ? 6 : 11) * dt);
+  } else if (H.p >= 100) H.cool += dt;
+  if (H.cup && H.p > 32 && H.on) H.dropT += dt;
+  const p = H.p, melt = clamp((p - 12) / 18);
+  // tube contents
+  crysG.setAttribute('opacity', (1 - melt).toFixed(2));
+  const col = colorAt(SUGAR, p);
+  $('#liq').setAttribute('fill', col); $('#liq').setAttribute('opacity', melt.toFixed(2));
+  $('#liqTop').setAttribute('opacity', (melt * clamp((70 - p) / 20) * .5).toFixed(2));
+  charG.setAttribute('opacity', clamp((p - 80) / 18).toFixed(2));
+  // flame
+  $('#flameG').setAttribute('opacity', H.on ? 1 : 0);
+  $('#flameG').setAttribute('transform', 'translate(230,303) scale(' + (H.lvl === 1 ? .75 : 1) + ')');
+  $('#glow').setAttribute('opacity', H.on ? (H.lvl === 1 ? .55 : .9) : 0);
+  $('#heatMeter').style.width = p + '%';
+  // droplets
+  const nd = Math.min(14, Math.floor(H.dropT * 5));
+  Array.from(dropsG.children).forEach((g, i) => g.setAttribute('opacity', i < nd ? 1 : 0));
+  // vapour
+  const vapOn = H.on && p >= 32;
+  if (Kit.reduced) {
+    $('#vapStatic').setAttribute('opacity', vapOn && !H.cup ? 1 : 0);
+  } else {
+    if (vapOn) { vapAcc += dt * (H.lvl === 1 ? 7 : 12); }
+    while (vapAcc >= 1) { vapAcc--; const v = vapPool.find(q => !q.live); if (v) { v.live = true; v.x = 230 + (Math.random() - .5) * 10; v.y = 104; v.vx = (Math.random() - .5) * 8; v.vy = -(26 + Math.random() * 18); v.life = 1; v.r = 3 + Math.random() * 3; } }
+    vapPool.forEach(v => {
+      if (!v.live) { v.e.setAttribute('opacity', 0); return; }
+      v.x += v.vx * dt; v.y += v.vy * dt; v.r += dt * 4; v.life -= dt * (H.cup ? .55 : .45);
+      if (H.cup && v.y < 60) { v.y = 60; v.vy = 0; v.vx = (v.vx >= 0 ? 1 : -1) * 14; if (Math.abs(v.x - 230) > 22) v.life -= dt * 2; }
+      if (v.life <= 0) { v.live = false; v.e.setAttribute('opacity', 0); return; }
+      v.e.setAttribute('cx', v.x.toFixed(1)); v.e.setAttribute('cy', v.y.toFixed(1)); v.e.setAttribute('rx', v.r.toFixed(1)); v.e.setAttribute('ry', (v.r * .7).toFixed(1));
+      v.e.setAttribute('opacity', (v.life * .5).toFixed(2));
+    });
+    // bubbles in molten sugar
+    if (H.on && p > 24 && p < 97) bubAcc += dt * 5;
+    while (bubAcc >= 1) { bubAcc--; const b = bubPool.find(q => !q.live); if (b) { b.live = true; b.x = 220 + Math.random() * 20; b.y = 286; } }
+    bubPool.forEach(b => { if (!b.live) { b.e.setAttribute('opacity', 0); return; } b.y -= dt * 18; if (b.y < 264) { b.live = false; b.e.setAttribute('opacity', 0); return; }
+      b.e.setAttribute('cx', b.x.toFixed(1)); b.e.setAttribute('cy', b.y.toFixed(1)); b.e.setAttribute('opacity', .8); b.e.setAttribute('stroke', p > 70 ? '#c99a6a' : '#fff'); });
+  }
+  heatQuestions();
+}
+
+/* ======================= STAGE 3: ELECTROLYSIS ======================= */
+const E = {w: {'+': null, '-': null}, sel: null, on: false, t: 0, asked: false, eqDone: false, drag: null};
+const TERM = {'+': {x: 58, y: 196, g: $('#termP')}, '-': {x: 98, y: 196, g: $('#termN')}};
+const LEAD = {L1: {x: 250, y: 68, g: $('#leadL1')}, L2: {x: 320, y: 68, g: $('#leadL2')}};
+const elSvg = $('#elSvg'), wiresG = $('#wires');
+const L0 = 140;
+const wireD = (a, b) => 'M' + a.x + ',' + a.y + ' C' + a.x + ',' + (a.y - 120) + ' ' + b.x + ',' + (b.y - 60) + ' ' + b.x + ',' + b.y;
+function drawWires() {
+  wiresG.innerHTML = '';
+  ['+', '-'].forEach(t => { const l = E.w[t]; if (!l) return; const d = wireD(TERM[t], LEAD[l]);
+    sv('path', {d, stroke: '#7a3a12', 'stroke-width': 6}, wiresG); sv('path', {d, stroke: '#d98a4a', 'stroke-width': 3.2}, wiresG); });
+  const both = E.w['+'] && E.w['-'];
+  $('#runBtn').disabled = !both;
+  if (!both && E.on) setRun(false);
+  if (both && !E.on && E.t === 0) { $('#elTask').textContent = 'اكتملتِ الدائرةُ. اضغطْ «شغّلْ» وراقبْ رأسَيِ القلمِ ومستوى الماءِ.'; Kit.say('#elHint', 'ok', 'وصلتَ السلكينِ: كلُّ طرفٍ من البطاريةِ بأحدِ رأسَيِ القلمِ.'); }
+}
+function selTerm(t) { E.sel = E.sel === t ? null : t; Object.values(TERM).forEach(o => o.g.classList.remove('sel')); if (E.sel) TERM[E.sel].g.classList.add('sel'); }
+function connect(t, l) {
+  const other = t === '+' ? '-' : '+';
+  if (E.w[other] === l) { Kit.say('#elHint', 'warn', 'هذا الرأسُ موصولٌ بالطرفِ الآخرِ. صِلْ هذا الطرفَ بالرأسِ الثاني.'); return; }
+  E.w[t] = l; E.sel = null; Object.values(TERM).forEach(o => o.g.classList.remove('sel')); drawWires();
+  if (!(E.w['+'] && E.w['-'])) Kit.say('#elHint', 'info', 'وصلتَ سلكاً واحداً. صِلِ الطرفَ الآخرَ للبطاريةِ بالرأسِ الآخرِ.');
+}
+function tapLead(l) { if (!E.sel) { Kit.say('#elHint', 'info', 'اضغطْ أولاً على أحدِ طرفيِ البطاريةِ (+ أو −).'); return; } connect(E.sel, l); }
+Object.entries(TERM).forEach(([t, o]) => {
+  keyAct(o.g, () => selTerm(t));
+  o.g.addEventListener('pointerdown', e => { e.preventDefault(); E.drag = {t, moved: false, x: e.clientX, y: e.clientY}; elSvg.setPointerCapture(e.pointerId); });
+});
+Object.entries(LEAD).forEach(([l, o]) => { keyAct(o.g, () => tapLead(l)); o.g.addEventListener('click', () => { if (!E.justDragged) tapLead(l); }); });
+elSvg.addEventListener('pointermove', e => {
+  if (!E.drag) return;
+  if (Math.hypot(e.clientX - E.drag.x, e.clientY - E.drag.y) > 8) E.drag.moved = true;
+  if (E.drag.moved) { const p = svgPt(elSvg, e); $('#tmpWire').setAttribute('d', wireD(TERM[E.drag.t], {x: p.x, y: p.y})); }
+});
+const elUp = e => {
+  if (!E.drag) return; const d = E.drag; E.drag = null; $('#tmpWire').setAttribute('d', '');
+  if (!d.moved) { selTerm(d.t); return; }
+  const under = document.elementFromPoint(e.clientX, e.clientY); const lg = under && under.closest('[data-lead]');
+  if (lg) { connect(d.t, lg.dataset.lead); E.justDragged = true; setTimeout(() => E.justDragged = false, 60); }
+  else Kit.say('#elHint', 'info', 'اتركِ السلكَ فوقَ أحدِ رأسَيِ القلمِ.');
+};
+elSvg.addEventListener('pointerup', elUp); elSvg.addEventListener('pointercancel', () => { E.drag = null; $('#tmpWire').setAttribute('d', ''); });
+$('#unwireBtn').addEventListener('click', () => { E.w = {'+': null, '-': null}; E.sel = null; Object.values(TERM).forEach(o => o.g.classList.remove('sel')); drawWires(); Kit.hush('#elHint'); });
+function setRun(on) { E.on = on; $('#runBtn').textContent = on ? '⏸️ أوقفْ' : '⚡ شغّلْ'; $('#runBtn').className = 'btn ' + (on ? 'ghost' : 'green');
+  if (on) { $('#elTask').textContent = 'راقبْ: ماذا يظهرُ عندَ رأسَيِ القلمِ؟ وماذا يحدثُ لمستوى الماءِ مع الوقتِ؟'; Kit.say('#elHint', 'info', '🫧 تتصاعدُ فقاعاتُ غازٍ عندَ رأسَيِ القلمِ.'); } }
+$('#runBtn').addEventListener('click', () => setRun(!E.on));
+$('#elTime').addEventListener('input', e => { E.t = +e.target.value; });
+const elBubG = $('#elBub');
+const ebPool = Array.from({length: 44}, () => ({e: sv('circle', {r: 2, fill: 'rgba(255,255,255,.75)', stroke: '#5aa9d6', 'stroke-width': .8, opacity: 0}, elBubG), live: false}));
+const ebStatic = [];
+(() => { const r = rng(11); ['L1', 'L2'].forEach(l => { for (let i = 0; i < 7; i++) ebStatic.push({x: LEAD[l].x + (r() - .5) * 10, y: 170 + r() * 110, r: 1.5 + r() * 1.8}); }); })();
+let ebAcc = 0;
+function elQuestions() {
+  if (E.asked || E.t < 22) return;
+  E.asked = true; $('#elQ').innerHTML = '';
+  quiz($('#elQ'), {q: 'هل تكوّنتْ مادةٌ جديدةٌ؟', opts: [
+    {t: 'نعم — ظهرتْ فقاعاتُ غازٍ لم تكنْ موجودةً', ok: true, why: 'صحيحٌ. الماءُ يتحللُ كهربائياً إلى غازيِ <b>الأوكسجينِ</b> و<b>الهيدروجينِ</b>، فتتصاعدُ فقاعاتُ الغازِ.'},
+    {t: 'لا — الماءُ يغلي فقط', why: 'لم نسخّنِ الماءَ؛ الفقاعاتُ ظهرتْ عندما مرَّ التيارُ الكهربائيُّ، وهي غازاتٌ جديدةٌ.'}
+  ], onDone: () => quiz($('#elQ'), {q: 'ما نوعُ هذا التفاعلِ؟', opts: [
+    {t: 'احتراقٌ', why: 'الاحتراقُ تفاعلٌ بينَ أوكسجينِ الهواءِ والموادِّ. هنا مادةٌ واحدةٌ (الماءُ) انقسمتْ إلى مادتينِ.'},
+    {t: 'اتحادٌ', why: 'في الاتحادِ تكوّنُ مادتانِ أو أكثرُ مادةً واحدةً. هنا حدثَ العكسُ.'},
+    {t: 'تحلّلٌ (تفكّكٌ)', ok: true, why: 'صحيحٌ. التحللُ عكسُ الاتحادِ: مادةٌ واحدةٌ (الماءُ) تفكّكتْ إلى مادتينِ (أوكسجينٍ وهيدروجينٍ).'}
+  ], onDone: () => quiz($('#elQ'), {q: 'حرّكْ مؤشّرَ الوقتِ ولاحظِ الخطَّ المتقطّعَ: ماذا يحدثُ لحجمِ الماءِ إذا استمرَّ التشغيلُ مدةً أطولَ؟', opts: [
+    {t: '⬇️ يقلُّ', ok: true, why: 'هذا ما تلاحظُه في المحاكاةِ: الماءُ يتحللُ إلى غازينِ يخرجانِ فقاعاتٍ.'},
+    {t: '⬆️ يزدادُ', why: 'قارنْ سطحَ الماءِ بالخطِّ المتقطّعِ (مستوى البدايةِ): هل ارتفعَ أم انخفضَ؟'},
+    {t: '↔️ لا يتغيّرُ', why: 'حرّكْ مؤشّرَ الوقتِ إلى النهايةِ وقارنْ سطحَ الماءِ بالخطِّ المتقطّعِ.'}
+  ], onDone: () => eqBuilder($('#elEq'), {title: 'المعادلةُ اللفظيةُ للتحليلِ الكهربائيِّ للماءِ',
+    cards: [{id: 'w', t: 'ماءٌ', role: 'R'}, {id: 'o', t: 'أوكسجينٌ', role: 'P'}, {id: 'h', t: 'هيدروجينٌ', role: 'P'}, {id: 'e', t: 'تيارٌ كهربائيٌّ', role: 'C'}, {id: 'p', t: '+', role: 'plus'}, {id: 'x', t: 'حرارةٌ', role: 'X'}],
+    xWhy: 'في هذه التجربةِ لم نسخّنْ؛ استعملنا بطاريةً، فالتفاعلُ يحتاجُ <b>تيّاراً كهربائيّاً</b>. اتركْ بطاقةَ «حرارةٌ» جانباً.',
+    okMsg: okMsgStd, doneMsg: 'هذه معادلةُ التحليلِ الكهربائيِّ للماءِ:' + eqHTML('ماءٌ', 'تيارٌ كهربائيٌّ', 'أوكسجينٌ', 'هيدروجينٌ'),
+    onDone: () => { E.eqDone = true; done[3] = true; Kit.toast('أنهيتَ المحطةَ ٣ ✔'); }})})})});
+}
+function elTick(dt) {
+  if (E.on) { E.t = Math.min(100, E.t + dt * 100 / 22); $('#elTime').value = E.t; }
+  const lvl = L0 + E.t * .17;
+  $('#water').setAttribute('y', lvl.toFixed(1)); $('#waterTop').setAttribute('y', lvl.toFixed(1));
+  if (Kit.reduced) {
+    ebPool.forEach((b, i) => { const s = ebStatic[i]; if (!s || !E.on || s.y < lvl + 4) { b.e.setAttribute('opacity', 0); return; } b.e.setAttribute('cx', s.x.toFixed(1)); b.e.setAttribute('cy', s.y.toFixed(1)); b.e.setAttribute('r', s.r.toFixed(1)); b.e.setAttribute('opacity', 1); });
+  } else {
+    if (E.on) ebAcc += dt * 26;
+    while (ebAcc >= 1) { ebAcc--; const b = ebPool.find(q => !q.live); if (b) { const l = Math.random() < .5 ? 'L1' : 'L2'; b.live = true; b.x = LEAD[l].x + (Math.random() < .5 ? -6 : 6) + (Math.random() - .5) * 3; b.y = lvl + 30 + Math.random() * (286 - lvl - 30); b.r = 1.2 + Math.random() * 2; b.v = 30 + Math.random() * 30; } }
+    ebPool.forEach(b => { if (!b.live) { b.e.setAttribute('opacity', 0); return; } b.y -= b.v * dt; b.x += Math.sin(b.y / 9) * .25; if (b.y < lvl + 3) { b.live = false; b.e.setAttribute('opacity', 0); return; }
+      b.e.setAttribute('cx', b.x.toFixed(1)); b.e.setAttribute('cy', b.y.toFixed(1)); b.e.setAttribute('r', b.r.toFixed(1)); b.e.setAttribute('opacity', 1); });
+  }
+  elQuestions();
+}
+
+/* ======================= STAGE 4: STEEL PADS ======================= */
+const P = {wet: null, sealed: false, day: 1, asked: false};
+const PADS = {A: {cx: 105, g: $('#padA')}, B: {cx: 315, g: $('#padB')}};
+Object.entries(PADS).forEach(([k, o], idx) => {
+  const r = rng(idx ? 99 : 42), cx = o.cx, cy = 150;
+  o.bag = sv('g', {opacity: 0}, o.g);
+  sv('rect', {x: cx - 82, y: 40, width: 164, height: 192, rx: 18, fill: 'rgba(225,238,255,.45)', stroke: '#9fb4c8', 'stroke-width': 2}, o.bag);
+  sv('rect', {x: cx - 82, y: 40, width: 164, height: 16, rx: 8, fill: '#7b5cff', opacity: .75}, o.bag);
+  sv('path', {d: 'M' + (cx - 68) + ',70 Q' + (cx - 74) + ',150 ' + (cx - 64) + ',220', stroke: '#fff', 'stroke-width': 4, fill: 'none', opacity: .7, 'stroke-linecap': 'round'}, o.bag);
+  const t = sv('text', {x: cx, y: 36, 'text-anchor': 'middle', 'font-size': 13}, o.bag); t.textContent = 'كيسُ نايلونٍ مغلقٌ';
+  const pad = sv('g', {}, o.g);
+  sv('ellipse', {cx, cy, rx: 58, ry: 40, fill: '#b8c0c9'}, pad);
+  for (let i = 0; i < 80; i++) {
+    const a = r() * Math.PI * 2, d = Math.sqrt(r());
+    const x = cx + Math.cos(a) * d * 50, y = cy + Math.sin(a) * d * 33;
+    sv('ellipse', {cx: x.toFixed(1), cy: y.toFixed(1), rx: (5 + r() * 10).toFixed(1), ry: (2 + r() * 6).toFixed(1), fill: 'none', stroke: ['#8e98a3', '#d5dbe2', '#a7b0ba', '#eef1f4'][i % 4], 'stroke-width': 1.5, transform: 'rotate(' + Math.round(r() * 180) + ' ' + x.toFixed(1) + ' ' + y.toFixed(1) + ')'}, pad);
+  }
+  o.rust = sv('g', {}, o.g); o.rustDots = [];
+  for (let i = 0; i < 30; i++) {
+    const a = r() * Math.PI * 2, d = Math.sqrt(r());
+    const e = sv('circle', {cx: (cx + Math.cos(a) * d * 48).toFixed(1), cy: (cy + Math.sin(a) * d * 30).toFixed(1), r: (3 + r() * 6).toFixed(1), fill: ['#b5541c', '#8a3b12', '#d0782f'][i % 3], opacity: 0}, o.rust);
+    o.rustDots.push({e, thr: 1.4 + r() * 4.2});
+  }
+  o.water = sv('g', {opacity: 0}, o.g);
+  for (let i = 0; i < 9; i++) { const x = cx - 40 + r() * 80, y = cy - 22 + r() * 44; sv('ellipse', {cx: x.toFixed(1), cy: y.toFixed(1), rx: 3.2, ry: 4.2, fill: '#8fd0f2', stroke: '#3c97c9', 'stroke-width': 1}, o.water); }
+  sv('ellipse', {cx, cy: cy + 46, rx: 40, ry: 5, fill: '#8fd0f2', opacity: .6}, o.water);
+  pad.setAttribute('role', 'img'); pad.setAttribute('aria-label', 'سلكُ تنظيفٍ ' + (k === 'A' ? 'أ' : 'ب'));
+});
+function wet(k) {
+  if (P.wet) return; P.wet = k; PADS[k].water.setAttribute('opacity', 1);
+  $('#wetA').disabled = $('#wetB').disabled = true; $('#sealBtn').disabled = false;
+  $('#lblA').textContent = 'السلكُ أ — ' + (k === 'A' ? '💧 مبلّلٌ' : 'جافٌّ'); $('#lblB').textContent = 'السلكُ ب — ' + (k === 'B' ? '💧 مبلّلٌ' : 'جافٌّ');
+  $('#padTask').textContent = 'ضعْ كلَّ سلكٍ في كيسِ نايلونٍ وأغلقْه.';
+  Kit.say('#padFb', 'info', 'بلّلتَ السلكَ ' + (k === 'A' ? 'أ' : 'ب') + '. السلكُ الآخرُ جافٌّ للمقارنةِ.');
+}
+$('#wetA').addEventListener('click', () => wet('A')); $('#wetB').addEventListener('click', () => wet('B'));
+$('#sealBtn').addEventListener('click', () => {
+  if (P.sealed) return; P.sealed = true; $('#sealBtn').disabled = true; $('#days').disabled = false;
+  tween(600, k => Object.values(PADS).forEach(o => o.bag.setAttribute('opacity', k.toFixed(2))));
+  $('#padTask').textContent = 'حرّكْ مؤشّرَ الأيامِ ولاحظِ السلكينِ.';
+  Kit.say('#padFb', 'info', 'أغلقتَ الكيسينِ. الآنَ مرِّرِ الأيامَ.');
+});
+function dayLabel(d) { return d >= 6 ? 'بعدَ عدّةِ أيامٍ' : 'اليومُ ' + ar(d); }
+$('#days').addEventListener('input', e => {
+  P.day = +e.target.value; $('#dayLbl').textContent = dayLabel(P.day);
+  const o = PADS[P.wet]; o.rustDots.forEach(d => d.e.setAttribute('opacity', clamp((P.day - d.thr) / 1.2).toFixed(2)));
+  if (P.day >= 5 && !P.asked) {
+    P.asked = true; Kit.say('#padFb', 'info', 'لاحظْ… أيُّ السلكينِ تكوّنتْ عليه مادةٌ جديدةٌ؟');
+    quiz($('#padQ'), {q: 'أيُّ السلكينِ تكوّنتْ عليه مادةٌ جديدةٌ؟', opts: [
+      {t: '💧 السلكُ المبلّلُ بالماءِ', ok: true, why: 'صحيحٌ. ظهرتْ عليه بقعٌ بلونٍ مختلفٍ (صدأٌ)؛ إنها مادةٌ جديدةٌ، فحدثَ تفاعلٌ كيميائيٌّ.'},
+      {t: 'السلكُ الجافُّ', why: 'انظرْ إلى السلكِ الجافِّ: هل تغيّرَ لونُه؟ قارنْه بالسلكِ المبلّلِ.'},
+      {t: 'كلاهما', why: 'قارنِ السلكينِ: على أحدِهما فقط ظهرتْ بقعٌ بلونٍ مختلفٍ.'},
+      {t: 'لا أحدَ منهما', why: 'مرِّرِ الأيامَ إلى النهايةِ وانظرْ جيداً إلى السلكِ المبلّلِ.'}
+    ], onDone: () => quiz($('#padQ'), {q: 'ما الدليلُ على حدوثِ تفاعلٍ كيميائيٍّ؟', opts: [
+      {t: 'ظهرتْ مادةٌ جديدةٌ بلونٍ مختلفٍ', ok: true, why: 'أحسنتَ. المادةُ الجديدةُ تختلفُ في صفاتِها عن المادةِ الأصليةِ.<p class="book" style="margin:8px 0 0">من التفاعلاتِ الكيميائيةِ في حياتِنا: صدأُ الحديدِ.</p>'},
+      {t: 'صارَ السلكُ مبلولاً بالماءِ', why: 'البللُ وحدَه ليسَ مادةً جديدةً؛ الماءُ ما زالَ ماءً. ابحثْ عن مادةٍ لم تكنْ موجودةً.'},
+      {t: 'وُضعَ السلكُ في كيسٍ مغلقٍ', why: 'الكيسُ وُضعَ للسلكينِ كليهما. ابحثْ عن مادةٍ جديدةٍ ظهرتْ على أحدِهما.'}
+    ], onDone: () => { done[4] = true; Kit.toast('أنهيتَ المحطةَ ٤ ✔'); }})});
+  }
+});
+
+/* ======================= STAGE 5: CLASSIFY ======================= */
+const NEWB = 'تتكوّنُ مادةٌ جديدةٌ — من أمثلةِ الكتابِ على التفاعلاتِ الكيميائيةِ في حياتِنا.';
+const CARDS = [
+  {id: 'tea', t: '🍵 السكرُ في الشايِ', k: 'phys', why: 'مخلوطٌ متجانسٌ؛ لا تتكوّنُ موادُّ جديدةٌ (الكتابُ).'},
+  {id: 'melt', t: '💧 انصهارُ السكرِ أولَ التسخينِ', k: 'phys', why: 'ما زالَ سكراً؛ تغيّرتْ حالتُه فقط. (استنتاجٌ من تعريفِ الكتابِ: لا مادةَ جديدةَ ← ليسَ تفاعلاً كيميائيّاً).'},
+  {id: 'black', t: '⚫ تسخينُ السكرِ حتى يسودَّ', k: 'chem', why: 'تحلّلَ السكرُ إلى ماءٍ وكاربونٍ: موادُّ جديدةٌ.'},
+  {id: 'rust', t: '🟤 صدأُ الحديدِ', k: 'chem', why: NEWB},
+  {id: 'bread', t: '🍞 تعفّنُ الخبزِ', k: 'chem', why: NEWB},
+  {id: 'wood', t: '🔥 احتراقُ الخشبِ', k: 'chem', why: 'الاحتراقُ تفاعلٌ بينَ أوكسجينِ الهواءِ والموادِّ، وتنتجُ موادُّ جديدةٌ.'},
+  {id: 'food', t: '🍽️ هضمُ الطعامِ', k: 'chem', why: NEWB},
+  {id: 'blood', t: '🩸 تخثّرُ الدمِ', k: 'chem', why: NEWB},
+  {id: 'elec', t: '⚡ التحليلُ الكهربائيُّ للماءِ', k: 'chem', why: 'تحلّلَ الماءُ إلى أوكسجينٍ وهيدروجينٍ: موادُّ جديدةٌ.'}
+];
+const sortChips = Kit.shuffle(CARDS).map(c => { const ch = el('div', {class: 'chip', 'data-id': c.id}, c.t); $('#sortTray').appendChild(ch); return ch; });
+const byId = id => CARDS.find(c => c.id === id);
+let sortWrong = 0, sortOk = 0;
+function sortUpdate() {
+  $('#sortCount').textContent = ar(sortOk) + ' / ' + ar(CARDS.length);
+  if (sortOk === CARDS.length && !done[5]) {
+    done[5] = true; $('#sortShow').classList.add('hidden'); $('#sortTray').classList.add('hidden');
+    $('#cmpBox').classList.remove('hidden');
+    $('#cmpPred').textContent = pred ? ' ' + pred.t : ' (لم تخترْ توقّعاً)';
+    if (pred && pred.id === 'right') Kit.say('#cmpFb', 'ok', 'توقّعُك كانَ صحيحاً، والآنَ عندَك الأدلّةُ من المختبرِ: قطراتُ الماءِ والمادةُ السوداءُ.');
+    else Kit.say('#cmpFb', 'info', 'لا بأسَ! العلماءُ يغيّرونَ توقّعاتِهم حينَ تظهرُ الأدلّةُ. الدليلُ هنا: في الشايِ ما زالَ سكراً، أما عندَ التسخينِ فظهرَ ماءٌ وكاربونٌ.');
+    Kit.celebrate();
+  }
+}
+Kit.dnd({
+  chips: sortChips, zones: [$('#zPhys'), $('#zChem')],
+  accept: (chip, z) => { const c = byId(chip.dataset.id); if (c.k === z.dataset.k) return true;
+    return c.k === 'phys' ? 'لم تتكوّنْ مادةٌ جديدةٌ في «' + chip.textContent.replace(/^\S+ /, '') + '»: ' + c.why : 'في «' + chip.textContent.replace(/^\S+ /, '') + '» تتكوّنُ مادةٌ جديدةٌ. فكّرْ: هل بقيتِ المادةُ كما هي؟'; },
+  onDrop: (chip, z, ok, msg) => {
+    if (ok) { sortOk++; Kit.say('#sortFb', 'ok', '<b>' + chip.textContent + '</b>: ' + byId(chip.dataset.id).why); sortUpdate(); return; }
+    sortWrong++; Kit.say('#sortFb', 'bad', 'حاولْ مرةً أخرى — ' + msg);
+    if (sortWrong >= 2) $('#sortShow').classList.remove('hidden');
+  }
+});
+$('#sortShow').addEventListener('click', () => {
+  sortChips.forEach(ch => { if (ch.dataset.locked) return; const c = byId(ch.dataset.id); const z = c.k === 'phys' ? $('#zPhys') : $('#zChem');
+    z.appendChild(ch); ch.classList.remove('bad', 'sel'); ch.classList.add('ok'); ch.dataset.locked = '1'; ch.setAttribute('tabindex', '-1'); sortOk++; });
+  Kit.say('#sortFb', 'info', 'هذا هو التصنيفُ. القاعدةُ: إذا تكوّنتْ مادةٌ جديدةٌ فهو تفاعلٌ كيميائيٌّ؛ وإذا بقيتِ المادةُ كما هي (ما زالَ سكراً) فهو تغيّرٌ فيزيائيٌّ.');
+  sortUpdate();
+});
+
+/* ======================= STAGE 6: SUMMARY ======================= */
+$('#sumEq1').innerHTML = eqHTML('سكرُ المائدةِ', 'حرارةٌ', 'ماءٌ', 'كاربونٌ');
+$('#sumEq2').innerHTML = eqHTML('ماءٌ', 'تيارٌ كهربائيٌّ', 'أوكسجينٌ', 'هيدروجينٌ');
+$('#restartBtn').addEventListener('click', () => location.reload());
+let celebrated = false;
+
+/* ======================= STAGES + LOOP ======================= */
+const MSG = {0: 'اخترْ توقّعَك أولاً.', 1: 'أكملِ التجربةَ وأجبْ عن الأسئلةِ أولاً.', 2: 'أكملِ التجربةَ والمعادلةَ أولاً.', 3: 'أكملِ التجربةَ والمعادلةَ أولاً.', 4: 'أكملِ التجربةَ وأجبْ عن الأسئلةِ أولاً.', 5: 'صنّفِ البطاقاتِ كلَّها أولاً.'};
+Kit.setupStages(['أتوقّعُ', 'سكرٌ في الشايِ', 'تسخينُ السكرِ', 'التحليلُ الكهربائيُّ', 'سلكانِ في كيسينِ', 'أصنّفُ', 'خلاصةٌ'], {
+  canLeave: i => done[i] === false ? MSG[i] : true,
+  onEnter: i => {
+    if (i !== 2 && H.on) setFlame(false);
+    if (i !== 3 && E.on) setRun(false);
+    if (i === 6 && !celebrated) { celebrated = true; setTimeout(Kit.celebrate, 300); }
+  }
+});
+let last = performance.now();
+function loop(now) {
+  const dt = Math.min(.1, (now - last) / 1000); last = now;
+  const c = Kit.cur;
+  if (c === 1) teaTick(dt); else if (c === 2) heatTick(dt, now); else if (c === 3) elTick(dt);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+window.Lab = {H, E, T, P, done};
+})();
+</script>
+</body>
+</html>
