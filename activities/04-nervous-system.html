@@ -3,1107 +3,654 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>مركز القيادة — الجهاز العصبي</title>
-<!--
-  BASE TEMPLATE — copy this whole file, then:
-  1. change <title>, the header (.ref chip, h1), and the STAGES list
-  2. write each stage inside <main> as <section class="stage" data-stage="i">
-  3. put activity CSS in the second <style> block and activity JS in the last <script>
-  Everything (CSS + JS) stays inline. No external files, fonts or CDNs.
--->
+<title>مركزُ القيادةِ</title>
 <style>
-/* ================= DESIGN TOKENS (from the book's brand) ================= */
 :root{
-  --navy:#200058; --navy-2:#3a1f7a; --ink:#200058; --muted:#5f5a85;
+  --navy:#200058; --muted:#5f5a85; --ink:#200058;
   --cyan:#00c3fe; --cyan-d:#0a8fc0; --cyan-l:#e3f8ff; --cyan-b:#b8ebff;
   --green:#12a06a; --green-d:#0b7a50; --green-l:#e4f6ee; --green-b:#9cd9bd;
   --red:#e8425a; --red-d:#c22b43; --red-l:#fde8ec; --red-b:#f5b3bf;
   --yellow:#ffd15c; --orange:#f6a723; --yellow-l:#fff6dc;
   --purple:#7b5cff; --purple-l:#efeaff;
-  --bg:#f1f0fb; --bg-2:#e3f8ff; --card:#ffffff; --line:#e0ddf0; --soft:#faf9fe;
-  --r-s:12px; --r:18px; --r-l:26px;
-  --sh:0 6px 18px rgba(32,0,88,.08); --sh-l:0 18px 50px rgba(32,0,88,.14);
-  --font: "Segoe UI","Noto Sans Arabic","Noto Naskh Arabic","Geeza Pro","Arial",Tahoma,system-ui,sans-serif;
-  --tap:48px;
+  --bg:#f1f0fb; --bg-2:#e3f8ff; --card:#fff; --line:#e0ddf0; --soft:#faf9fe;
+  --sh:0 6px 18px rgba(32,0,88,.08); --sh-l:0 18px 50px rgba(32,0,88,.16);
+  --font:"Segoe UI","Noto Sans Arabic","Noto Naskh Arabic","Geeza Pro","Arial",Tahoma,system-ui,sans-serif;
+  --nav-h:68px;
 }
 *{box-sizing:border-box;}
 html{-webkit-text-size-adjust:100%;}
-body{margin:0;min-height:100vh;font-family:var(--font);color:var(--ink);
-  background:linear-gradient(180deg,var(--bg) 0%,var(--bg-2) 100%) fixed;line-height:1.7;}
-button,input,select,textarea{font-family:inherit;color:inherit;}
-img,svg,canvas{max-width:100%;}
+body{margin:0;min-height:100vh;font-family:var(--font);color:var(--ink);line-height:1.65;
+  background:linear-gradient(180deg,var(--bg) 0%,var(--bg-2) 100%) fixed;}
+button,input{font-family:inherit;color:inherit;}
 :focus-visible{outline:3px solid var(--cyan);outline-offset:3px;border-radius:8px;}
-.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
 
-/* ================= SHELL ================= */
-.app{max-width:1120px;margin:0 auto;padding:14px 16px 110px;}
-.topbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--card);border:1.5px solid var(--line);
-  border-radius:var(--r);box-shadow:var(--sh);padding:10px 14px;}
-.ref{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13.5px;font-weight:700;color:var(--cyan-d);
-  background:var(--cyan-l);border:1.5px solid var(--cyan-b);border-radius:999px;padding:6px 14px;}
-.ref b{color:var(--navy);}
-.topbar h1{flex:1;min-width:200px;margin:0;font-size:clamp(19px,2.6vw,26px);font-weight:900;line-height:1.3;}
-.topbar h1 small{display:block;font-size:13px;font-weight:600;color:var(--muted);}
-.dots{display:flex;gap:6px;align-items:center;list-style:none;margin:0;padding:0;}
-.dots li{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:14px;
-  background:var(--soft);border:2px solid var(--line);color:var(--muted);transition:all .25s;}
-.dots li.on{background:var(--navy);border-color:var(--navy);color:#fff;transform:scale(1.08);}
-.dots li.done{background:var(--green);border-color:var(--green);color:#fff;}
+/* ---------- header: title + 3 scene pills ---------- */
+.hdr{max-width:1180px;margin:0 auto;padding:12px 16px 0;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.hdr h1{margin:0;font-size:clamp(19px,2.6vw,25px);font-weight:900;line-height:1.3;flex:1;min-width:180px;}
+.ref{font-size:12.5px;font-weight:700;color:var(--cyan-d);background:var(--cyan-l);border:1.5px solid var(--cyan-b);border-radius:999px;padding:4px 12px;white-space:nowrap;}
+.pills{display:flex;gap:6px;list-style:none;margin:0;padding:0;}
+.pills li{display:flex;align-items:center;gap:6px;height:38px;padding:0 12px;border-radius:999px;font-weight:800;font-size:14px;
+  background:#fff;border:2px solid var(--line);color:var(--muted);transition:all .25s;white-space:nowrap;}
+.pills li b{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--soft);font-size:13px;}
+.pills li.on{border-color:var(--navy);color:var(--navy);box-shadow:0 0 0 3px rgba(32,0,88,.08);}
+.pills li.on b{background:var(--navy);color:#fff;}
+.pills li.done{border-color:var(--green-b);color:var(--green-d);}
+.pills li.done b{background:var(--green);color:#fff;}
 
-.stage{display:none;margin-top:16px;background:var(--card);border-radius:var(--r-l);box-shadow:var(--sh-l);overflow:hidden;
-  animation:rise .4s ease both;}
-.stage.on{display:block;}
-.stage-h{background:var(--navy);color:#fff;padding:14px 22px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
-.stage-h .kind{font-size:13px;font-weight:800;background:rgba(255,255,255,.14);border-radius:999px;padding:4px 12px;}
-.stage-h h2{margin:0;font-size:clamp(18px,2.4vw,23px);font-weight:900;}
-.stage-b{padding:20px 22px 24px;}
-.lead{font-size:17px;margin:0 0 14px;}
-.task{display:flex;gap:10px;align-items:flex-start;background:var(--yellow-l);border:1.5px solid #f3dc97;border-radius:var(--r-s);
-  padding:10px 14px;font-weight:700;margin:0 0 14px;}
-.task::before{content:"👆";font-size:20px;line-height:1.4;}
-.book{font-size:15px;background:var(--purple-l);border-inline-start:5px solid var(--purple);border-radius:var(--r-s);padding:10px 14px;margin:10px 0;}
-.book::before{content:"📘 من الكتاب: ";font-weight:800;color:var(--purple);}
-.extra{font-size:13.5px;color:var(--muted);background:var(--soft);border:1.5px dashed var(--line);border-radius:var(--r-s);padding:8px 12px;margin:10px 0;}
-.extra::before{content:"ℹ️ توضيح للنشاط وليس من الكتاب: ";font-weight:800;}
-.grid2{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:20px;align-items:start;}
-@media (max-width:820px){.grid2{grid-template-columns:minmax(0,1fr);}}
-.panel{background:var(--soft);border:1.5px solid var(--line);border-radius:var(--r);padding:14px;}
-.panel h3{margin:0 0 8px;font-size:17px;font-weight:900;}
+/* ---------- scene layout ---------- */
+.wrap{max-width:1180px;margin:0 auto;padding:12px 16px calc(var(--nav-h) + 18px);}
+.scene{display:none;}
+.scene.on{display:block;animation:rise .35s ease both;}
+.layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,1fr);gap:16px;align-items:start;}
+.viewport{position:relative;border-radius:24px;overflow:hidden;background:#fff;box-shadow:var(--sh-l);min-height:420px;}
+.viewport.dark{background:radial-gradient(ellipse at 50% 38%,#33197a 0%,#170040 72%);}
+.v3d{position:relative;width:100%;aspect-ratio:4/3;touch-action:none;cursor:grab;}
+.v3d canvas{display:block;width:100%;height:100%;}
+.v3d .rot{position:absolute;bottom:10px;inset-inline-start:10px;font-size:12.5px;font-weight:800;color:#e8e3ff;background:rgba(255,255,255,.12);
+  border-radius:999px;padding:4px 12px;pointer-events:none;}
+.viewport:not(.dark) .v3d .rot{color:var(--muted);background:rgba(32,0,88,.06);}
+.vtools{position:absolute;top:10px;inset-inline-end:10px;display:flex;gap:6px;z-index:3;flex-wrap:wrap;justify-content:flex-end;}
 
-/* ================= CONTROLS ================= */
-.btn{min-height:var(--tap);min-width:var(--tap);display:inline-flex;align-items:center;justify-content:center;gap:8px;
-  padding:0 20px;border-radius:999px;border:2px solid transparent;font-size:16px;font-weight:800;cursor:pointer;
-  background:var(--navy);color:#fff;transition:transform .12s,background .2s,box-shadow .2s;touch-action:manipulation;
-  -webkit-tap-highlight-color:transparent;user-select:none;}
-.btn:active{transform:scale(.96);}
-.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;}
-.btn.cyan{background:var(--cyan);color:var(--navy);}
-.btn.green{background:var(--green);}
-.btn.red{background:var(--red);}
+/* ---------- the guide card (one place to look) ---------- */
+.guide{background:#fff;border-radius:24px;box-shadow:var(--sh-l);padding:16px 16px 14px;position:sticky;top:12px;}
+.g-trail{display:flex;gap:6px;align-items:center;margin-bottom:10px;}
+.g-trail i{flex:1;height:8px;border-radius:99px;background:#ece9f8;transition:background .3s;}
+.g-trail i.done{background:var(--green);} .g-trail i.cur{background:var(--cyan);}
+.g-count{font-size:13px;font-weight:800;color:var(--muted);margin-bottom:4px;}
+.g-step{display:flex;gap:12px;align-items:flex-start;}
+.g-num{flex:none;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--navy);color:#fff;font-weight:900;font-size:20px;}
+.g-text{margin:0;font-size:clamp(18px,2.1vw,21px);font-weight:900;line-height:1.45;padding-top:6px;}
+.g-body{margin-top:12px;}
+.g-body:empty{display:none;}
+.g-book{margin-top:12px;border-top:1.5px dashed var(--line);padding-top:8px;}
+.g-book summary{cursor:pointer;font-weight:800;font-size:14px;color:var(--purple);list-style:none;min-height:36px;display:flex;align-items:center;gap:6px;}
+.g-book summary::-webkit-details-marker{display:none;}
+.g-book p{margin:6px 0 0;font-size:15px;background:var(--purple-l);border-radius:12px;padding:8px 12px;}
+.g-book .extra{background:var(--soft);color:var(--muted);font-size:13.5px;border:1.5px dashed var(--line);}
+.g-book .extra::before{content:"ℹ️ توضيحٌ للنشاطِ وليس من الكتابِ: ";font-weight:800;}
+.g-done{text-align:center;padding:8px 0 2px;}
+.g-done .big{font-size:44px;line-height:1;animation:pop .5s ease both;}
+.g-done h3{margin:6px 0 4px;font-size:21px;font-weight:900;}
+.g-done ul{list-style:none;padding:0;margin:10px 0 0;display:grid;gap:6px;text-align:start;}
+.g-done li{background:var(--green-l);border:1.5px solid var(--green-b);border-radius:12px;padding:7px 12px;font-weight:700;font-size:15px;}
+
+/* ---------- controls ---------- */
+.btn{min-height:48px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0 20px;border-radius:999px;border:2px solid transparent;
+  font-size:16px;font-weight:800;cursor:pointer;background:var(--navy);color:#fff;transition:transform .12s,background .2s,box-shadow .2s;touch-action:manipulation;user-select:none;}
+.btn:active{transform:scale(.96);} .btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn.cyan{background:var(--cyan);color:var(--navy);} .btn.green{background:var(--green);} .btn.red{background:var(--red);}
 .btn.ghost{background:#fff;color:var(--navy);border-color:var(--line);}
 .btn.ghost[aria-pressed="true"]{background:var(--navy);color:#fff;border-color:var(--navy);}
 .btn.sm{min-height:40px;font-size:14.5px;padding:0 14px;}
-.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
-.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;}
-.choice{min-height:56px;text-align:start;padding:10px 14px;border-radius:var(--r-s);border:2px solid var(--line);background:#fff;
-  font-size:16px;font-weight:700;cursor:pointer;transition:all .15s;}
+.btn.glow{animation:glow 1.4s ease-in-out infinite;}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.choices{display:grid;gap:8px;}
+.choice{min-height:52px;text-align:start;padding:8px 14px;border-radius:14px;border:2px solid var(--line);background:#fff;font-size:16.5px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:10px;}
 .choice:hover{border-color:var(--cyan);}
-.choice[aria-pressed="true"]{border-color:var(--navy);background:var(--purple-l);}
-.choice.ok{border-color:var(--green);background:var(--green-l);}
-.choice.bad{border-color:var(--red);background:var(--red-l);}
+.choice.ok{border-color:var(--green);background:var(--green-l);} .choice.bad{border-color:var(--red);background:var(--red-l);animation:shake .4s;}
+.counter{display:flex;align-items:center;gap:10px;justify-content:space-between;background:var(--soft);border:1.5px solid var(--line);border-radius:16px;padding:6px 8px 6px 12px;}
+.counter .n{font-size:24px;font-weight:900;min-width:34px;text-align:center;}
 input[type=range]{width:100%;height:44px;accent-color:var(--cyan-d);cursor:pointer;}
-.slider-lbl{display:flex;justify-content:space-between;font-size:13.5px;font-weight:700;color:var(--muted);}
-
-/* chips + drop zones (Kit.dnd) */
-.chips{display:flex;flex-wrap:wrap;gap:8px;min-height:56px;padding:8px;border-radius:var(--r-s);background:var(--soft);
-  border:1.5px dashed var(--line);}
-.chip{min-height:46px;display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;background:#fff;
-  border:2px solid var(--cyan-b);font-weight:800;font-size:15.5px;cursor:grab;touch-action:none;user-select:none;
-  -webkit-user-select:none;box-shadow:0 2px 0 var(--cyan-b);transition:transform .12s,box-shadow .12s,border-color .2s;}
-.chip.sel{border-color:var(--navy);box-shadow:0 0 0 4px rgba(0,195,254,.35);transform:translateY(-2px);}
-.chip.dragging{opacity:.35;}
-.chip.ghost{position:fixed;z-index:999;pointer-events:none;opacity:.95;transform:rotate(-3deg) scale(1.05);box-shadow:var(--sh-l);}
-.chip.ok{border-color:var(--green);background:var(--green-l);box-shadow:0 2px 0 var(--green-b);cursor:default;}
-.chip.bad{border-color:var(--red);background:var(--red-l);animation:shake .4s;}
-.zone{min-height:64px;border:2.5px dashed var(--cyan-b);border-radius:var(--r-s);padding:8px;background:#fff;
-  transition:background .15s,border-color .15s;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;}
+.chips{display:flex;flex-wrap:wrap;gap:8px;}
+.chip{min-height:46px;display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;background:#fff;border:2px solid var(--cyan-b);
+  font-weight:800;font-size:15.5px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;box-shadow:0 3px 0 var(--cyan-b);}
+.chip.sel{border-color:var(--navy);box-shadow:0 0 0 4px rgba(0,195,254,.35);}
+.chip.dragging{opacity:.35;} .chip.ghost{position:fixed;z-index:999;pointer-events:none;transform:rotate(-3deg) scale(1.05);box-shadow:var(--sh-l);}
+.chip.ok{border-color:var(--green);background:var(--green-l);box-shadow:0 3px 0 var(--green-b);cursor:default;} .chip.bad{border-color:var(--red);background:var(--red-l);animation:shake .4s;}
+.zone{min-height:62px;border:2.5px dashed var(--cyan-b);border-radius:16px;padding:8px;background:#fff;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;transition:background .15s,border-color .15s;}
 .zone.hot{background:var(--cyan-l);border-color:var(--cyan);border-style:solid;}
-.zone .zt{width:100%;font-weight:900;font-size:15px;color:var(--navy);}
+.zone .zt{width:100%;font-weight:900;font-size:15px;}
+.tag{display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:14px;border-radius:999px;padding:3px 12px;background:var(--soft);border:1.5px solid var(--line);}
+.tag.ok{background:var(--green-l);border-color:var(--green-b);color:var(--green-d);} .tag.bad{background:var(--red-l);border-color:var(--red-b);color:var(--red-d);}
 
-/* feedback */
-.fb{display:none;margin-top:12px;border-radius:var(--r-s);padding:12px 14px 12px 14px;font-size:16px;font-weight:600;
-  border:2px solid;animation:rise .25s ease both;}
-.fb.show{display:flex;gap:10px;align-items:flex-start;}
-.fb .ic{font-size:22px;line-height:1.3;flex:none;}
+/* feedback (inside the guide card) */
+.fb{display:none;margin-top:10px;border-radius:14px;padding:10px 12px;font-size:15.5px;font-weight:700;border:2px solid;animation:rise .25s ease both;}
+.fb.show{display:flex;gap:8px;align-items:flex-start;}
+.fb .ic{font-size:20px;line-height:1.3;flex:none;}
 .fb.ok{background:var(--green-l);border-color:var(--green-b);color:#064b31;}
 .fb.bad{background:var(--red-l);border-color:var(--red-b);color:#7a1426;}
 .fb.info{background:var(--cyan-l);border-color:var(--cyan-b);color:#06456a;}
 .fb.warn{background:var(--yellow-l);border-color:#f3dc97;color:#5a4200;}
 
-/* meters & badges */
-.meter{height:16px;border-radius:999px;background:#ece9f8;overflow:hidden;}
-.meter>i{display:block;height:100%;border-radius:999px;background:var(--cyan);transition:width .4s;}
-.badge{display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:14px;border-radius:999px;padding:4px 12px;
-  background:var(--soft);border:1.5px solid var(--line);}
-.badge.ok{background:var(--green-l);border-color:var(--green-b);color:var(--green-d);}
-.badge.bad{background:var(--red-l);border-color:var(--red-b);color:var(--red-d);}
-.missions{list-style:none;margin:0;padding:0;display:grid;gap:8px;}
-.missions li{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-s);background:#fff;
-  border:2px solid var(--line);font-weight:700;}
-.missions li .st{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--soft);
-  border:2px solid var(--line);flex:none;font-size:15px;}
-.missions li.cur{border-color:var(--cyan);}
-.missions li.done{border-color:var(--green-b);background:var(--green-l);}
-.missions li.done .st{background:var(--green);border-color:var(--green);color:#fff;}
+/* spotlight ring + pointing hand */
+#spot{position:fixed;z-index:60;pointer-events:none;border-radius:50%;border:4px solid var(--yellow);box-shadow:0 0 0 6px rgba(255,209,92,.35),0 0 24px rgba(255,209,92,.8);
+  display:none;animation:ring 1.3s ease-in-out infinite;transition:left .25s,top .25s,width .25s,height .25s;}
+#spot.box{border-radius:18px;}
+#hand{position:fixed;z-index:61;pointer-events:none;font-size:34px;display:none;filter:drop-shadow(0 3px 4px rgba(0,0,0,.3));animation:tapme 1.3s ease-in-out infinite;transition:left .25s,top .25s;}
 
-/* 3D canvas wrapper (Kit.orbit) */
-.view3d{position:relative;border-radius:var(--r);background:radial-gradient(ellipse at 50% 40%,#2d1670 0%,#160038 75%);
-  overflow:hidden;touch-action:none;cursor:grab;aspect-ratio:4/3;width:100%;}
-.view3d canvas{display:block;width:100%;height:100%;}
-.view3d .hint3d{position:absolute;bottom:10px;inset-inline-start:10px;font-size:13px;font-weight:700;color:#d9d2ff;
-  background:rgba(255,255,255,.1);border-radius:999px;padding:4px 12px;pointer-events:none;}
-
-/* nav footer */
-.navbar{position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);
-  border-top:1.5px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));}
-.navbar .in{max-width:1120px;margin:0 auto;display:flex;gap:10px;align-items:center;justify-content:space-between;}
-.navbar .where{font-weight:800;color:var(--muted);font-size:14.5px;text-align:center;flex:1;}
-
-/* summary card */
-.sum{display:grid;gap:10px;}
-.sum li{background:var(--green-l);border:1.5px solid var(--green-b);border-radius:var(--r-s);padding:10px 14px;font-weight:700;list-style:none;}
-.sum{padding:0;margin:0;}
+/* nav */
+.navbar{position:fixed;bottom:0;left:0;right:0;z-index:50;height:var(--nav-h);background:rgba(255,255,255,.95);backdrop-filter:blur(8px);border-top:1.5px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));}
+.navbar .in{max-width:1180px;margin:0 auto;display:flex;gap:10px;align-items:center;justify-content:space-between;height:100%;}
+.navbar .where{font-weight:800;color:var(--muted);font-size:14px;text-align:center;flex:1;}
 
 .confetti{position:fixed;inset:0;pointer-events:none;z-index:998;}
-@keyframes rise{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+@keyframes rise{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
 @keyframes shake{0%,100%{transform:none;}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
-@keyframes pop{0%{transform:scale(.6);opacity:0;}70%{transform:scale(1.08);}100%{transform:scale(1);opacity:1;}}
-@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;scroll-behavior:auto !important;}}
-@media (max-width:560px){.stage-b{padding:16px 14px 20px;}.stage-h{padding:12px 14px;}.dots li{width:28px;height:28px;font-size:12.5px;}.btn{padding:0 16px;}}
+@keyframes pop{0%{transform:scale(.5);opacity:0;}70%{transform:scale(1.12);}100%{transform:scale(1);opacity:1;}}
+@keyframes ring{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.12);opacity:.75;}}
+@keyframes tapme{0%,100%{transform:translate(0,0);}50%{transform:translate(-4px,-8px);}}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(0,195,254,.6);}50%{box-shadow:0 0 0 10px rgba(0,195,254,0);}}
+
+/* phone: one screen, no overlap — header, model (top), guide (fills the rest, scrolls inside), nav */
+@media (max-width:820px){
+  body{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden;}
+  .hdr{padding:8px 10px 0;gap:8px;flex:none;} .hdr h1{font-size:18px;min-width:0;} .ref{display:none;}
+  .pills li{height:34px;padding:0 9px;font-size:13px;} .pills li span{display:none;}
+  .wrap{flex:1;min-height:0;width:100%;padding:8px 8px calc(var(--nav-h) + 8px);}
+  .scene.on{height:100%;}
+  .layout{display:flex;flex-direction:column;height:100%;gap:8px;align-items:stretch;}
+  .viewport{flex:0 0 auto;min-height:0;border-radius:18px;}
+  .v3d{aspect-ratio:auto;height:36vh;height:36dvh;min-height:200px;}
+  .guide{position:static;flex:1 1 0;min-height:140px;overflow:auto;border-radius:18px;padding:12px;}
+  .g-num{width:38px;height:38px;font-size:18px;border-radius:12px;} .g-text{font-size:17.5px;padding-top:4px;}
+  .g-count{display:none;}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;}}
 </style>
 <style>
-/* ================= ACTIVITY-SPECIFIC CSS ================= */
-.diagram{background:linear-gradient(180deg,#fff 0%,#f6f4ff 100%);border:1.5px solid var(--line);border-radius:var(--r);padding:8px;position:relative;}
-.diagram svg{display:block;width:100%;height:auto;max-height:66vh;margin:0 auto;font-family:var(--font);}
-.diagram.head svg{max-height:52vh;}
-.diagram.head .lb{font-size:10.5px !important;}
-.diagram.head .lb[data-part="cer"]{font-size:16px !important;}
-.sw{display:inline-block;width:18px;height:18px;border-radius:6px;border:2px solid rgba(32,0,88,.25);vertical-align:-3px;margin-inline-end:6px;flex:none;}
-/* body svg */
-.body-f{fill:#ece8fb;stroke:#cbc2ee;stroke-width:2;}
-.body-s{fill:none;stroke:#ece8fb;stroke-linecap:round;stroke-linejoin:round;}
-.body-o{fill:none;stroke:#cbc2ee;stroke-linecap:round;stroke-linejoin:round;}
-.skull{fill:none;stroke:#b4a8e3;stroke-width:6;}
-.vert{fill:none;stroke:#d9d3ee;stroke-width:22;stroke-dasharray:13 3;stroke-linecap:butt;}
-.part{transition:opacity .35s,filter .35s;}
-.nv-line{fill:none;stroke:#f6a723;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;}
-.sc-line{fill:none;stroke:#0a8fc0;stroke-width:8;stroke-linecap:round;}
-.gyri{fill:none;stroke:rgba(110,20,60,.35);stroke-width:2.2;stroke-linecap:round;}
-.folia{fill:none;stroke:rgba(255,255,255,.55);stroke-width:1.8;}
-.part.sel{filter:drop-shadow(0 0 7px #ffd15c) drop-shadow(0 0 3px #f6a723);}
-svg.v-central .g-pnv, svg.v-central .eye-g{opacity:.13;}
-svg.v-peripheral .g-cns{opacity:.15;}
-svg.v-central .g-cns{filter:drop-shadow(0 0 5px #00c3fe);}
-svg.v-peripheral .g-pnv{filter:drop-shadow(0 0 4px #f6a723);}
-svg.dimparts .bp{opacity:.25;filter:grayscale(.85);}
-svg.dimparts .bp.lit{opacity:1;filter:none;}
-.bp.flash{animation:flash .9s ease 1;}
-@keyframes flash{0%{filter:drop-shadow(0 0 0 #ffd15c);}40%{filter:drop-shadow(0 0 12px #ffd15c) brightness(1.15);}100%{filter:none;}}
-.lb{font-weight:900;fill:#200058;paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round;opacity:0;transition:opacity .3s;pointer-events:none;}
-.lb.in{fill:#fff;stroke:none;}
-.lbl-line{stroke:#200058;stroke-width:1.5;opacity:0;transition:opacity .3s;pointer-events:none;}
-svg.lbl-all .lb, svg.lbl-all .lbl-line, .lb.show, .lbl-line.show{opacity:1;}
-.hit{cursor:pointer;outline:none;-webkit-tap-highlight-color:transparent;}
-.hit.f{fill:#00c3fe;fill-opacity:0;stroke:none;}
-.hit.s{fill:none;stroke:#00c3fe;stroke-opacity:0;stroke-linecap:round;}
-.hit.f:focus-visible{fill-opacity:.25;}
-.hit.s:focus-visible{stroke-opacity:.3;}
-.hit.f.ping{animation:pingf .5s;} .hit.s.ping{animation:pings .5s;}
-@keyframes pingf{0%{fill-opacity:.35;}100%{fill-opacity:0;}}
-@keyframes pings{0%{stroke-opacity:.35;}100%{stroke-opacity:0;}}
-.trail{fill:none;stroke:#00c3fe;stroke-width:7;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 5px #00c3fe);pointer-events:none;}
-.pulse{fill:#fff;stroke:#00c3fe;stroke-width:4;filter:drop-shadow(0 0 7px #00c3fe) drop-shadow(0 0 3px #fff);pointer-events:none;}
-.pulse.stop{stroke:#e8425a;fill:#ffd6dd;filter:drop-shadow(0 0 8px #e8425a);}
-.cutmark{opacity:0;transition:opacity .25s;pointer-events:none;}
-svg.cut .cutmark{opacity:1;}
-svg.cut .nv-arm-vis{stroke-dasharray:var(--cutd,1000);}
-.armg,.legg{transition:transform .35s ease;}
-.speed{stroke:#9b93c9;stroke-width:3;stroke-linecap:round;stroke-dasharray:10 8;}
-.cap{margin-top:8px;min-height:52px;display:flex;align-items:center;gap:8px;background:var(--navy);color:#fff;border-radius:var(--r-s);padding:8px 14px;font-weight:800;font-size:16px;}
-.cap::before{content:"📡";}
-/* stage 1 */
-.seg{gap:8px;margin-bottom:8px;}
-.seg .btn{flex:1;min-height:48px;}
-.divnote{font-size:15px;font-weight:700;background:var(--cyan-l);border:1.5px solid var(--cyan-b);border-radius:var(--r-s);padding:8px 12px;margin-bottom:10px;}
-.card{background:#fff;border:2px solid var(--line);border-radius:var(--r);padding:12px 14px;box-shadow:var(--sh);margin-bottom:12px;min-height:120px;}
-.card.pop{animation:pop .35s ease both;}
-.card-h{display:flex;align-items:center;gap:4px;font-size:19px;flex-wrap:wrap;}
-.card p{margin:6px 0 0;font-size:16px;}
-.card .tag{font-size:13px;font-weight:800;border-radius:999px;padding:2px 10px;margin-inline-start:auto;background:var(--soft);border:1.5px solid var(--line);}
-.card .tag.c{background:var(--cyan-l);border-color:var(--cyan-b);color:var(--cyan-d);}
-.card .tag.p{background:var(--yellow-l);border-color:#f3dc97;color:#7a5800;}
-.mh{margin:6px 0 8px;font-size:17px;font-weight:900;}
-.missions li{min-height:48px;}
-.alt{margin-top:10px;font-size:15px;}
-.alt summary{cursor:pointer;font-weight:800;color:var(--cyan-d);min-height:44px;display:flex;align-items:center;}
-.alt .row{margin-top:6px;}
-.quiz{margin-top:16px;}
-.qtext{margin:0 0 10px;font-size:16.5px;}
-/* stage 2 */
-.zones3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px;}
-.zones3 .zone{min-height:150px;}
-@media (max-width:560px){.zones3{grid-template-columns:minmax(0,1fr);}.zones3 .zone{min-height:84px;}}
-.zone .chip{font-size:14.5px;}
-.mini{font-size:15px;font-weight:700;color:var(--muted);margin:8px 0 6px;}
-/* stage 3 */
-.path{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
-.path li{display:flex;align-items:center;gap:6px;}
-.path .slot{min-height:44px;min-width:64px;display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:4px 10px;border-radius:12px;border:2px dashed var(--line);background:var(--soft);font-weight:800;font-size:14.5px;color:var(--muted);}
-.path .slot.fill{border-style:solid;border-color:var(--green-b);background:var(--green-l);color:var(--green-d);animation:pop .3s ease both;}
-.path .slot.next{border-color:var(--cyan);color:var(--cyan-d);}
-.path .arr{font-weight:900;color:var(--muted);}
-.bank{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
-.bank .choice{min-height:50px;font-size:15px;display:flex;align-items:center;gap:4px;}
-.bank .choice.used{opacity:.45;}
-/* stage 4 */
-.circ{margin-top:18px;}
-.csvg svg{display:block;width:100%;max-width:420px;height:auto;margin:4px auto 8px;font-family:var(--font);}
-.wire{fill:none;stroke:#5f5a85;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;}
-.flow{fill:none;stroke:#00c3fe;stroke-width:3;stroke-dasharray:6 12;stroke-linecap:round;animation:flow 0.8s linear infinite;}
-@keyframes flow{to{stroke-dashoffset:-18;}}
-.bulb{fill:#e6e3f0;stroke:#5f5a85;stroke-width:3;transition:fill .3s;}
-svg.lit .bulb{fill:#ffd15c;}
-.rays{stroke:#f6a723;stroke-width:3;stroke-linecap:round;opacity:0;transition:opacity .3s;}
-svg.lit .rays{opacity:1;}
-.ctext{font-size:13px;font-weight:900;fill:#200058;}
-.cx{opacity:0;}
-.circ1.cutw .cx{opacity:1;}
-.circ1.cutw .flow{display:none;}
-.circ2 .flow{display:none;}
-.circ2.lit .flow{display:inline;}
-/* stage 5 */
-.hgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px;}
-.hcard{background:#fff;border:2px solid var(--line);border-radius:var(--r);padding:12px 14px;box-shadow:var(--sh);}
-.hcard.done{border-color:var(--green-b);}
-.hcard h3{margin:0 0 8px;font-size:17px;font-weight:900;display:flex;gap:8px;align-items:center;}
-.hcard .ico{font-size:28px;}
-.hcard .choices{grid-template-columns:minmax(0,1fr);}
-@media (max-width:560px){.bank{grid-template-columns:minmax(0,1fr);} .path .slot{min-width:52px;font-size:13.5px;padding:4px 8px;}}
-
+/* ===== ACTIVITY CSS ===== */
+.cap{position:absolute;top:10px;inset-inline:10px;text-align:center;font-size:14.5px;font-weight:800;color:#fff;background:rgba(255,255,255,.13);border-radius:14px;padding:6px 12px;pointer-events:none;}
+.sit{display:flex;align-items:center;gap:10px;background:var(--yellow-l);border:2px solid #f3dc97;border-radius:16px;padding:10px 14px;font-size:18px;font-weight:900;}
+.sit .em{font-size:32px;line-height:1;}
+.hintp{margin:8px 0 0;color:var(--muted);font-weight:700;font-size:15px;}
+.path{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
+.path li{min-height:44px;border-radius:12px;border:2px dashed var(--line);display:flex;align-items:center;justify-content:center;gap:4px;padding:4px 6px;font-weight:800;font-size:14px;text-align:center;color:var(--muted);line-height:1.3;}
+.path li.fill{border-style:solid;border-color:var(--green-b);background:var(--green-l);color:var(--green-d);}
+.path li.next{border-color:var(--cyan);color:var(--navy);}
+@media (max-width:820px){ .cap{font-size:12.5px;padding:4px 10px;top:6px;} .path li{font-size:12.5px;min-height:40px;} .sit{font-size:16px;padding:8px 10px;} .sit .em{font-size:26px;} }
 </style>
 </head>
 <body>
-<div class="app">
-  <header class="topbar">
-    <span class="ref">📘 <b>الفصلُ ٣</b> · الدرسُ ١: الجهازُ العصبيُّ وصحتُه · <span>كتابُ النشاطِ ص ٢٠–٢٢</span></span>
-    <h1>«مركزُ القيادةِ»<small>كيف يقودُ الجهازُ العصبيُّ جسمي؟</small></h1>
-    <ol class="dots" id="dots" aria-label="مراحلُ النشاطِ"></ol>
-  </header>
+<header class="hdr">
+  <h1>🧠 «مركزُ القيادةِ»</h1>
+  <span class="ref">📘 الفصلُ ٣ · الدرسُ ١: الجهازُ العصبيُّ وصحتُه · كتابُ النشاطِ ص ٢٠–٢٢</span>
+  <ol class="pills" id="pills" aria-label="أجزاءُ النشاطِ"></ol>
+</header>
 
-  <main id="main">
-  <!-- ============ STAGE 1: EXPLORE ============ -->
-  <section class="stage" data-stage="0" aria-labelledby="s0h">
-    <div class="stage-h"><span class="kind">أستكشفُ</span><h2 id="s0h">مَن يقودُ جسمي؟</h2></div>
-    <div class="stage-b">
-      <p class="book">الجهازُ العصبيُّ ينظّمُ عملَ الجسمِ، وينسّقُ جميعَ أنشطتِه ووظائفِه على مدارِ اليومِ.</p>
-      <div class="task">المسْ أجزاءَ الجهازِ العصبيِّ في الرسمِ واكتشفِ الأجزاءَ الخمسةَ.</div>
-      <div class="grid2">
-        <div class="diagram" id="d1"></div>
-        <div>
-          <div class="row seg" role="group" aria-label="اعرضْ قسماً من الجهازِ العصبيِّ">
-            <button class="btn ghost sm" type="button" data-view="all" aria-pressed="true">الكلُّ</button>
-            <button class="btn ghost sm" type="button" data-view="central" aria-pressed="false">المركزيُّ</button>
-            <button class="btn ghost sm" type="button" data-view="peripheral" aria-pressed="false">الطرفيُّ</button>
-          </div>
-          <div class="divnote" id="divNote">اخترْ «المركزيُّ» أو «الطرفيُّ» لترى كلَّ قسمٍ.</div>
-          <div class="card" id="card1" aria-live="polite">
-            <div class="card-h"><span class="sw" style="background:#c9c0ee"></span><b>المسْ جزءاً…</b></div>
-            <p>ستظهرُ هنا وظيفةُ الجزءِ الذي تلمسُه.</p>
-          </div>
-          <h3 class="mh">مهمتي: اكتشفْ <span id="foundN">٠</span> / ٥</h3>
-          <ul class="missions" id="miss1"></ul>
-          <details class="alt">
-            <summary>لا تستطيعُ اللمسَ بدقّةٍ؟ استعملِ الأزرارَ</summary>
-            <div class="row" id="altBtns"></div>
-          </details>
-        </div>
-      </div>
-      <div class="panel quiz" id="q1">
-        <h3>🕵️ صحّحِ الخطأَ الشائعَ</h3>
-        <p class="qtext">قالَ سامرٌ: «الحبلُ الشوكيُّ يتّصلُ بالدماغِ عن طريقِ <b>المخيخِ</b>». بأيِّ جزءٍ يتّصلُ الحبلُ الشوكيُّ بالدماغِ حقاً؟</p>
-        <div class="choices" id="q1c">
-          <button class="choice" type="button" data-a="cbl">المخيخُ</button>
-          <button class="choice" type="button" data-a="med">النخاعُ المستطيلُ</button>
-          <button class="choice" type="button" data-a="cer">المخُّ</button>
-        </div>
-        <div class="fb" id="q1fb"></div>
-      </div>
+<div class="wrap">
+  <section class="scene" data-scene="0">
+    <div class="layout">
+      <div class="viewport dark"><div class="v3d" id="view0"></div></div>
+      <aside class="guide"></aside>
     </div>
   </section>
 
-  <!-- ============ STAGE 2: SORT ============ -->
-  <section class="stage" data-stage="1" aria-labelledby="s1h">
-    <div class="stage-h"><span class="kind">أصنّفُ</span><h2 id="s1h">أيُّ جزءٍ يعملُ الآنَ؟</h2></div>
-    <div class="stage-b">
-      <div class="task">اسحبْ كلَّ موقفٍ إلى جزءِ الدماغِ الذي يعملُ فيه (أو المسِ البطاقةَ ثم المسِ المكانَ).</div>
-      <div class="grid2">
-        <div>
-          <div class="chips" id="chips2" aria-label="بطاقاتُ المواقفِ"></div>
-          <div class="zones3">
-            <div class="zone" data-part="cer"><div class="zt"><span class="sw" style="background:#e86aa0"></span>المخُّ</div></div>
-            <div class="zone" data-part="cbl"><div class="zt"><span class="sw" style="background:#7b5cff"></span>المخيخُ</div></div>
-            <div class="zone" data-part="med"><div class="zt"><span class="sw" style="background:#12a06a"></span>النخاعُ المستطيلُ</div></div>
-          </div>
-          <div class="fb" id="fb2"></div>
-        </div>
-        <div>
-          <div class="diagram head" id="d2"></div>
-          <p class="mini">يضيءُ الجزءُ في الدماغِ عندما تضعُ بطاقتَه في مكانِها. <b id="n2">٠</b> / ٩</p>
-          <div class="meter"><i id="m2" style="width:0%"></i></div>
-        </div>
-      </div>
+  <section class="scene" data-scene="1">
+    <div class="layout">
+      <div class="viewport dark"><div class="v3d" id="view1"></div></div>
+      <aside class="guide"></aside>
     </div>
   </section>
 
-  <!-- ============ STAGE 3: PATH ============ -->
-  <section class="stage" data-stage="2" aria-labelledby="s2h">
-    <div class="stage-h"><span class="kind">أبني</span><h2 id="s2h">رحلةُ الإيعازِ: حارسُ المرمى</h2></div>
-    <div class="stage-b">
-      <p class="lead">⚽ كرةٌ تطيرُ نحوَ حارسِ المرمى! كيف يعرفُ جسمُه أن يرفعَ يدَه ويمسكَها؟</p>
-      <div class="task">ابنِ مسارَ الإيعازِ: المسِ الأجزاءَ بالترتيبِ في الرسمِ (أو من الأزرارِ)، ثم اضغطْ «أرسلِ الإيعازَ».</div>
-      <div class="grid2">
-        <div>
-          <div class="diagram" id="d3"></div>
-          <div class="cap" id="cap3" aria-live="polite">الكرةُ قادمةٌ…</div>
-        </div>
-        <div>
-          <h3 class="mh">المسارُ</h3>
-          <ol class="path" id="path3" aria-label="خطواتُ المسارِ"></ol>
-          <div class="bank" id="bank3" role="group" aria-label="أجزاءٌ للاختيارِ"></div>
-          <div class="row" style="margin-top:12px">
-            <button class="btn cyan" type="button" id="send3" disabled>⚡ أرسلِ الإيعازَ</button>
-            <button class="btn ghost sm" type="button" id="reset3">↺ من جديدٍ</button>
-          </div>
-          <div class="fb" id="fb3"></div>
-        </div>
+  <section class="scene" data-scene="2">
+    <div class="layout">
+      <div class="viewport dark"><div class="v3d" id="view2"></div>
+        <div class="cap" id="cap3" aria-live="polite">⚽ الكرةُ قادمةٌ نحوَ حارسِ المرمى!</div>
       </div>
-      <p class="book">الإيعازُ العصبيُّ: أوامرُ يُصدرُها الدماغُ، تنتقلُ على شكلِ إشاراتٍ كهربائيةٍ إلى الأعضاءِ. والأعصابُ تنقلُ المعلوماتِ من الدماغِ وإليه.</p>
-      <p class="extra">الكتابُ لا يذكرُ هذه الخطواتِ بالترتيبِ؛ بنينا المسارَ من حقائقِه: الأعصابُ تنقلُ المعلوماتِ من أعضاءِ الحسِّ إلى الدماغِ، والمخُّ ينظّمُ معلوماتِ الحواسِّ، والدماغُ يُصدرُ الأوامرَ إشاراتٍ كهربائيةً، والحبلُ الشوكيُّ يتّصلُ بالدماغِ عن طريقِ النخاعِ المستطيلِ وتتفرّعُ منه الأعصابُ. شكلُ الحركةِ وسرعتُها في الرسمِ مبسّطانِ.</p>
+      <aside class="guide"></aside>
     </div>
   </section>
-
-  <!-- ============ STAGE 4: CUT ============ -->
-  <section class="stage" data-stage="3" aria-labelledby="s3h">
-    <div class="stage-h"><span class="kind">أجرّبُ</span><h2 id="s3h">ماذا لو انقطعَ العصبُ؟</h2></div>
-    <div class="stage-b">
-      <div class="grid2">
-        <div>
-          <div class="diagram" id="d4"></div>
-          <div class="cap" id="cap4" aria-live="polite">العصبُ سليمٌ.</div>
-        </div>
-        <div>
-          <div class="panel">
-            <h3>١) توقّعْ أولاً</h3>
-            <p style="margin:0 0 8px">إذا قُطِعَ عصبُ الذراعِ، ماذا يحدثُ عندما يُرسلُ الدماغُ أمرَ «امسكِ الكرةَ»؟</p>
-            <div class="choices" id="pred4">
-              <button class="choice" type="button" data-a="catch">تمسكُ اليدُ الكرةَ كالعادةِ</button>
-              <button class="choice" type="button" data-a="nomove">لا تتحرّكُ اليدُ</button>
-            </div>
-          </div>
-          <div class="panel" style="margin-top:12px">
-            <h3>٢) جرّبْ</h3>
-            <div class="row">
-              <button class="btn ghost" type="button" id="cut4" aria-pressed="false" disabled>✂️ اقطعِ العصبَ</button>
-              <button class="btn cyan" type="button" id="send4" disabled>⚡ أرسلِ الإيعازَ</button>
-            </div>
-          </div>
-          <div class="fb" id="fb4"></div>
-        </div>
-      </div>
-
-      <div class="grid2 circ">
-        <div class="panel">
-          <h3>🔦 تجربةُ الكتابِ: الدائرةُ الكهربائيةُ</h3>
-          <div class="csvg" id="circ1"></div>
-          <div class="row"><button class="btn ghost" type="button" id="cutWire" aria-pressed="false">✂️ اقطعِ السلكَ</button></div>
-          <div class="fb" id="fbc1"></div>
-        </div>
-        <div class="panel">
-          <h3>🔌 أستكشفُ أكثرَ: مفتاحٌ واحدٌ وأعضاءٌ كثيرةٌ</h3>
-          <div class="csvg" id="circ2"></div>
-          <div class="row">
-            <button class="btn ghost" type="button" id="sw2" aria-pressed="false">اضغطِ المفتاحَ</button>
-            <button class="btn ghost" type="button" id="multi4">⚡ إيعازٌ إلى اليدِ والرِّجلِ معاً</button>
-          </div>
-          <div class="fb" id="fbc2"></div>
-        </div>
-      </div>
-      <p class="book">الجهازُ العصبيُّ يشبهُ الدائرةَ الكهربائيةَ: البطاريةُ = الدماغُ، الأسلاكُ = الأعصابُ، المصباحُ = جسمُ الإنسانِ. وبدونِ الأسلاكِ لا يضيءُ المصباحُ.</p>
-    </div>
-  </section>
-
-  <!-- ============ STAGE 5: HEALTH ============ -->
-  <section class="stage" data-stage="4" aria-labelledby="s4h">
-    <div class="stage-h"><span class="kind">أطبّقُ</span><h2 id="s4h">أحمي مركزَ قيادتي</h2></div>
-    <div class="stage-b">
-      <div class="task">اخترِ التصرّفَ الذي يحمي جهازَك العصبيَّ في كلِّ موقفٍ.</div>
-      <div class="row" style="margin-bottom:12px"><span class="badge" id="score5">✔️ ٠ / ٦</span></div>
-      <div class="hgrid" id="health"></div>
-    </div>
-  </section>
-
-  <!-- ============ STAGE 6: SUMMARY ============ -->
-  <section class="stage" data-stage="5" aria-labelledby="s5h">
-    <div class="stage-h"><span class="kind">خلاصةٌ</span><h2 id="s5h">ماذا تعلّمتُ عن مركزِ القيادةِ؟</h2></div>
-    <div class="stage-b">
-      <div class="grid2">
-        <ul class="sum">
-          <li>🧭 الجهازُ العصبيُّ ينظّمُ عملَ الجسمِ وينسّقُ جميعَ أنشطتِه ووظائفِه، ويسيطرُ على فعالياتِ الجسمِ كافةً.</li>
-          <li>🏛️ المركزيُّ = الدماغُ + الحبلُ الشوكيُّ. الطرفيُّ = شبكةٌ كبيرةٌ من الأعصابِ تربطُ المركزيَّ بأعضاءِ الجسمِ مثلَ أعضاءِ الحسِّ.</li>
-          <li>🧠 المخُّ (أكبرُ الأجزاءِ): الذاكرةُ والتفكيرُ وتنظيمُ معلوماتِ الحواسِّ. المخيخُ: توازنُ الجسمِ. النخاعُ المستطيلُ: نبضاتُ القلبِ والتنفّسُ وضغطُ الدمِ.</li>
-          <li>🔗 الحبلُ الشوكيُّ (نحوُ ٤٢ سم عندَ البالغِ) داخلَ العمودِ الفقريِّ، ويتّصلُ بالدماغِ عن طريقِ <b>النخاعِ المستطيلِ</b> — لا المخيخِ.</li>
-          <li>⚡ الإيعازُ العصبيُّ: أوامرُ الدماغِ تنتقلُ إشاراتٍ كهربائيةً عبرَ الأعصابِ إلى الأعضاءِ. إذا انقطعَ العصبُ لا يصلُ الأمرُ، كالمصباحِ بلا أسلاكٍ.</li>
-          <li>💪 أحمي جهازي: نومٌ نحوَ ثماني ساعاتٍ، رياضةٌ منتظمةٌ، تجنّبُ الرياضةِ العنيفةِ والسقوطِ القويِّ، أسماكٌ وخضراواتٌ طازجةٌ، والابتعادُ عن المدخّنينَ.</li>
-        </ul>
-        <div>
-          <div class="diagram" id="d6"></div>
-          <div class="row" style="justify-content:center;margin-top:10px">
-            <button class="btn" type="button" id="again">↺ ابدأْ من جديدٍ</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-</main>
 </div>
 
-<nav class="navbar" aria-label="التنقلُ بينَ المراحلِ">
+<nav class="navbar" aria-label="التنقلُ">
   <div class="in">
     <button class="btn ghost" id="prevBtn" type="button">→ السابقُ</button>
-    <div class="where" id="where" aria-live="polite"></div>
+    <div class="where" id="where"></div>
     <button class="btn" id="nextBtn" type="button">التالي ←</button>
   </div>
 </nav>
+<div id="spot" aria-hidden="true"></div><div id="hand" aria-hidden="true">👆</div>
 
 <script>
-/* ================= KIT (shared helpers) ================= */
+/* =====================================================================
+   KIT v2
+   Scenes & guided steps:
+     Kit.scene(i, { title:'أستكشفُ', book:'<p>…</p><p class="extra">…</p>', summary:['…'], steps:[ STEP, … ] })
+     STEP = { text:'اضغطْ على النواةِ', target: '#sel' | element | ()=>({x,y,r}) (client coords) | null,
+              body: html string | (el)=>{} , enter(){}, check(){ return true when done }, after:'feedback html shown when done' }
+     Kit.start()            begin
+     Kit.ping()             re-check current step now (call after any state change)
+     Kit.next()             force-advance current step
+     Kit.say(html,type)     feedback in the current guide card ('ok'|'bad'|'info'|'warn')
+     Kit.tries(key)         counts wrong tries; returns the count (use to reveal "أرني الحلَّ" after 2)
+   3D:
+     const V = Kit.view3d(el, { draw(R,t){…}, onPick(id,hit){…}, yaw, pitch, zoom, auto:false, dist })
+       R.sphere([x,y,z], r, '#hex', {id, label, labelColor, alpha})
+       R.cyl([x,y,z],[x,y,z], r, '#hex', {id, alpha})          (rod / bond / bone)
+       R.mesh(mesh, {pos,rot,scale}, {id, color:'#hex'|fn(c,n), alpha, doubleSided})
+       R.line(a,b,'#hex',width,{dash,glow})   R.poly([p…],'#hex',width,{closed,dash,glow})   R.text(p,'نص',{color,size,bg})
+       R.shadow([x,y,z], rx, rz)
+       V.screen([x,y,z]) -> client {x,y}   V.cam (yaw,pitch,zoom)   V.redraw()
+     Kit.mesh.ellipsoid({rx,ry,rz,seg,ring, bump:(u,v)=>k})  Kit.mesh.surface(fn(u,v)->[x,y,z], uSeg, vSeg, {closedU})
+     Kit.mesh.box(w,h,d)   Kit.mesh.lathe(profile[[r,y]…], seg)
+   Misc: Kit.ar(n) Arabic digits · Kit.dnd({chips,zones,accept,onDrop}) · Kit.celebrate() · Kit.toast(msg) · Kit.reduced
+   ===================================================================== */
 const Kit = (() => {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const $ = (s, r=document) => r.querySelector(s);
-  const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
-  const AR = '٠١٢٣٤٥٦٧٨٩';
-  const ar = n => String(n).replace(/[0-9]/g, d => AR[d]).replace('-', '−');
-  const shuffle = a => { a = a.slice(); for (let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; };
-  const el = (tag, attrs={}, html) => { const e=document.createElement(tag);
-    for (const k in attrs){ if(k==='class') e.className=attrs[k]; else if(k.startsWith('on')) e.addEventListener(k.slice(2),attrs[k]); else e.setAttribute(k,attrs[k]); }
-    if (html!=null) e.innerHTML=html; return e; };
+  const $ = (s, r=document) => r.querySelector(s), $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+  const AR='٠١٢٣٤٥٦٧٨٩', ar = n => String(n).replace(/[0-9]/g, d => AR[d]);
+  const shuffle = a => { a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; };
 
-  /* ---- feedback: Kit.say(box, 'ok'|'bad'|'info'|'warn', html) ---- */
-  const ICON = {ok:'✅', bad:'🤔', info:'💡', warn:'⚠️'};
-  function say(box, type, html){
-    if (typeof box==='string') box=$(box);
-    box.className='fb show '+type; box.setAttribute('role','status'); box.setAttribute('aria-live','polite');
-    box.innerHTML='<span class="ic" aria-hidden="true">'+ICON[type]+'</span><div>'+html+'</div>';
+  /* ---------------- scenes + guided steps ---------------- */
+  const S=[]; let cur=0, step=0, timer=null, advancing=false; const tryCount={};
+  function scene(i,cfg){ S[i]=Object.assign({done:false},cfg); }
+  function start(){
+    const pills=$('#pills'); pills.innerHTML='';
+    S.forEach((s,i)=>{ const li=document.createElement('li'); li.innerHTML='<b>'+ar(i+1)+'</b><span>'+s.title+'</span>'; li.title=s.title; pills.appendChild(li); });
+    $('#prevBtn').onclick=()=>goScene(cur-1); $('#nextBtn').onclick=()=>goScene(cur+1);
+    addEventListener('resize',placeSpot); addEventListener('scroll',placeSpot,{passive:true});
+    (function spotLoop(){ placeSpot(); requestAnimationFrame(spotLoop); })();
+    goScene(0,true);
   }
-  function hush(box){ if (typeof box==='string') box=$(box); box.className='fb'; box.innerHTML=''; }
+  function goScene(i,first){
+    if(i<0||i>=S.length) return;
+    if(!first && i>cur && !S[cur].done){ toast('أكملْ خطواتِ هذا الجزءِ أولاً 👆'); return; }
+    cur=i; $$('.scene').forEach((el,k)=>el.classList.toggle('on',k===i));
+    $$('#pills li').forEach((li,k)=>{ li.classList.toggle('on',k===i); li.classList.toggle('done',S[k].done&&k!==i); });
+    $('#prevBtn').disabled=i===0; $('#nextBtn').style.visibility=i===S.length-1?'hidden':'visible';
+    $('#where').textContent='الجزءُ '+ar(i+1)+' من '+ar(S.length);
+    if(!first) scrollTo({top:0,behavior:reduced?'auto':'smooth'});
+    S[i].enter&&S[i].enter();
+    if(S[i].done) showDone(); else goStep(0);
+    updateNext();
+  }
+  function card(){ return $$('.scene')[cur].querySelector('.guide'); }
+  function goStep(k){
+    step=k; advancing=false; const s=S[cur], st=s.steps[k], g=card();
+    const trail=s.steps.map((_,j)=>'<i class="'+(j<k?'done':j===k?'cur':'')+'"></i>').join('');
+    g.innerHTML='<div class="g-trail">'+trail+'</div><div class="g-count">الخطوةُ '+ar(k+1)+' من '+ar(s.steps.length)+'</div>'+
+      '<div class="g-step"><span class="g-num">'+ar(k+1)+'</span><p class="g-text">'+st.text+'</p></div><div class="g-body"></div><div class="fb"></div>'+
+      (s.book?'<details class="g-book"><summary>📘 من الكتابِ</summary>'+s.book+'</details>':'');
+    const body=g.querySelector('.g-body');
+    if(typeof st.body==='string') body.innerHTML=st.body; else if(typeof st.body==='function') st.body(body);
+    st.enter&&st.enter();
+    clearInterval(timer); timer=setInterval(ping,300);
+  }
+  function ping(){
+    const s=S[cur]; if(!s||s.done||advancing) return; const st=s.steps[step];
+    if(st && st.check && st.check()) next();
+  }
+  function next(){
+    const s=S[cur]; if(advancing||s.done) return; advancing=true; const st=s.steps[step];
+    if(st.after) say(st.after,'ok'); else say('أحسنتَ!','ok');
+    const wait=st.after?Math.max(1600,Math.min(4200,st.after.length*45)):800;
+    setTimeout(()=>{ if(step<s.steps.length-1) goStep(step+1); else { s.done=true; clearInterval(timer); showDone(); updateNext(); celebrate(); } }, reduced?Math.min(wait,900):wait);
+  }
+  function showDone(){
+    const s=S[cur], g=card(), last=cur===S.length-1;
+    g.innerHTML='<div class="g-trail">'+s.steps.map(()=>'<i class="done"></i>').join('')+'</div><div class="g-done"><div class="big">'+(last?'🏆':'✅')+'</div>'+
+      '<h3>'+(last?'أنهيتَ النشاطَ!':'أنهيتَ هذا الجزءَ')+'</h3>'+(s.summary?'<ul>'+s.summary.map(x=>'<li>✓ '+x+'</li>').join('')+'</ul>':'')+
+      (last?'<p style="margin:12px 0 0"><button class="btn ghost sm" type="button" onclick="location.reload()">↻ ابدأْ من جديدٍ</button></p>':'')+'</div>'+
+      (s.book?'<details class="g-book"><summary>📘 من الكتابِ</summary>'+s.book+'</details>':'');
+    s.onDone&&s.onDone();
+  }
+  function updateNext(){ const b=$('#nextBtn'); b.classList.toggle('glow',!!S[cur].done && cur<S.length-1); $$('#pills li')[cur].classList.toggle('done',false); }
+  function say(html,type='info'){
+    const box=card().querySelector('.fb'); if(!box) return;
+    const ic={ok:'✅',bad:'🤔',info:'💡',warn:'⚠️'}[type];
+    box.className='fb show '+type; box.setAttribute('role','status'); box.innerHTML='<span class="ic" aria-hidden="true">'+ic+'</span><div>'+html+'</div>';
+  }
+  function tries(key){ tryCount[key]=(tryCount[key]||0)+1; return tryCount[key]; }
 
-  /* ---- stages + nav. canLeave(i) may return false or a message string to block "next". ---- */
-  let stages=[], cur=0, names=[], hooks={};
-  function setupStages(stageNames, opts={}){
-    names=stageNames; hooks=opts; stages=$$('.stage');
-    const dots=$('#dots'); dots.innerHTML='';
-    names.forEach((n,i)=>{ const li=el('li',{title:n,'aria-label':'المرحلة '+ar(i+1)+': '+n},ar(i+1)); dots.appendChild(li); });
-    $('#prevBtn').onclick=()=>go(cur-1); $('#nextBtn').onclick=()=>go(cur+1);
-    go(0, true);
+  /* spotlight */
+  function placeSpot(){
+    const sp=$('#spot'), hd=$('#hand'); const s=S[cur]; const st=s&&!s.done&&s.steps[step];
+    let t=st&&st.target, r=null;
+    if(typeof t==='function'){ try{ r=t(); }catch(e){ r=null; } }
+    else if(typeof t==='string'){ const el=$$(t,$$('.scene')[cur]).find(e=>e.offsetParent!==null); if(el){ const b=el.getBoundingClientRect(); r={x:b.left+b.width/2,y:b.top+b.height/2,w:b.width+14,h:b.height+14,box:true}; } }
+    else if(t instanceof Element){ const b=t.getBoundingClientRect(); r={x:b.left+b.width/2,y:b.top+b.height/2,w:b.width+14,h:b.height+14,box:true}; }
+    if(!r||advancing){ sp.style.display='none'; hd.style.display='none'; return; }
+    const w=r.w||(r.r||26)*2, h=r.h||(r.r||26)*2;
+    sp.className=r.box?'box':''; sp.style.display='block'; sp.style.left=(r.x-w/2)+'px'; sp.style.top=(r.y-h/2)+'px'; sp.style.width=w+'px'; sp.style.height=h+'px';
+    hd.style.display='block'; hd.style.left=(r.x+w/2-14)+'px'; hd.style.top=(r.y+h/2-10)+'px';
   }
-  function go(i, first){
-    if (i<0||i>=stages.length) return;
-    if (!first && i>cur && hooks.canLeave){ const r=hooks.canLeave(cur); if (r!==true && r!==undefined){ toast(r||'أكملِ المهمةَ أولاً'); return; } }
-    stages.forEach((s,k)=>s.classList.toggle('on',k===i));
-    $$('#dots li').forEach((d,k)=>{ d.classList.toggle('on',k===i); d.classList.toggle('done',k<i); });
-    cur=i; $('#where').textContent=ar(i+1)+' / '+ar(stages.length)+' · '+names[i];
-    $('#prevBtn').disabled=i===0; $('#nextBtn').style.visibility=i===stages.length-1?'hidden':'visible';
-    if(!first) window.scrollTo({top:0,behavior:reduced?'auto':'smooth'});
-    hooks.onEnter && hooks.onEnter(i);
-  }
+
   let toastT;
   function toast(msg){
-    let t=$('#kitToast'); if(!t){ t=el('div',{id:'kitToast',role:'alert'}); Object.assign(t.style,{position:'fixed',bottom:'86px',left:'50%',
-      transform:'translateX(-50%)',background:'#200058',color:'#fff',padding:'12px 20px',borderRadius:'999px',fontWeight:'800',
-      zIndex:1000,boxShadow:'0 10px 30px rgba(0,0,0,.25)',maxWidth:'90vw',textAlign:'center'}); document.body.appendChild(t); }
-    t.textContent=msg; t.style.display='block'; clearTimeout(toastT); toastT=setTimeout(()=>t.style.display='none',2600);
+    let t=$('#kitToast'); if(!t){ t=document.createElement('div'); t.id='kitToast'; t.setAttribute('role','alert');
+      Object.assign(t.style,{position:'fixed',top:'14px',left:'50%',transform:'translateX(-50%)',background:'#200058',color:'#fff',padding:'12px 20px',borderRadius:'999px',fontWeight:'800',zIndex:1000,boxShadow:'0 10px 30px rgba(0,0,0,.25)',maxWidth:'90vw',textAlign:'center'}); document.body.appendChild(t); }
+    t.textContent=msg; t.style.display='block'; clearTimeout(toastT); toastT=setTimeout(()=>t.style.display='none',2400);
   }
 
-  /* ---- drag & drop with tap-to-place + keyboard.
-     Kit.dnd({ chips:[chipEls], zones:[zoneEls], accept:(chip,zone)=>bool|string, onDrop:(chip,zone,ok)=>{} , lockCorrect:true })
-     chips need data-id. zone gets the chip appended when accepted (or always, if place:'always'). ---- */
+  /* ---------------- drag & drop (drag, tap-then-tap, keyboard) ---------------- */
   function dnd(cfg){
-    let sel=null;
-    const zones=cfg.zones;
-    const clear=()=>{ if(sel){sel.classList.remove('sel'); sel.setAttribute('aria-pressed','false');} sel=null; };
-    function drop(chip, zone){
-      const ok = cfg.accept ? cfg.accept(chip, zone) : true;
-      if (ok===true || cfg.place==='always'){ zone.appendChild(chip); }
-      if (ok===true){ chip.classList.remove('bad'); if(cfg.lockCorrect!==false){ chip.classList.add('ok'); chip.dataset.locked='1'; chip.setAttribute('tabindex','-1'); chip.setAttribute('aria-disabled','true'); } }
+    let sel=null; const zones=cfg.zones;
+    const clear=()=>{ if(sel){ sel.classList.remove('sel'); sel.setAttribute('aria-pressed','false'); } sel=null; };
+    function drop(chip,zone){
+      const ok=cfg.accept?cfg.accept(chip,zone):true;
+      if(ok===true){ zone.appendChild(chip); chip.classList.remove('bad'); chip.classList.add('ok'); chip.dataset.locked='1'; chip.setAttribute('tabindex','-1'); }
       else { chip.classList.remove('bad'); void chip.offsetWidth; chip.classList.add('bad'); }
-      cfg.onDrop && cfg.onDrop(chip, zone, ok===true, ok);
+      cfg.onDrop&&cfg.onDrop(chip,zone,ok===true); ping();
     }
-    zones.forEach(z=>{
-      z.setAttribute('tabindex', z.getAttribute('tabindex')||'0'); z.setAttribute('role','button');
-      const act=()=>{ if(sel){ const c=sel; clear(); drop(c,z);} };
-      z.addEventListener('click', e=>{ if(e.target.closest('.chip') && !sel) return; act(); });
-      z.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); act(); } });
-    });
+    zones.forEach(z=>{ z.tabIndex=0; z.setAttribute('role','button');
+      const act=()=>{ if(sel){ const c=sel; clear(); drop(c,z); } };
+      z.addEventListener('click',e=>{ if(e.target.closest('.chip')&&!sel) return; act(); });
+      z.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); act(); } }); });
     cfg.chips.forEach(chip=>{
-      chip.setAttribute('tabindex','0'); chip.setAttribute('role','button'); chip.setAttribute('aria-pressed','false');
-      chip.addEventListener('keydown', e=>{ if(chip.dataset.locked) return; if(e.key==='Enter'||e.key===' '){ e.preventDefault(); const was=sel===chip; clear(); if(!was){sel=chip;chip.classList.add('sel');chip.setAttribute('aria-pressed','true');} } });
-      let start=null, ghost=null, moved=false, overZ=null;
-      chip.addEventListener('pointerdown', e=>{
-        if (chip.dataset.locked || e.button>0) return;
-        start={x:e.clientX,y:e.clientY}; moved=false; chip.setPointerCapture(e.pointerId);
-      });
-      chip.addEventListener('pointermove', e=>{
-        if(!start) return;
-        if(!moved && Math.hypot(e.clientX-start.x,e.clientY-start.y)>7){
-          moved=true; clear(); ghost=chip.cloneNode(true); ghost.classList.add('ghost'); ghost.classList.remove('sel','bad');
-          document.body.appendChild(ghost); chip.classList.add('dragging');
-        }
-        if(moved){
-          ghost.style.left=(e.clientX-ghost.offsetWidth/2)+'px'; ghost.style.top=(e.clientY-ghost.offsetHeight/2)+'px';
-          const under=document.elementFromPoint(e.clientX,e.clientY); const z=under&&under.closest('.zone');
-          const zz = z && zones.includes(z) ? z : null;
-          if(zz!==overZ){ overZ&&overZ.classList.remove('hot'); overZ=zz; overZ&&overZ.classList.add('hot'); }
-        }
-      });
-      const end=e=>{
-        if(!start) return; start=null;
-        if(moved){ ghost.remove(); ghost=null; chip.classList.remove('dragging'); if(overZ){ overZ.classList.remove('hot'); drop(chip,overZ); overZ=null; } }
-        else if(e.type==='pointerup'){ const was=sel===chip; clear(); if(!was){ sel=chip; chip.classList.add('sel'); chip.setAttribute('aria-pressed','true'); } }
-      };
-      chip.addEventListener('pointerup', end); chip.addEventListener('pointercancel', end);
+      chip.tabIndex=0; chip.setAttribute('role','button'); chip.setAttribute('aria-pressed','false');
+      const pick=()=>{ const was=sel===chip; clear(); if(!was){ sel=chip; chip.classList.add('sel'); chip.setAttribute('aria-pressed','true'); } };
+      chip.addEventListener('keydown',e=>{ if(chip.dataset.locked) return; if(e.key==='Enter'||e.key===' '){ e.preventDefault(); pick(); } });
+      let st=null, ghost=null, moved=false, over=null;
+      chip.addEventListener('pointerdown',e=>{ if(chip.dataset.locked||e.button>0) return; st={x:e.clientX,y:e.clientY}; moved=false; chip.setPointerCapture(e.pointerId); });
+      chip.addEventListener('pointermove',e=>{ if(!st) return;
+        if(!moved&&Math.hypot(e.clientX-st.x,e.clientY-st.y)>7){ moved=true; clear(); ghost=chip.cloneNode(true); ghost.classList.add('ghost'); document.body.appendChild(ghost); chip.classList.add('dragging'); }
+        if(moved){ ghost.style.left=(e.clientX-ghost.offsetWidth/2)+'px'; ghost.style.top=(e.clientY-ghost.offsetHeight/2)+'px';
+          const u=document.elementFromPoint(e.clientX,e.clientY), z=u&&u.closest('.zone'), zz=z&&zones.includes(z)?z:null;
+          if(zz!==over){ over&&over.classList.remove('hot'); over=zz; over&&over.classList.add('hot'); } } });
+      const end=e=>{ if(!st) return; st=null;
+        if(moved){ ghost.remove(); chip.classList.remove('dragging'); if(over){ over.classList.remove('hot'); drop(chip,over); over=null; } }
+        else if(e.type==='pointerup') pick(); };
+      chip.addEventListener('pointerup',end); chip.addEventListener('pointercancel',end);
     });
-    return { clear, reset(home){ cfg.chips.forEach(c=>{ c.classList.remove('ok','bad','sel'); delete c.dataset.locked; c.setAttribute('tabindex','0'); c.removeAttribute('aria-disabled'); home.appendChild(c); }); } };
+    return {clear};
   }
 
-  /* ---- 3D orbit view: Kit.orbit(container, draw(ctx, cam, w, h, t), {yaw,pitch,zoom,auto}) ----
-     cam.project(x,y,z) -> {x,y,s,z}  (s = perspective scale, z = depth: larger = closer to viewer) */
-  function orbit(box, draw, o={}){
-    const cv=document.createElement('canvas'); box.prepend(cv);
-    const ctx=cv.getContext('2d');
-    const cam={yaw:o.yaw??0.6, pitch:o.pitch??0.35, zoom:o.zoom??1, dist:o.dist??900, auto:o.auto??true, vy:0, vp:0};
-    let W=0,H=0,dpr=1, drag=null, last=performance.now(), userTouched=false;
-    function size(){ const r=box.getBoundingClientRect(); dpr=Math.min(2,devicePixelRatio||1); W=r.width; H=r.height; cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
+  /* ---------------- tiny 3D engine (canvas 2D, painter's algorithm, lambert light) ---------------- */
+  const sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]], cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+  const norm=a=>{ const l=Math.hypot(a[0],a[1],a[2])||1; return [a[0]/l,a[1]/l,a[2]/l]; }, dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+  function hexRgb(h){ if(h[0]!=='#') { const m=h.match(/\d+/g); return m?m.slice(0,3).map(Number):[128,128,128]; } const n=parseInt(h.length===4?h.slice(1).split('').map(c=>c+c).join(''):h.slice(1),16); return [n>>16,n>>8&255,n&255]; }
+  const rgb=(c,k,a)=>'rgba('+Math.min(255,c[0]*k|0)+','+Math.min(255,c[1]*k|0)+','+Math.min(255,c[2]*k|0)+','+(a==null?1:a)+')';
+  function rotXYZ(p,r){ if(!r) return p; let [x,y,z]=p;
+    if(r[0]){ const c=Math.cos(r[0]),s=Math.sin(r[0]); [y,z]=[y*c-z*s,y*s+z*c]; }
+    if(r[1]){ const c=Math.cos(r[1]),s=Math.sin(r[1]); [x,z]=[x*c+z*s,-x*s+z*c]; }
+    if(r[2]){ const c=Math.cos(r[2]),s=Math.sin(r[2]); [x,y]=[x*c-y*s,x*s+y*c]; } return [x,y,z]; }
+  function xf(p,t){ if(!t) return p; let q=p; const s=t.scale; if(s!=null) q=Array.isArray(s)?[q[0]*s[0],q[1]*s[1],q[2]*s[2]]:[q[0]*s,q[1]*s,q[2]*s];
+    q=rotXYZ(q,t.rot); if(t.pos) q=[q[0]+t.pos[0],q[1]+t.pos[1],q[2]+t.pos[2]]; return q; }
+
+  function view3d(box,o={}){
+    const cv=document.createElement('canvas'); box.prepend(cv); const ctx=cv.getContext('2d');
+    if(!box.querySelector('.rot')){ const h=document.createElement('div'); h.className='rot'; h.textContent='↻ اسحبْ لتدويرِ النموذجِ'; box.appendChild(h); }
+    const cam={yaw:o.yaw??0.5,pitch:o.pitch??0.3,zoom:o.zoom??1,dist:o.dist??1100,vy:0,vp:0,auto:!!o.auto};
+    let W=0,H=0,dpr=1,drag=null,picks=[],dirty=true;
+    const L=norm([-0.45,0.65,0.62]);
+    function size(){ const r=box.getBoundingClientRect(); dpr=Math.min(2,devicePixelRatio||1); W=r.width; H=r.height; cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); dirty=true; }
     new ResizeObserver(size).observe(box); size();
-    cam.project=(x,y,z)=>{
-      const cy=Math.cos(cam.yaw), sy=Math.sin(cam.yaw), cp=Math.cos(cam.pitch), sp=Math.sin(cam.pitch);
-      let X=x*cy - z*sy, Z=x*sy + z*cy;           // yaw around Y
-      let Y=y*cp - Z*sp; Z=y*sp + Z*cp;            // pitch around X
-      const unit=Math.min(W,H)/520*cam.zoom;
-      const s=cam.dist/(cam.dist - Z);
-      return {x:W/2 + X*s*unit, y:H/2 - Y*s*unit, s:s*unit, z:Z};
+    const toCam=p=>{ const cy=Math.cos(cam.yaw),sy=Math.sin(cam.yaw),cp=Math.cos(cam.pitch),sp=Math.sin(cam.pitch);
+      let X=p[0]*cy-p[2]*sy, Z=p[0]*sy+p[2]*cy; const Y=p[1]*cp-Z*sp; Z=p[1]*sp+Z*cp; return [X,Y,Z]; };
+    const proj=c=>{ const unit=Math.min(W,H)/520*cam.zoom, s=cam.dist/(cam.dist-c[2]); return {x:W/2+c[0]*s*unit,y:H/2-c[1]*s*unit,s:s*unit,z:c[2]}; };
+    const project=p=>proj(toCam(p));
+    let items=[];
+    const R={
+      sphere(p,r,col,op={}){ const q=project(p); items.push({k:'s',z:q.z,q,r:r*q.s,c:hexRgb(col),op}); },
+      cyl(a,b,r,col,op={}){ const A=project(a),B=project(b); items.push({k:'c',z:(A.z+B.z)/2,A,B,r:r*(A.s+B.s)/2,c:hexRgb(col),op}); },
+      line(a,b,col,w=2,op={}){ const A=project(a),B=project(b); items.push({k:'l',z:Math.max(A.z,B.z)+(op.front?1e4:0),pts:[A,B],col,w,op}); },
+      poly(ps,col,w=2,op={}){ const P=ps.map(project); const z=op.front?1e4:P.reduce((m,p)=>m+p.z,0)/P.length; items.push({k:'l',z,pts:P,col,w,op}); },
+      text(p,txt,op={}){ const q=project(p); items.push({k:'t',z:op.behind?q.z:1e5,q,txt,op}); },
+      shadow(p,rx,rz){ const pts=[]; for(let i=0;i<20;i++){ const a=i/20*Math.PI*2; pts.push(project([p[0]+Math.cos(a)*rx,p[1],p[2]+Math.sin(a)*rz])); } items.push({k:'sh',z:-1e5,pts}); },
+      mesh(m,t,op={}){ const V=m.v.map(v=>toCam(xf(v,t))), P=V.map(proj), c0=op.color||'#cccccc', fn=typeof c0==='function'?c0:null, base=fn?null:hexRgb(c0);
+        for(let i=0;i<m.f.length;i++){ const f=m.f[i], a=V[f[0]],b=V[f[1]],c=V[f[2]]; let n=norm(cross(sub(b,a),sub(c,a)));
+          if(n[2]<0){ if(!op.doubleSided) continue; n=[-n[0],-n[1],-n[2]]; }
+          const lam=0.42+0.68*Math.max(0,dot(n,L)), col=fn?hexRgb(fn(m.v[f[0]],i)):base;
+          items.push({k:'f',z:(a[2]+b[2]+c[2])/3,pts:[P[f[0]],P[f[1]],P[f[2]]],fill:rgb(col,lam,op.alpha),op}); } }
     };
-    box.addEventListener('pointerdown',e=>{ drag={x:e.clientX,y:e.clientY}; userTouched=true; box.setPointerCapture(e.pointerId); box.style.cursor='grabbing'; });
-    box.addEventListener('pointermove',e=>{ if(!drag) return; const dx=e.clientX-drag.x, dy=e.clientY-drag.y; drag={x:e.clientX,y:e.clientY};
-      cam.vy=-dx*0.008; cam.vp=dy*0.006; cam.yaw+=cam.vy; cam.pitch=Math.max(-1.3,Math.min(1.3,cam.pitch+cam.vp)); });
-    const up=()=>{ drag=null; box.style.cursor='grab'; };
-    box.addEventListener('pointerup',up); box.addEventListener('pointercancel',up);
-    box.addEventListener('wheel',e=>{ e.preventDefault(); cam.zoom=Math.max(.6,Math.min(2.2,cam.zoom*(e.deltaY<0?1.08:.92))); },{passive:false});
-    box.tabIndex=0; box.setAttribute('role','img');
-    box.addEventListener('keydown',e=>{ const k=e.key; if(k==='ArrowLeft'){cam.yaw+=.15;} else if(k==='ArrowRight'){cam.yaw-=.15;}
-      else if(k==='ArrowUp'){cam.pitch=Math.max(-1.3,cam.pitch-.12);} else if(k==='ArrowDown'){cam.pitch=Math.min(1.3,cam.pitch+.12);}
-      else if(k==='+'||k==='='){cam.zoom=Math.min(2.2,cam.zoom*1.1);} else if(k==='-'){cam.zoom=Math.max(.6,cam.zoom*.9);} else return; e.preventDefault(); userTouched=true; });
-    function frame(now){
-      const dt=Math.min(50,now-last); last=now;
-      if(!drag){ cam.vy*=0.93; cam.vp*=0.9; cam.yaw+=cam.vy; cam.pitch=Math.max(-1.3,Math.min(1.3,cam.pitch+cam.vp));
-        if(cam.auto && !reduced && Math.abs(cam.vy)<0.002) cam.yaw+=dt*0.00018*(userTouched?0.4:1); }
-      ctx.clearRect(0,0,W,H); draw(ctx,cam,W,H,reduced?0:now,dt);
-      requestAnimationFrame(frame);
+    function render(t){
+      ctx.clearRect(0,0,W,H); items=[]; picks=[]; o.draw&&o.draw(R,t);
+      items.sort((a,b)=>a.z-b.z);
+      for(const it of items){
+        const op=it.op||{}; ctx.globalAlpha=1;
+        if(it.k==='f'){ ctx.beginPath(); ctx.moveTo(it.pts[0].x,it.pts[0].y); ctx.lineTo(it.pts[1].x,it.pts[1].y); ctx.lineTo(it.pts[2].x,it.pts[2].y); ctx.closePath();
+          ctx.fillStyle=it.fill; ctx.fill(); ctx.strokeStyle=it.fill; ctx.lineWidth=.6; ctx.stroke(); if(op.id!=null) picks.push({id:op.id,tri:it.pts,z:it.z}); }
+        else if(it.k==='s'){ const {q,r,c}=it; if(r<.5) continue; if(op.alpha!=null) ctx.globalAlpha=op.alpha;
+          const g=ctx.createRadialGradient(q.x-r*.35,q.y-r*.4,r*.12,q.x,q.y,r); g.addColorStop(0,rgb(c,1.55)); g.addColorStop(.3,rgb(c,1)); g.addColorStop(1,rgb(c,.5));
+          ctx.beginPath(); ctx.arc(q.x,q.y,r,0,7); ctx.fillStyle=g; ctx.fill();
+          if(op.ring){ ctx.lineWidth=3; ctx.strokeStyle=op.ring; ctx.stroke(); }
+          if(op.label&&r>7){ ctx.fillStyle=op.labelColor||'#fff'; ctx.font='900 '+Math.round(Math.min(r*1.05,30))+'px '+getComputedStyle(document.body).fontFamily; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(op.label,q.x,q.y+r*.06); }
+          if(op.id!=null) picks.push({id:op.id,cx:q.x,cy:q.y,r:Math.max(r,14),z:q.z}); }
+        else if(it.k==='c'){ const {A,B,r,c}=it; if(op.alpha!=null) ctx.globalAlpha=op.alpha; const dx=B.x-A.x,dy=B.y-A.y,l=Math.hypot(dx,dy)||1,nx=-dy/l,ny=dx/l;
+          const g=ctx.createLinearGradient(A.x+nx*r,A.y+ny*r,A.x-nx*r,A.y-ny*r); g.addColorStop(0,rgb(c,.55)); g.addColorStop(.35,rgb(c,1.35)); g.addColorStop(1,rgb(c,.6));
+          ctx.beginPath(); ctx.moveTo(A.x+nx*r,A.y+ny*r); ctx.lineTo(B.x+nx*r,B.y+ny*r); ctx.lineTo(B.x-nx*r,B.y-ny*r); ctx.lineTo(A.x-nx*r,A.y-ny*r); ctx.closePath(); ctx.fillStyle=g; ctx.fill();
+          ctx.beginPath(); ctx.arc(A.x,A.y,r,0,7); ctx.arc(B.x,B.y,r,0,7); ctx.fillStyle=rgb(c,.85); ctx.fill();
+          if(op.id!=null) picks.push({id:op.id,seg:[A,B],r:Math.max(r,12),z:it.z}); }
+        else if(it.k==='l'){ ctx.beginPath(); it.pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)); if(op.closed) ctx.closePath();
+          ctx.setLineDash(op.dash||[]); ctx.lineCap='round'; ctx.lineJoin='round'; if(op.alpha!=null) ctx.globalAlpha=op.alpha;
+          if(op.glow){ ctx.shadowColor=it.col; ctx.shadowBlur=14; } ctx.strokeStyle=it.col; ctx.lineWidth=it.w; ctx.stroke(); ctx.shadowBlur=0; ctx.setLineDash([]); }
+        else if(it.k==='sh'){ ctx.beginPath(); it.pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)); ctx.closePath(); ctx.fillStyle='rgba(0,0,0,.22)'; ctx.filter='blur(6px)'; ctx.fill(); ctx.filter='none'; }
+        else if(it.k==='t'){ const {q,txt}=it, sz=op.size||15; ctx.font='800 '+sz+'px '+getComputedStyle(document.body).fontFamily; ctx.textAlign='center'; ctx.textBaseline='middle';
+          const w=ctx.measureText(txt).width+16, x=q.x+(op.dx||0), y=q.y+(op.dy||0);
+          if(op.bg!==false){ ctx.fillStyle=op.bg||'rgba(255,255,255,.95)'; ctx.beginPath(); ctx.roundRect?ctx.roundRect(x-w/2,y-sz*.8,w,sz*1.6,sz*.8):ctx.rect(x-w/2,y-sz*.8,w,sz*1.6); ctx.fill(); }
+          ctx.fillStyle=op.color||'#200058'; ctx.fillText(txt,x,y+1); }
+      }
+      ctx.globalAlpha=1;
     }
-    requestAnimationFrame(frame);
-    return cam;
-  }
-  /* shaded sphere */
-  function ball(ctx,x,y,r,color,label,labelColor){
-    if(r<=0.5) return;
-    const g=ctx.createRadialGradient(x-r*.35,y-r*.4,r*.15,x,y,r);
-    g.addColorStop(0,'#ffffff'); g.addColorStop(.25,color); g.addColorStop(1,shade(color,-0.45));
-    ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
-    if(label && r>8){ ctx.fillStyle=labelColor||'#fff'; ctx.font='900 '+Math.round(r*1.05)+'px '+getComputedStyle(document.body).fontFamily;
-      ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(label,x,y+r*.05); }
-  }
-  function shade(hex,p){ const n=parseInt(hex.slice(1),16); let r=n>>16,g=n>>8&255,b=n&255;
-    const f=v=>Math.max(0,Math.min(255,Math.round(p<0?v*(1+p):v+(255-v)*p))); return 'rgb('+f(r)+','+f(g)+','+f(b)+')'; }
-
-  /* small celebration */
-  function celebrate(){
-    if(reduced) return;
-    const c=document.createElement('canvas'); c.className='confetti'; document.body.appendChild(c);
-    const x=c.getContext('2d'); c.width=innerWidth; c.height=innerHeight;
-    const cols=['#00c3fe','#12a06a','#ffd15c','#7b5cff','#e8425a'];
-    const P=Array.from({length:90},()=>({x:innerWidth/2+(Math.random()-.5)*200,y:innerHeight*.35,vx:(Math.random()-.5)*9,vy:-Math.random()*9-3,
-      s:5+Math.random()*6,c:cols[Math.random()*5|0],r:Math.random()*6}));
-    let t=0; (function f(){ t++; x.clearRect(0,0,c.width,c.height);
-      P.forEach(p=>{ p.vy+=.28; p.x+=p.vx; p.y+=p.vy; p.r+=.15; x.save(); x.translate(p.x,p.y); x.rotate(p.r); x.fillStyle=p.c; x.fillRect(-p.s/2,-p.s/4,p.s,p.s/2); x.restore(); });
-      if(t<110) requestAnimationFrame(f); else c.remove(); })();
+    function hit(x,y){ let best=null;
+      for(const p of picks){ let ok=false;
+        if(p.tri){ const [a,b,c]=p.tri, d=(b.y-c.y)*(a.x-c.x)+(c.x-b.x)*(a.y-c.y); const l1=((b.y-c.y)*(x-c.x)+(c.x-b.x)*(y-c.y))/d, l2=((c.y-a.y)*(x-c.x)+(a.x-c.x)*(y-c.y))/d; ok=l1>=0&&l2>=0&&l1+l2<=1; }
+        else if(p.seg){ const [A,B]=p.seg, dx=B.x-A.x, dy=B.y-A.y, l2=dx*dx+dy*dy||1, t=Math.max(0,Math.min(1,((x-A.x)*dx+(y-A.y)*dy)/l2)); ok=Math.hypot(x-(A.x+t*dx),y-(A.y+t*dy))<=p.r; }
+        else ok=Math.hypot(x-p.cx,y-p.cy)<=p.r;
+        if(ok&&(!best||p.z>best.z)) best=p; }
+      return best; }
+    let down=null;
+    box.addEventListener('pointerdown',e=>{ down={x:e.clientX,y:e.clientY,moved:false}; drag={x:e.clientX,y:e.clientY}; box.setPointerCapture(e.pointerId); });
+    box.addEventListener('pointermove',e=>{ if(!drag) return; const dx=e.clientX-drag.x, dy=e.clientY-drag.y; drag={x:e.clientX,y:e.clientY};
+      if(down&&Math.hypot(e.clientX-down.x,e.clientY-down.y)>6) down.moved=true;
+      if(down&&down.moved&&o.rotate!==false){ cam.vy=-dx*.009; cam.vp=dy*.007; cam.yaw+=cam.vy; cam.pitch=Math.max(-1.35,Math.min(1.35,cam.pitch+cam.vp)); box.style.cursor='grabbing'; } });
+    const up=e=>{ if(down&&!down.moved&&o.onPick){ const b=cv.getBoundingClientRect(), h=hit(e.clientX-b.left,e.clientY-b.top); o.onPick(h?h.id:null,h); ping(); }
+      drag=null; down=null; box.style.cursor='grab'; };
+    box.addEventListener('pointerup',up); box.addEventListener('pointercancel',()=>{drag=null;down=null;});
+    box.addEventListener('wheel',e=>{ e.preventDefault(); cam.zoom=Math.max(.6,Math.min(2.4,cam.zoom*(e.deltaY<0?1.08:.92))); },{passive:false});
+    box.tabIndex=0; box.setAttribute('role','img'); box.setAttribute('aria-label',o.label||'نموذجٌ ثلاثيُّ الأبعادِ: استعملِ الأسهمَ للتدويرِ');
+    box.addEventListener('keydown',e=>{ const k=e.key; if(k==='ArrowLeft')cam.yaw+=.15; else if(k==='ArrowRight')cam.yaw-=.15; else if(k==='ArrowUp')cam.pitch=Math.max(-1.35,cam.pitch-.12); else if(k==='ArrowDown')cam.pitch=Math.min(1.35,cam.pitch+.12); else return; e.preventDefault(); });
+    let last=performance.now();
+    (function frame(now){ const dt=Math.min(50,now-last); last=now;
+      if(!drag){ cam.vy*=.92; cam.vp*=.88; cam.yaw+=cam.vy; cam.pitch=Math.max(-1.35,Math.min(1.35,cam.pitch+cam.vp)); if(cam.auto&&!reduced&&Math.abs(cam.vy)<.002) cam.yaw+=dt*.00015; }
+      if(box.offsetParent!==null) render(reduced?0:now); requestAnimationFrame(frame); })(last);
+    return { cam, project, screen(p){ const q=project(p), b=cv.getBoundingClientRect(); return {x:b.left+q.x,y:b.top+q.y,s:q.s}; }, hit, canvas:cv };
   }
 
-  return {$, $$, ar, el, shuffle, say, hush, setupStages, go, toast, dnd, orbit, ball, shade, celebrate, reduced, get cur(){return cur;}};
+  /* mesh builders */
+  const mesh={
+    surface(fn,us,vs,op={}){ const v=[],f=[]; for(let j=0;j<=vs;j++) for(let i=0;i<=us;i++) v.push(fn(i/us,j/vs));
+      const W=us+1; for(let j=0;j<vs;j++) for(let i=0;i<us;i++){ const a=j*W+i,b=a+1,c=a+W,d=c+1; f.push([a,c,b],[b,c,d]); } return {v,f}; },
+    ellipsoid(o={}){ const rx=o.rx||100, ry=o.ry||rx, rz=o.rz||rx, bump=o.bump||(()=>1);
+      return mesh.surface((u,v)=>{ const th=u*Math.PI*2, ph=v*Math.PI, k=bump(u,v); return [Math.cos(th)*Math.sin(ph)*rx*k, Math.cos(ph)*ry*k, -Math.sin(th)*Math.sin(ph)*rz*k]; }, o.seg||28, o.ring||18); },
+    lathe(prof,seg=24){ return mesh.surface((u,v)=>{ const i=v*(prof.length-1), a=prof[Math.floor(i)], b=prof[Math.min(prof.length-1,Math.floor(i)+1)], t=i-Math.floor(i), r=a[0]+(b[0]-a[0])*t, y=a[1]+(b[1]-a[1])*t, th=u*Math.PI*2; return [Math.cos(th)*r,y,-Math.sin(th)*r]; }, seg, (prof.length-1)*2); },
+    box(w,h,d){ const x=w/2,y=h/2,z=d/2, v=[[-x,-y,-z],[x,-y,-z],[x,y,-z],[-x,y,-z],[-x,-y,z],[x,-y,z],[x,y,z],[-x,y,z]];
+      return {v,f:[[0,2,1],[0,3,2],[4,5,6],[4,6,7],[0,1,5],[0,5,4],[3,6,2],[3,7,6],[1,2,6],[1,6,5],[0,4,7],[0,7,3]]}; }
+  };
+
+  function celebrate(){ if(reduced) return; const c=document.createElement('canvas'); c.className='confetti'; document.body.appendChild(c); const x=c.getContext('2d'); c.width=innerWidth; c.height=innerHeight;
+    const cols=['#00c3fe','#12a06a','#ffd15c','#7b5cff','#e8425a'], P=Array.from({length:70},()=>({x:innerWidth/2+(Math.random()-.5)*160,y:innerHeight*.3,vx:(Math.random()-.5)*8,vy:-Math.random()*8-3,s:5+Math.random()*5,c:cols[Math.random()*5|0],r:Math.random()*6}));
+    let t=0; (function f(){ t++; x.clearRect(0,0,c.width,c.height); P.forEach(p=>{ p.vy+=.28; p.x+=p.vx; p.y+=p.vy; p.r+=.15; x.save(); x.translate(p.x,p.y); x.rotate(p.r); x.fillStyle=p.c; x.fillRect(-p.s/2,-p.s/4,p.s,p.s/2); x.restore(); }); if(t<100) requestAnimationFrame(f); else c.remove(); })(); }
+
+  return {$,$$,ar,shuffle,scene,start,ping,next,say,tries,toast,dnd,view3d,mesh,celebrate,reduced,goScene,get scene_(){return cur;},get step_(){return step;}};
 })();
 </script>
 <script>
-/* ================= ACTIVITY JS ================= */
-const {$, $$, ar, el, say, hush, toast} = Kit;
-const COL = {cer:'#e86aa0', cbl:'#7b5cff', med:'#12a06a', sc:'#0a8fc0', nv:'#f6a723'};
-const NAME = {cer:'المخُّ', cbl:'المخيخُ', med:'النخاعُ المستطيلُ', sc:'الحبلُ الشوكيُّ', nv:'الأعصابُ'};
-const FN = {
-  cer:'المخُّ فيه مراكزُ الذاكرةِ والتفكيرِ، وينظّمُ المعلوماتِ التي تصلُه من الحواسِّ.',
-  cbl:'المخيخُ يحفظُ توازنَ الجسمِ.',
-  med:'النخاعُ المستطيلُ ينظّمُ نبضاتِ القلبِ والتنفّسَ وضغطَ الدمِ.'
+/* ===== ACTIVITY JS ===== */
+/* ---------- shared 3D body: head + brain + spinal cord + arm ---------- */
+const COL={cer:'#e86aa0',cbl:'#7b5cff',med:'#12a06a',sc:'#2ec8ff',nv:'#f6a723',skin:'#f2c7a5'};
+const NAME={cer:'المخُّ',cbl:'المخيخُ',med:'النخاعُ المستطيلُ',sc:'الحبلُ الشوكيُّ',nvEye:'عصبُ العينِ',nvArm:'عصبُ الذراعِ',eye:'العينُ',hand:'عضلاتُ اليدِ'};
+const FN={cer:'المخُّ للذاكرةِ والتفكيرِ وتنظيمِ معلوماتِ الحواسِّ',cbl:'المخيخُ لحفظِ توازنِ الجسمِ',med:'النخاعُ المستطيلُ لنبضاتِ القلبِ والتنفّسِ وضغطِ الدمِ'};
+const M={
+  skull:Kit.mesh.ellipsoid({rx:92,ry:108,rz:112,seg:22,ring:14}),
+  cer:Kit.mesh.ellipsoid({rx:68,ry:52,rz:76,seg:28,ring:18,bump:(u,v)=>1+.045*Math.sin(u*Math.PI*18)*Math.sin(v*Math.PI*7)}),
+  cbl:Kit.mesh.ellipsoid({rx:40,ry:22,rz:26,seg:18,ring:10,bump:(u,v)=>1+.06*Math.sin(v*Math.PI*10)}),
+  torso:Kit.mesh.ellipsoid({rx:108,ry:150,rz:58,seg:18,ring:12})
 };
-const P = {
-  cer:'M118,150 C98,95 130,38 196,32 C252,28 274,70 266,126 C248,140 222,138 202,146 C182,154 146,162 118,150Z',
-  gyri:'M140,120 C150,100 170,110 168,90 M180,60 C200,70 205,50 225,62 M235,95 C222,100 230,115 214,118 M150,80 C165,70 160,55 178,50 M190,95 C200,105 215,95 212,80 M245,70 C250,82 240,88 252,100 M160,140 C172,128 185,138 195,128',
-  med:'M184,152 L202,150 C201,175 198,198 196,224 L184,224 C185,198 185,175 184,152Z',
-  sc:'M190,222 C187,248 170,262 167,300 C164,340 166,400 172,440',
-  nvArm:'M167,300 C188,288 208,274 225,280 L271,334 L330,296',
-  nvArmTips:'M330,296 l10,-14 M330,296 l17,-3 M330,296 l13,9',
-  nvLeg:'M172,440 C186,444 200,446 206,452 L219,505 L215,548 L246,552',
-  nvLegTips:'M246,552 l10,-8 M246,552 l12,2',
-  nvTrunk:'M166,330 l32,8 M166,365 l36,4 M168,405 l32,-6 M182,240 l26,10',
-  nvEye:'M273,117 C265,115 260,113 252,110',
-  // pulse routes
-  r_eye:'M273,117 C265,115 260,113 252,110',
-  r_cer:'M252,110 C240,100 226,94 212,94',
-  r_med:'M212,94 C200,112 194,135 193,152 L190,222',
-  r_sc:'M190,222 C187,248 170,262 167,300',
-  r_arm:'M167,300 C188,288 208,274 225,280 L271,334 L330,296',
-  r_scl:'M167,300 C164,340 166,400 172,440',
-  r_leg:'M172,440 C186,444 200,446 206,452 L219,505 L215,548'
-};
-const HITLBL = {cer:'المخُّ', cbl:'المخيخُ', med:'النخاعُ المستطيلُ', sc:'الحبلُ الشوكيُّ', 'nv-arm':'عصبُ الذراعِ', 'nv-leg':'عصبُ الرِّجلِ',
-  'nv-trunk':'أعصابُ الجذعِ', 'nv-eye':'عصبٌ من العينِ إلى الدماغِ', eye:'العينُ', hand:'اليدُ', skull:'الجمجمةُ'};
+const G={skull:[0,150,5],cer:[0,178,-2],cbl:[0,112,-58],medTop:[0,130,-24],medBot:[0,72,-36],cordBot:[0,-235,-44],
+  eye:[34,160,100],branch:[0,2,-38],sh0:[80,6,-30],sh:[112,4,-28],elbow:[150,-108,-6],wrist:[198,-58,60],hand:[207,-48,72]};
+const EYEN=[[34,160,96],[42,138,74],[34,134,44],[20,146,22]];
+const ARMN=[G.branch,G.sh0,G.sh,G.elbow,G.wrist];
+const CUT=[131,-52,-17];
+const lerp=(a,b,t)=>a.map((v,i)=>v+(b[i]-v)*t);
+function lift(hex,k){ const n=parseInt(hex.slice(1),16), c=[n>>16,n>>8&255,n&255].map(v=>Math.round(v+(255-v)*k)); return '#'+c.map(v=>v.toString(16).padStart(2,'0')).join(''); }
+const LBL={cer:[[0,205,10],[-30,250,-30]],cbl:[[0,112,-70],[0,62,-125]],med:[[0,100,-30],[0,64,52]],sc:[[0,-100,-40],[-70,-130,-40]],
+  nvArm:[[131,-52,-17],[175,-5,-20]],eye:[[34,160,100],[125,185,125]],hand:[[207,-48,72],[235,-105,95]],nvEye:[[38,136,60],[115,112,80]]};
+const LTXT=Object.assign({},NAME,{nvArm:'عصبٌ'});
 
-function bodySVG(o){
-  o = Object.assign({hits:[], ball:false, vb:'40 0 380 570', head:false}, o);
-  const hitsMarkup = {
-    skull:`<ellipse class="hit s" data-hit="skull" cx="205" cy="120" rx="100" ry="104" stroke-width="16"/>`,
-    cer:`<path class="hit f" data-hit="cer" d="${P.cer}"/>`,
-    cbl:`<ellipse class="hit f" data-hit="cbl" cx="150" cy="170" rx="36" ry="25"/>`,
-    med:`<rect class="hit f" data-hit="med" x="176" y="152" width="34" height="74" rx="10"/>`,
-    sc:`<path class="hit s" data-hit="sc" d="${P.sc}" stroke-width="30"/>`,
-    'nv-trunk':`<path class="hit s" data-hit="nv-trunk" d="${P.nvTrunk}" stroke-width="18"/>`,
-    'nv-leg':`<path class="hit s" data-hit="nv-leg" d="${P.nvLeg}" stroke-width="32"/>`,
-    'nv-arm':`<path class="hit s" data-hit="nv-arm" d="M190,288 L225,280 L271,334 L322,300" stroke-width="28"/>`,
-    'nv-eye':`<path class="hit s" data-hit="nv-eye" d="${P.nvEye}" stroke-width="18"/>`,
-    eye:`<circle class="hit f" data-hit="eye" cx="283" cy="118" r="16"/>`,
-    hand:`<circle class="hit f" data-hit="hand" cx="342" cy="288" r="26"/>`
-  };
-  const order = ['skull','cer','cbl','med','sc','nv-trunk','nv-leg','nv-arm','nv-eye','eye','hand'];
-  const hits = order.filter(h=>o.hits.includes(h)).map(h=>hitsMarkup[h].replace('/>',` role="button" tabindex="0" aria-label="${HITLBL[h]}"/>`)).join('');
-  return `<svg viewBox="${o.vb}" role="group" aria-label="رسمٌ لجسمِ الإنسانِ والجهازِ العصبيِّ" xmlns="http://www.w3.org/2000/svg">
-  <g class="body" aria-hidden="true">
-    <g class="legg">
-      <path class="body-o" d="M205,440 L218,505 L214,552" stroke-width="38"/>
-      <path class="body-s" d="M205,440 L218,505 L214,552" stroke-width="34"/>
-      <path class="body-o" d="M214,552 L252,556" stroke-width="22"/><path class="body-s" d="M214,552 L252,556" stroke-width="18"/>
-    </g>
-    <rect class="body-f" x="168" y="200" width="54" height="56" rx="14"/>
-    <path class="body-f" d="M150,250 C170,236 240,236 258,252 C272,300 268,380 252,447 L160,447 C146,380 140,300 150,250Z"/>
-    <path class="vert" d="${P.sc}"/>
-    <ellipse class="body-f" cx="205" cy="120" rx="100" ry="104"/>
-    <path class="body-f" d="M298,112 C312,128 318,142 304,152" />
-    <path d="M290,178 C282,186 270,188 262,184" fill="none" stroke="#cbc2ee" stroke-width="3" stroke-linecap="round"/>
-    <ellipse class="skull part" data-part="skull" cx="205" cy="120" rx="96" ry="100"/>
-  </g>
-  <g class="g-cns">
-    <path class="part bp" data-part="med" d="${P.med}" fill="${COL.med}" stroke="#0b7a50" stroke-width="2"/>
-    <g class="part bp" data-part="cer"><path d="${P.cer}" fill="${COL.cer}" stroke="#b8466f" stroke-width="2.5"/><path class="gyri" d="${P.gyri}"/></g>
-    <g class="part bp" data-part="cbl"><ellipse cx="150" cy="170" rx="31" ry="19" fill="${COL.cbl}" stroke="#4d36b8" stroke-width="2"/>
-      <path class="folia" d="M124,166 C140,160 160,160 178,166 M122,174 C140,170 160,170 179,175 M128,181 C142,179 158,179 172,182"/></g>
-    <path class="part sc-line" data-part="sc" d="${P.sc}"/>
-  </g>
-  <g class="g-pnv part" data-part="nv">
-    <path class="nv-line" d="${P.nvTrunk}"/>
-    <g class="legg"><path class="nv-line" d="${P.nvLeg}"/><path class="nv-line" d="${P.nvLegTips}"/></g>
-  </g>
-  <g class="armg">
-    <path class="body-o" d="M222,272 L272,330 L332,292" stroke-width="34"/>
-    <path class="body-s" d="M222,272 L272,330 L332,292" stroke-width="30"/>
-    <circle class="body-f" cx="342" cy="288" r="19"/>
-    <g class="g-pnv part" data-part="nv"><path class="nv-line nv-arm-vis" d="${P.nvArm}"/><path class="nv-line" d="${P.nvArmTips}"/></g>
-    <g class="cutmark"><rect x="241" y="296" width="14" height="20" fill="#ece8fb" transform="rotate(-40 248 306)"/>
-      <path d="M238,296 l20,20 M258,296 l-20,20" stroke="#e8425a" stroke-width="4" stroke-linecap="round"/>
-      <text x="248" y="345" text-anchor="middle" font-size="22">✂️</text></g>
-    ${o.ball?`<path class="trail" data-seg="arm" d="${P.r_arm}"/>
-    <path class="route" data-seg="arm" d="${P.r_arm}" fill="none" stroke="none"/>`:''}
-  </g>
-  <g class="g-pnv part eye-g" data-part="nv"><path class="nv-line" d="${P.nvEye}"/></g>
-  <g class="eye-g" data-part="eye"><ellipse cx="283" cy="118" rx="10" ry="8" fill="#fff" stroke="#200058" stroke-width="2"/><circle cx="287" cy="118" r="4" fill="#200058"/></g>
-  ${o.ball?`<g class="routes">
-    ${['eye','cer','med','sc','scl'].map(k=>`<path class="trail" data-seg="${k}" d="${P['r_'+k]}"/><path class="route" data-seg="${k}" d="${P['r_'+k]}" fill="none" stroke="none"/>`).join('')}
-    <g class="legg"><path class="trail" data-seg="leg" d="${P.r_leg}"/><path class="route" data-seg="leg" d="${P.r_leg}" fill="none" stroke="none"/></g>
-  </g>`:''}
-  ${o.ball?`<g class="ballg" transform="translate(392,178)" aria-hidden="true"><path class="speed" d="M20,-6 L60,-14 M22,8 L64,10"/>
-    <circle r="15" fill="#fff" stroke="#200058" stroke-width="2.5"/><path d="M0,-6 l6,4 -2,7 h-8 l-2,-7z" fill="#200058"/></g>`:''}
-  <g class="labels" aria-hidden="true">
-    <text class="lb in" data-part="cer" x="196" y="96" text-anchor="middle" font-size="21.0">المخُّ</text>
-    <text class="lb in" data-part="cbl" x="150" y="175" text-anchor="middle" font-size="14.5">المخيخُ</text>
-    <line class="lbl-line" data-part="med" x1="203" y1="198" x2="222" y2="203"/>
-    <text class="lb" data-part="med" x="278" y="210" text-anchor="middle" font-size="15.5">النخاعُ المستطيلُ</text>
-    ${o.head?'':`<line class="lbl-line" data-part="sc" x1="172" y1="372" x2="196" y2="378"/>
-    <text class="lb" data-part="sc" x="226" y="384" text-anchor="middle" font-size="16">الحبلُ الشوكيُّ</text>
-    <text class="lb" data-part="nv" x="296" y="364" text-anchor="middle" font-size="16">عصبٌ</text>
-    <text class="lb" data-part="nv" x="270" y="512" text-anchor="middle" font-size="16">عصبٌ</text>
-    <text class="lb" data-part="skull" x="95" y="36" text-anchor="middle" font-size="15.0">الجمجمةُ</text>
-    <text class="lb" data-part="eye" x="322" y="96" text-anchor="middle" font-size="15.0">العينُ</text>`}
-  </g>
-  <circle class="pulse" r="7" cx="-50" cy="-50"/>
-  <g class="hits">${hits}</g>
-</svg>`;
-}
-
-/* ---------- animation helpers ---------- */
-const sleep = ms => new Promise(r=>setTimeout(r, Kit.reduced?Math.min(ms,60):ms));
-function anim(dur, fn){
-  return new Promise(res=>{
-    if(Kit.reduced || dur<=0){ fn(1); res(); return; }
-    const t0=performance.now();
-    (function f(now){ let t=Math.min(1,(now-t0)/dur); fn(t); if(t<1) requestAnimationFrame(f); else res(); })(t0);
-  });
-}
-function resetTrails(svg){
-  $$('.trail',svg).forEach(t=>{ const L=t.getTotalLength(); t.style.strokeDasharray=L; t.style.strokeDashoffset=L; });
-  $$('.pulse',svg).forEach((p,i)=>{ if(i>0) p.remove(); else { p.setAttribute('cx',-50); p.setAttribute('cy',-50); p.classList.remove('stop'); }});
-}
-/* move a pulse dot along segment; stopLen optional; returns final length reached */
-async function travelSeg(svg, seg, dot, stopLen){
-  const path=$(`.route[data-seg="${seg}"]`,svg), trail=$(`.trail[data-seg="${seg}"]`,svg);
-  const L=path.getTotalLength(), end=stopLen==null?L:stopLen;
-  // dot lives at root: convert local point to root coords via CTM
-  const m = path.getCTM(), rm = dot.getCTM();
-  const toRoot = p => { const pt=svg.createSVGPoint(); pt.x=p.x; pt.y=p.y; return pt.matrixTransform(m).matrixTransform(rm.inverse()); };
-  await anim(Math.max(260, end*5.5), t=>{
-    const l=end*t, p=toRoot(path.getPointAtLength(l));
-    dot.setAttribute('cx',p.x); dot.setAttribute('cy',p.y);
-    trail.style.strokeDashoffset = L - l;
-  });
-}
-function flashPart(svg, part){ $$(`.part[data-part="${part}"]`,svg).forEach(p=>{ p.classList.remove('flash','sel'); void p.getBBox; p.classList.add('sel'); setTimeout(()=>p.classList.remove('sel'),900); }); }
-function hitHandler(svg, fn){
-  $$('.hit',svg).forEach(h=>{
-    h.addEventListener('click',()=>{ h.classList.remove('ping'); void h.getBBox(); h.classList.add('ping'); fn(h.dataset.hit,h); });
-    h.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); fn(h.dataset.hit,h); } });
-  });
-}
-
-/* ================= STAGE 1 ================= */
-const d1=$('#d1'); d1.innerHTML=bodySVG({hits:['skull','cer','cbl','med','sc','nv-trunk','nv-leg','nv-arm','nv-eye','eye']});
-const s1=$('svg',d1);
-const MIS=['cer','cbl','med','sc','nv'];
-const INFO={
-  cer:{t:'c', d:'أكبرُ أجزاءِ الدماغِ. فيه مراكزُ الذاكرةِ والتفكيرِ، وينظّمُ المعلوماتِ التي تصلُه من الحواسِّ.'},
-  cbl:{t:'c', d:'جزءٌ من الدماغِ وظيفتُه حفظُ توازنِ الجسمِ.'},
-  med:{t:'c', d:'يقعُ أسفلَ المخيخِ. ينظّمُ نبضاتِ القلبِ والتنفّسَ وضغطَ الدمِ، ويتّصلُ به الحبلُ الشوكيُّ بالدماغِ.'},
-  sc:{t:'c', d:'حزمةٌ من الأعصابِ تمتدُّ داخلَ العمودِ الفقريِّ، طولُها نحوُ ٤٢ سم عندَ البالغِ. يتّصلُ من الأعلى بالدماغِ عن طريقِ النخاعِ المستطيلِ، وتتفرّعُ منه أعصابٌ تصلُ إلى جميعِ أجزاءِ الجسمِ.'},
-  nv:{t:'p', d:'شبكةٌ كبيرةٌ من الأعصابِ تنتشرُ في جميعِ الأعضاءِ، تربطُ الجهازَ المركزيَّ بأعضاءِ الجسمِ مثلَ أعضاءِ الحسِّ، وتنقلُ المعلوماتِ من الدماغِ وإليه.'},
-  skull:{t:'', n:'الجمجمةُ', c:'#b4a8e3', d:'الدماغُ في الرأسِ داخلَ الجمجمةِ التي تحميه من المؤثراتِ الخارجيةِ والصدماتِ.'},
-  eye:{t:'', n:'العينُ (عضوُ حسٍّ)', c:'#ffffff', d:'من أعضاءِ الحسِّ. ترتبطُ بالجهازِ العصبيِّ المركزيِّ عن طريقِ الأعصابِ.'}
-};
-const found=new Set(); let q1ok=false;
-const miss1=$('#miss1');
-MIS.forEach(k=>miss1.appendChild(el('li',{'data-k':k},`<span class="st" aria-hidden="true">؟</span><span class="sw" style="background:${COL[k]}"></span><span>${NAME[k]}</span>`)));
-miss1.appendChild(el('li',{'data-k':'q'},`<span class="st" aria-hidden="true">؟</span><span>صحّحِ الخطأَ الشائعَ (في الأسفلِ)</span>`));
-function showPart(k){
-  const inf=INFO[k]; if(!inf) return;
-  const nm=inf.n||NAME[k], c=inf.c||COL[k];
-  const tag=inf.t==='c'?'<span class="tag c">الجهازُ العصبيُّ المركزيُّ</span>':inf.t==='p'?'<span class="tag p">الجهازُ العصبيُّ الطرفيُّ</span>':'';
-  const card=$('#card1'); card.classList.remove('pop'); void card.offsetWidth; card.classList.add('pop');
-  card.innerHTML=`<div class="card-h"><span class="sw" style="background:${c}"></span><b>${nm}</b>${tag}</div><p>${inf.d}</p>`;
-  $$('.part',s1).forEach(p=>p.classList.toggle('sel',p.dataset.part===k));
-  $$(`.lb[data-part="${k}"],.lbl-line[data-part="${k}"]`,s1).forEach(l=>l.classList.add('show'));
-  if(MIS.includes(k) && !found.has(k)){
-    found.add(k); const li=$(`li[data-k="${k}"]`,miss1); li.classList.add('done'); $('.st',li).textContent='✓';
-    $('#foundN').textContent=ar(found.size);
-    if(found.size===5) toast('🎉 اكتشفتَ الأجزاءَ الخمسةَ! جرّبْ «المركزيُّ» و«الطرفيُّ».');
+function drawBody(R,t,c){
+  const o=c.off||[0,0,0], T=p=>[p[0]+o[0],p[1]+o[1],p[2]+o[2]], now=performance.now();
+  const col=(id,hex)=>{ const l=c.lit&&c.lit[id]; if(l&&now-l<1800){ const k=Kit.reduced?.5:.5+.5*Math.sin((now-l)/110); return lift(hex,.2+.45*k); } return hex; };
+  const pid=id=>c.pick&&c.pick.includes(id)?id:null;
+  if(c.full){
+    R.shadow(T([20,-252,-10]),150,90);
+    R.mesh(M.torso,{pos:T([0,-95,-25])},{color:'#bfb2ff',alpha:.10});
+    // arms (skin, see-through) + hand
+    [[[80,10,-28],G.sh],[G.sh,G.elbow],[G.elbow,G.wrist]].forEach(([a,b])=>R.cyl(T(a),T(b),20,COL.skin,{alpha:.28}));
+    [[[-80,10,-28],[-114,2,-28]],[[-114,2,-28],[-138,-118,-18]],[[-138,-118,-18],[-150,-212,-6]]].forEach(([a,b])=>R.cyl(T(a),T(b),20,COL.skin,{alpha:.22}));
+    R.sphere(T(G.hand),21,col('hand',COL.skin),{id:pid('hand')});
+    // peripheral nerves (decoration)
+    [[[0,-60,-40],[-80,-80,-22],[-96,-112,-4]],[[0,-120,-41],[74,-140,-22],[86,-170,-6]],[[0,-182,-43],[-72,-205,-22]],
+     [[0,-230,-44],[40,-250,-28]],[[0,-230,-44],[-40,-250,-28]],[G.branch,[-80,6,-30],[-114,2,-28],[-138,-118,-18],[-150,-205,-6]]]
+      .forEach(ps=>R.poly(ps.map(T),'rgba(246,167,35,.75)',2.4));
+    // arm nerve (pickable): cut leaves a gap
+    for(let i=0;i<ARMN.length-1;i++){ const a=ARMN[i], b=ARMN[i+1];
+      if(c.cut&&i===2){ R.cyl(T(a),T(lerp(a,b,.42)),4,col('nvArm',COL.nv),{id:pid('nvArm')}); R.cyl(T(lerp(a,b,.58)),T(b),4,col('nvArm',COL.nv),{id:pid('nvArm')}); }
+      else R.cyl(T(a),T(b),4,col('nvArm',COL.nv),{id:pid('nvArm')}); }
+    R.line(T(ARMN[4]),T(G.hand),col('nvArm',COL.nv),3);
+    if(c.cut) R.text(T(CUT),'✂️',{size:22,bg:'rgba(232,66,90,.9)',color:'#fff',dx:-30});
+  } else R.shadow(T([0,30,0]),100,100);
+  // spinal cord inside the vertebral column
+  const cordBot=c.full?G.cordBot:[0,-10,-38];
+  R.cyl(T(G.medBot),T(cordBot),8,col('sc',COL.sc),{id:pid('sc')});
+  for(let y=50;y>cordBot[1]+10;y-=26){ const z=-36-(72-y)/307*8; R.cyl(T([0,y,z]),T([0,y-12,z]),18,'#ece7ff',{alpha:.3}); }
+  // brain
+  R.cyl(T(G.medTop),T(G.medBot),11,col('med',COL.med),{id:pid('med')});
+  R.mesh(M.cbl,{pos:T(G.cbl)},{color:col('cbl',COL.cbl),id:pid('cbl')});
+  R.mesh(M.cer,{pos:T(G.cer)},{color:col('cer',COL.cer),id:pid('cer')});
+  // eyes + eye nerve
+  if(c.eyes){
+    for(let i=0;i<EYEN.length-1;i++) R.cyl(T(EYEN[i]),T(EYEN[i+1]),3.5,col('nvEye',COL.nv),{id:pid('nvEye')});
+    R.sphere(T(G.eye),12,col('eye','#ffffff'),{id:pid('eye')}); R.sphere(T([37,160,110]),5,'#200058');
+    R.sphere(T([-34,160,100]),12,'#ffffff'); R.sphere(T([-37,160,110]),5,'#200058');
   }
+  R.mesh(M.skull,{pos:T(G.skull)},{color:'#e6e0ff',alpha:.13});
+  // labels on the model
+  (c.labels||[]).forEach(k=>{ const [p,q]=LBL[k]; if(q) R.line(T(p),T(q),'rgba(255,255,255,.7)',1.5); R.text(T(q||p),LTXT[k],{size:14}); });
+  // impulse pulse + ball
+  if(c.pulse&&c.pulse.pts.length){ const P=c.pulse.pts.map(T); R.poly(P,'#fff36b',6,{glow:true,front:true,alpha:.9});
+    const h=P[P.length-1]; R.poly([h,[h[0]+.5,h[1],h[2]]],'#ffffff',16,{glow:true,front:true}); }
+  if(c.ball) R.sphere(T(c.ball),17,'#ffffff',{label:'⚽'});
 }
-hitHandler(s1, h=>showPart(h.startsWith('nv')?'nv':h));
-MIS.concat(['skull']).forEach(k=>$('#altBtns').appendChild(el('button',{class:'btn ghost sm',type:'button',onclick:()=>showPart(k)},(INFO[k].n||NAME[k]))));
-const VIEWNOTE={all:'اخترْ «المركزيُّ» أو «الطرفيُّ» لترى كلَّ قسمٍ.',
-  central:'🔵 الجهازُ العصبيُّ المركزيُّ = الدماغُ (المخُّ والمخيخُ والنخاعُ المستطيلُ) + الحبلُ الشوكيُّ.',
-  peripheral:'🟠 الجهازُ العصبيُّ الطرفيُّ (المحيطيُّ) = شبكةٌ كبيرةٌ من الأعصابِ تربطُ المركزيَّ بأعضاءِ الجسمِ مثلَ أعضاءِ الحسِّ.'};
-$$('.seg .btn').forEach(b=>b.addEventListener('click',()=>{
-  $$('.seg .btn').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
-  s1.classList.remove('v-central','v-peripheral'); if(b.dataset.view!=='all') s1.classList.add('v-'+b.dataset.view);
-  $('#divNote').textContent=VIEWNOTE[b.dataset.view];
-}));
-// misconception quiz
-let q1wrong=0;
-$$('#q1c .choice').forEach(b=>b.addEventListener('click',()=>{
-  if(q1ok) return;
-  const a=b.dataset.a;
-  if(a==='med'){
-    q1ok=true; b.classList.add('ok');
-    say('#q1fb','ok','أحسنتَ! الحبلُ الشوكيُّ متّصلٌ من الأعلى بالدماغِ عن طريقِ <b>النخاعِ المستطيلِ</b> الذي يقعُ أسفلَ المخيخِ. أمّا المخيخُ فوظيفتُه حفظُ توازنِ الجسمِ.');
-    const li=$('li[data-k="q"]',miss1); li.classList.add('done'); $('.st',li).textContent='✓';
-    showPart('med'); flashPart(s1,'sc');
-  } else {
-    q1wrong++; b.classList.add('bad');
-    const why=a==='cbl'?'هذا هو الخطأُ الشائعُ! المخيخُ وظيفتُه حفظُ توازنِ الجسمِ.':'المخُّ هو أكبرُ أجزاءِ الدماغِ، وفيه مراكزُ الذاكرةِ والتفكيرِ.';
-    say('#q1fb','bad',`حاولْ مرةً أخرى — ${why} انظرْ في الرسمِ: ما الجزءُ الذي يقعُ أسفلَ المخيخِ ويصلُ إلى الحبلِ الشوكيِّ؟`+(q1wrong>=2?' <button class="btn sm green" type="button" id="q1show">أرني الحلَّ</button>':''));
-    const sb=$('#q1show'); if(sb) sb.onclick=()=>$('#q1c [data-a="med"]').click();
-  }
-}));
+const spot=(V,off,p,r)=>()=>{ const s=V.screen([p[0]+off[0],p[1]+off[1],p[2]+off[2]]); return {x:s.x,y:s.y,r}; };
+const boxOf=sel=>()=>{ const b=Kit.$(sel).getBoundingClientRect(); return {x:b.left+b.width/2,y:b.top+b.height/2,w:b.width-20,h:b.height-20,box:true}; };
+const SPOTP={cer:[0,195,40],cbl:[0,112,-60],med:[0,104,-28],sc:[0,20,-38],eye:G.eye,nvEye:[38,137,60],nvArm:[131,-52,-17],hand:G.hand};
 
-/* ================= STAGE 2 ================= */
-const d2=$('#d2'); d2.innerHTML=bodySVG({vb:'92 14 228 222', head:true});
-const s2=$('svg',d2); s2.classList.add('dimparts','lbl-all');
-const CARDS=[
-  ['أحفظُ قصيدةً','cer'],['أحلُّ مسألةَ رياضياتٍ','cer'],['أتعرّفُ على صوتِ صديقي','cer'],
-  ['أمشي على حافةٍ دونَ أن أقعَ','cbl'],['أقفُ على قدمٍ واحدةٍ','cbl'],['أركبُ الدراجةَ متوازناً','cbl'],
-  ['قلبي ينبضُ وأنا نائمٌ','med'],['أتنفّسُ دونَ أن أفكّرَ','med'],['ينتظمُ ضغطُ دمي','med']];
-const WHY2={cer:'يحتاجُ إلى الذاكرةِ والتفكيرِ أو إلى تنظيمِ معلوماتِ الحواسِّ',cbl:'يحتاجُ إلى حفظِ التوازنِ',med:'يتعلّقُ بنبضِ القلبِ أو التنفّسِ أو ضغطِ الدمِ'};
-const chips2=Kit.shuffle(CARDS).map(([t,p],i)=>el('div',{class:'chip','data-id':'c'+i,'data-part':p},t));
-chips2.forEach(c=>$('#chips2').appendChild(c));
-const zones2=$$('.zones3 .zone'); let placed2=0; const wrong2={};
-function place2(chip, zone){
-  placed2++; s2.querySelector(`.bp[data-part="${zone.dataset.part}"]`).classList.add('lit');
-  const bp=s2.querySelector(`.bp[data-part="${zone.dataset.part}"]`); bp.classList.remove('flash'); void bp.getBBox(); bp.classList.add('flash');
-  $('#n2').textContent=ar(placed2); $('#m2').style.width=(placed2/9*100)+'%';
-  const p=chip.dataset.part;
-  say('#fb2','ok',`صحيحٌ! «${chip.textContent}» ${WHY2[p]}.<br><span class="sr">من الكتابِ: </span>📘 ${FN[p]}`+(placed2===9?'<br>🎉 صنّفتَ كلَّ المواقفِ!':''));
-  if(placed2===9) Kit.celebrate();
+/* ================= Scene 1: explore ================= */
+const S1={labels:[],pick:['cer','cbl','med','sc'],lit:{},full:true,eyes:true,got:null,ok5:false,w5:0};
+const v0=Kit.view3d(Kit.$('#view0'),{yaw:.95,pitch:.12,zoom:.86,
+  draw(R,t){ drawBody(R,t,S1); },
+  onPick(id){ if(!id) return; S1.got=id; S1.lit[id]=performance.now(); const st=Kit.step_;
+    if(st>=1&&st<=3){ const want=['cer','cbl','med'][st-1]; if(id!==want) Kit.say('اضغطِ الجزءَ الذي تشيرُ إليه اليدُ 👆','info'); }
+    if(st===4){
+      if(id==='med'){ S1.ok5=true; return; }
+      if(id==='sc'){ Kit.say('هذا هو <b>الحبلُ الشوكيُّ</b> نفسُه — اتبعْه للأعلى.','info'); return; }
+      S1.w5++; const why=id==='cbl'?'<b>المخيخُ</b> يحفظُ توازنَ الجسمِ، والحبلُ لا يتّصلُ به.':'اتبعِ الحبلَ الأزرقَ للأعلى: بأيِّ جزءٍ يلتصقُ أولاً؟';
+      Kit.say('حاولْ مرةً أخرى — '+why+(S1.w5>=2?'<br><b>الحلُّ:</b> النخاعُ المستطيلُ (الأخضرُ)؛ به يتّصلُ الحبلُ الشوكيُّ بالدماغِ.':''),'bad'); } }});
+const O0=[0,0,0]; let yaw0;
+const tapStep=(id,text,after)=>({text,target:spot(v0,O0,SPOTP[id],id==='cer'?48:28),
+  enter(){ S1.got=null; }, check(){ if(S1.got===id){ if(!S1.labels.includes(id)) S1.labels.push(id); return true; } return false; }, after});
+Kit.scene(0,{title:'أستكشفُ',
+  book:'<p>الجهازُ العصبيُّ ينظّمُ عملَ الجسمِ وينسّقُ أنشطتَه. <b>المركزيُّ</b>: الدماغُ والحبلُ الشوكيُّ. <b>الطرفيُّ</b>: شبكةٌ من الأعصابِ تربطُه بأعضاءِ الجسمِ.</p><p>الدماغُ داخلَ الجمجمةِ التي تحميه. الحبلُ الشوكيُّ (نحوُ ٤٢ سم عندَ البالغِ) داخلَ العمودِ الفقريِّ، ويتّصلُ بالدماغِ عن طريقِ <b>النخاعِ المستطيلِ</b>.</p><p class="extra">ألوانُ الأجزاءِ في النموذجِ للتمييزِ فقط.</p>',
+  summary:['الدماغُ (المخُّ والمخيخُ والنخاعُ المستطيلُ) داخلَ الجمجمةِ','الحبلُ الشوكيُّ داخلَ العمودِ الفقريِّ، ويتّصلُ بالدماغِ عبرَ النخاعِ المستطيلِ','الأعصابُ تربطُ الدماغَ والحبلَ الشوكيَّ بأعضاءِ الجسمِ'],
+  onDone(){ ['cer','cbl','med','sc','nvArm'].forEach(k=>{ if(!S1.labels.includes(k)) S1.labels.push(k); }); },
+  steps:[
+    {text:'دوِّرِ الجسمَ بإصبعِك وانظرْ داخلَ الرأسِ 👆', target:()=>{ const b=Kit.$('#view0').getBoundingClientRect(); return {x:b.left+b.width*.5,y:b.top+b.height*.4,r:60}; },
+      enter(){ yaw0=v0.cam.yaw; }, check(){ return Math.abs(v0.cam.yaw-yaw0)>0.7; }, after:'الدماغُ داخلَ <b>الجمجمةِ</b>، والحبلُ الشوكيُّ داخلَ <b>العمودِ الفقريِّ</b>.'},
+    tapStep('cer','اضغطْ على أكبرِ جزءٍ في الدماغِ (الورديِّ)','هذا <b>المخُّ</b>: أكبرُ أجزاءِ الدماغِ، فيه مراكزُ الذاكرةِ والتفكيرِ.'),
+    tapStep('cbl','اضغطْ على الجزءِ البنفسجيِّ في الخلفِ','هذا <b>المخيخُ</b>: يحفظُ توازنَ الجسمِ.'),
+    tapStep('med','اضغطْ على الجزءِ الأخضرِ أسفلَ المخيخِ','هذا <b>النخاعُ المستطيلُ</b>: ينظّمُ نبضاتِ القلبِ والتنفّسَ وضغطَ الدمِ.'),
+    {text:'بأيِّ جزءٍ يتّصلُ <b>الحبلُ الشوكيُّ</b> بالدماغِ؟ اضغطْه',
+      body:'<p class="hintp">قالَ سامرٌ: «يتّصلُ بالمخيخِ». هل هو محقٌّ؟ اتبعِ الحبلَ الأزرقَ للأعلى.</p>',
+      target:()=>S1.w5>=2?spot(v0,O0,SPOTP.med,26)():spot(v0,O0,SPOTP.sc,26)(),
+      enter(){ S1.ok5=false; if(!S1.labels.includes('sc')) S1.labels.push('sc'); }, check(){ return S1.ok5; },
+      after:'صحيحٌ! يتّصلُ الحبلُ الشوكيُّ بالدماغِ عن طريقِ <b>النخاعِ المستطيلِ</b>، لا المخيخِ.'}
+  ]});
+
+/* ================= Scene 2: which part is working? ================= */
+const O1=[0,-150,0];
+const S2={off:O1,labels:['cer','cbl','med'],pick:['cer','cbl','med'],lit:{},got:null,wrong:{}};
+let sit2=null;
+const v1=Kit.view3d(Kit.$('#view1'),{yaw:1.0,pitch:.15,zoom:1.7,
+  draw(R,t){ drawBody(R,t,S2); },
+  onPick(id){ if(!id||!sit2) return; S2.lit[id]=performance.now();
+    if(id===sit2.ans){ S2.got=id; return; }
+    const n=S2.wrong[sit2.k]=(S2.wrong[sit2.k]||0)+1;
+    Kit.say('حاولْ مرةً أخرى — '+FN[id]+'. هل هذا ما يحتاجُه الموقفُ؟'+(n>=2?'<br><b>الحلُّ:</b> '+NAME[sit2.ans]+' — '+FN[sit2.ans]+'.':''),'bad'); }});
+const sitStep=(k,em,txt,ans,after)=>({text:'«'+txt+'» — أيُّ جزءٍ يعملُ؟',
+  body:'<div class="sit"><span class="em" aria-hidden="true">'+em+'</span><span>'+txt+'</span></div><p class="hintp">اضغطِ الجزءَ على النموذجِ.</p>',
+  target:()=>(S2.wrong[k]||0)>=1?spot(v1,O1,SPOTP[ans],ans==='cer'?44:26)():boxOf('#view1')(),
+  enter(){ sit2={k,ans}; S2.got=null; }, check(){ return S2.got===ans; }, after});
+Kit.scene(1,{title:'أجرّبُ',
+  book:'<p><b>المخُّ</b> أكبرُ أجزاءِ الدماغِ: فيه مراكزُ الذاكرةِ والتفكيرِ، وينظّمُ معلوماتِ الحواسِّ. <b>المخيخُ</b>: يحفظُ توازنَ الجسمِ. <b>النخاعُ المستطيلُ</b>: ينظّمُ نبضاتِ القلبِ والتنفّسَ وضغطَ الدمِ.</p>',
+  summary:['التفكيرُ والذاكرةُ ← المخُّ','التوازنُ ← المخيخُ','نبضُ القلبِ والتنفّسُ ← النخاعُ المستطيلُ'],
+  steps:[
+    sitStep('a','🧮','أحلُّ مسألةَ رياضياتٍ','cer','صحيحٌ! <b>المخُّ</b> فيه مراكزُ الذاكرةِ والتفكيرِ.'),
+    sitStep('b','🦩','أقفُ على قدمٍ واحدةٍ','cbl','صحيحٌ! <b>المخيخُ</b> يحفظُ توازنَ الجسمِ.'),
+    sitStep('c','😴','قلبي ينبضُ وأنا نائمٌ','med','صحيحٌ! <b>النخاعُ المستطيلُ</b> ينظّمُ نبضاتِ القلبِ والتنفّسَ، حتى في النومِ.')
+  ]});
+
+/* ================= Scene 3: the goalkeeper's impulse ================= */
+const ORDER=['eye','nvEye','cer','sc','nvArm','hand'];
+const HINT={eye:'ابدأْ من عضوِ الحسِّ الذي يرى الكرةَ.',nvEye:'المعلومةُ تصلُ إلى الدماغِ عن طريقِ عصبٍ.',cer:'المخُّ ينظّمُ معلوماتِ الحواسِّ ويصدرُ منه الأمرُ.',
+  sc:'الأمرُ ينزلُ من الدماغِ في الحبلِ الشوكيِّ.',nvArm:'من الحبلِ الشوكيِّ تتفرّعُ أعصابٌ إلى الجسمِ. أيُّها يصلُ إلى اليدِ؟',hand:'أينَ يصلُ الأمرُ ليمسكَ الكرةَ؟'};
+const BALL0=[360,60,330], BALLH=[214,-40,92];
+const O2=[0,-14,0];
+const S3={off:O2,labels:[],pick:['eye','nvEye','cer','cbl','med','sc','nvArm','hand'],lit:{},full:true,eyes:true,path:[],wrong:{},
+  cut:false,ball:BALL0,pulse:null,busy:false,runs:0,cutRun:false,pred:false};
+const v2=Kit.view3d(Kit.$('#view2'),{yaw:.62,pitch:.12,zoom:.84,
+  draw(R,t){ drawBody(R,t,S3); },
+  onPick(id){ if(!id||Kit.step_!==0||Kit.scene_!==2||S3.path.length>=6) return; S3.lit[id]=performance.now();
+    const want=ORDER[S3.path.length];
+    if(id===want){ S3.path.push(id); if(!S3.labels.includes(id)) S3.labels.push(id); drawPath(); Kit.say('✔ '+NAME[id]+(S3.path.length<6?' — ما الخطوةُ التاليةُ؟':''),'ok'); return; }
+    if(S3.path.includes(id)){ Kit.say('«'+NAME[id]+'» في المسارِ. '+HINT[want],'info'); return; }
+    if(id==='med'&&want==='sc'){ Kit.say('صحيحٌ أنَّ الإيعازَ يمرُّ بالنخاعِ المستطيلِ. تابعْ: إلى أين ينزلُ بعدَه؟','info'); return; }
+    const n=S3.wrong[want]=(S3.wrong[want]||0)+1;
+    const why=id==='cbl'?FN.cbl+'، لا لتنظيمِ معلوماتِ الحواسِّ. ':id==='med'?FN.med+'. ':'';
+    Kit.say('حاولْ مرةً أخرى — '+why+HINT[want]+(n>=2?'<br><b>الحلُّ:</b> '+NAME[want]+' (انظرْ إلى الحلقةِ الصفراءِ).':''),'bad'); }});
+function drawPath(){ const ol=Kit.$('.scene.on #path3'); if(!ol) return;
+  ol.innerHTML=ORDER.map((k,i)=>'<li class="'+(i<S3.path.length?'fill':i===S3.path.length?'next':'')+'">'+(i<S3.path.length?NAME[k]:Kit.ar(i+1))+'</li>').join(''); }
+// impulse route (part tag = the part the pulse is inside on the way to that point)
+const ROUTE=[[G.eye,'eye'],[EYEN[1],'nvEye'],[EYEN[2],'nvEye'],[EYEN[3],'nvEye'],[[0,178,0],'cer'],[G.medTop,'cer'],[G.medBot,'med'],[G.branch,'sc'],
+  [G.sh0,'nvArm'],[G.sh,'nvArm'],[G.elbow,'nvArm'],[G.wrist,'nvArm'],[G.hand,'hand']];
+const SEG=[]; let LTOT=0; for(let i=1;i<ROUTE.length;i++){ const a=ROUTE[i-1][0], b=ROUTE[i][0], l=Math.hypot(b[0]-a[0],b[1]-a[1],b[2]-a[2]); SEG.push({a,b,l,s:LTOT,k:ROUTE[i][1]}); LTOT+=l; }
+const DCUT=(()=>{ const s=SEG[9]; return s.s+s.l*.42; })();
+const CAP={eye:'١) العينُ ترى الكرةَ…',nvEye:'٢) العصبُ ينقلُ المعلومةَ إلى الدماغِ…',cer:'٣) المخُّ ينظّمُ المعلومةَ ويُصدرُ الأمرَ: «امسكِ الكرةَ!»',med:'…يمرُّ الإيعازُ بالنخاعِ المستطيلِ…',
+  sc:'٤) الإيعازُ ينزلُ في الحبلِ الشوكيِّ إشارةً كهربائيةً…',nvArm:'٥) …ثم في عصبِ الذراعِ…',hand:'٦) وصلَ الإيعازُ إلى اليدِ: أمسكَ الحارسُ الكرةَ! 🧤'};
+function pulseAt(d){ const pts=[ROUTE[0][0]]; let k='eye'; for(const s of SEG){ if(d>=s.s+s.l){ pts.push(s.b); k=s.k; continue; } if(d>s.s){ pts.push(lerp(s.a,s.b,(d-s.s)/s.l)); k=s.k; } break; } return {pts,k}; }
+function send(){
+  if(S3.busy) return; S3.busy=true; Kit.$$('.scene.on .g-body .btn').forEach(b=>b.disabled=true);
+  const cut=S3.cut, speed=Kit.reduced?2000:260, pause=Kit.reduced?0:700, dPause=SEG[4].s+SEG[4].l, dEnd=cut?DCUT:LTOT;
+  const tPause=dPause/speed*1000, tEnd=tPause+pause+(dEnd-dPause)/speed*1000, tFull=tPause+pause+(LTOT-dPause)/speed*1000, tAll=cut?tEnd+(Kit.reduced?100:700):tEnd;
+  const cap=Kit.$('#cap3'); let lastK=null; const t0=performance.now();
+  (function f(now){ const t=now-t0;
+    const d=Math.min(dEnd, t<tPause?t/1000*speed:t<tPause+pause?dPause:dPause+(t-tPause-pause)/1000*speed);
+    const p=pulseAt(d); S3.pulse=p;
+    if(p.k!==lastK){ lastK=p.k; S3.lit[p.k]=performance.now(); cap.textContent=CAP[p.k]; }
+    const bf=Math.min(1,t/tFull); S3.ball=cut?lerp(BALL0,BALLH,Math.min(1.7,t/tFull*1.15)):lerp(BALL0,BALLH,bf);
+    if(cut&&d>=dEnd) cap.textContent='⛔ توقّفتِ الإشارةُ عندَ القطعِ! لم يصلِ الأمرُ إلى اليدِ.';
+    if(t<tAll) requestAnimationFrame(f);
+    else { S3.busy=false; S3.runs++; if(cut) S3.cutRun=true; else S3.lit.hand=performance.now(); Kit.$$('.scene.on .g-body .btn').forEach(b=>b.disabled=false); Kit.ping(); }
+  })(t0);
 }
-const dnd2=Kit.dnd({chips:chips2, zones:zones2,
-  accept:(c,z)=>c.dataset.part===z.dataset.part,
-  onDrop:(chip,zone,ok)=>{
-    if(ok){ place2(chip,zone); return; }
-    const id=chip.dataset.id; wrong2[id]=(wrong2[id]||0)+1;
-    const zp=zone.dataset.part;
-    say('#fb2','bad',`حاولْ مرةً أخرى — ${FN[zp]} هل «${chip.textContent}» ${WHY2[zp]}؟`+
-      (wrong2[id]>=2?` <button class="btn sm green" type="button" id="show2">أرني الحلَّ</button>`:''));
-    const sb=$('#show2'); if(sb) sb.onclick=()=>{
-      const z=zones2.find(z=>z.dataset.part===chip.dataset.part); z.appendChild(chip);
-      chip.classList.remove('bad','sel'); chip.classList.add('ok'); chip.dataset.locked='1'; chip.setAttribute('tabindex','-1'); chip.setAttribute('aria-disabled','true');
-      place2(chip,z);
-    };
-  }});
+function resetRun(){ S3.pulse=null; S3.ball=BALL0; }
+Kit.scene(2,{title:'أتحدّى',
+  book:'<p><b>الإيعازُ العصبيُّ</b>: أوامرُ يُصدرُها الدماغُ، تنتقلُ على شكلِ إشاراتٍ كهربائيةٍ إلى الأعضاءِ. والأعصابُ تنقلُ المعلوماتِ من الدماغِ وإليه.</p><p>الجهازُ العصبيُّ يشبهُ الدائرةَ الكهربائيةَ: البطاريةُ = الدماغُ، والأسلاكُ = الأعصابُ؛ وبدونِ الأسلاكِ لا يضيءُ المصباحُ.</p><p class="extra">الكتابُ لا يذكرُ خطواتِ المسارِ بالترتيبِ؛ بنيناه من حقائقِه: الأعصابُ تنقلُ المعلوماتِ من أعضاءِ الحسِّ إلى الدماغِ، والمخُّ ينظّمُها، والدماغُ يُصدرُ الأمرَ، والحبلُ الشوكيُّ تتفرّعُ منه الأعصابُ. شكلُ الحركةِ وسرعتُها مبسّطانِ.</p>',
+  summary:['العينُ ← عصبٌ ← المخُّ ← الحبلُ الشوكيُّ ← عصبُ الذراعِ ← اليدُ','الإيعازُ العصبيُّ ينتقلُ إشاراتٍ كهربائيةً','إذا انقطعَ العصبُ لا يصلُ الأمرُ — كمصباحٍ بلا أسلاكٍ'],
+  steps:[
+    {text:'⚽ ابنِ مسارَ الإيعازِ: اضغطِ الأجزاءَ بالترتيبِ، من العينِ إلى اليدِ',
+      body(el){ el.innerHTML='<ol class="path" id="path3" aria-label="المسارُ"></ol>'; drawPath(); },
+      target:()=>{ const want=ORDER[S3.path.length]; if(!want) return null; if(S3.path.length===0||(S3.wrong[want]||0)>=2) return spot(v2,O2,SPOTP[want],want==='cer'?44:26)(); return boxOf('#view2')(); },
+      check(){ return S3.path.length===6; }, after:'مسارٌ كاملٌ! المعلومةُ تصعدُ إلى <b>الدماغِ</b>، والأمرُ ينزلُ إلى <b>اليدِ</b>.'},
+    {text:'اضغطْ «أرسلِ الإيعازَ» وراقبِ الإشارةَ',
+      body(el){ el.innerHTML='<button class="btn cyan" type="button" id="send3">⚡ أرسلِ الإيعازَ</button>'; el.querySelector('#send3').onclick=send; },
+      target:'#send3', enter(){ resetRun(); S3.runs=0; }, check(){ return S3.runs>0&&!S3.busy; },
+      after:'أمسكَ الحارسُ الكرةَ! أصدرَ الدماغُ <b>الإيعازَ العصبيَّ</b> إشاراتٍ كهربائيةً وصلتْ إلى اليدِ.'},
+    {text:'✂️ ماذا لو انقطعَ العصبُ؟ اقطعْ عصبَ الذراعِ',
+      body(el){ el.innerHTML='<button class="btn red" type="button" id="cut3">✂️ اقطعِ العصبَ</button>'; el.querySelector('#cut3').onclick=()=>{ S3.cut=true; resetRun(); S3.lit.nvArm=performance.now(); Kit.$('#cap3').textContent='✂️ عصبُ الذراعِ مقطوعٌ.'; Kit.ping(); }; },
+      target:'#cut3', check(){ return S3.cut; }, after:'انقطعَ <b>العصبُ</b> — مثلَ سلكٍ مقطوعٍ في دائرةٍ كهربائيةٍ.'},
+    {text:'توقّعْ: هل ستمسكُ اليدُ الكرةَ الآنَ؟',
+      body(el){ el.innerHTML='<div class="choices"><button class="choice" type="button" data-a="0">✋ نعم، كالعادةِ</button><button class="choice" type="button" data-a="1">🚫 لا، لن تتحرّكَ اليدُ</button></div>';
+        el.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{ if(b.dataset.a==='1'){ b.classList.add('ok'); S3.pred=true; Kit.ping(); }
+          else { b.classList.add('bad'); const n=Kit.tries('pred'); Kit.say('حاولْ مرةً أخرى — الأمرُ ينتقلُ في العصبِ؛ فكيف يصلُ إذا انقطعَ؟'+(n>=2?'<br><b>الحلُّ:</b> لن تتحرّكَ اليدُ، لأنَّ الإيعازَ لا يصلُها.':''),'bad'); } }); },
+      target:'.scene.on .choices', enter(){ S3.pred=false; }, check(){ return S3.pred; }, after:'لنتحقّقْ من توقّعِك…'},
+    {text:'أرسلِ الإيعازَ مرةً أخرى وتحقّقْ',
+      body(el){ el.innerHTML='<button class="btn cyan" type="button" id="send3b">⚡ أرسلِ الإيعازَ</button>'; el.querySelector('#send3b').onclick=send; },
+      target:'#send3b', enter(){ resetRun(); S3.cutRun=false; }, check(){ return S3.cutRun&&!S3.busy; },
+      after:'توقّفتِ الإشارةُ عندَ القطعِ فلم تتحرّكِ اليدُ. بدونِ <b>الأعصابِ</b> لا يصلُ الأمرُ، كالمصباحِ بلا أسلاكٍ.'}
+  ]});
 
-/* ================= STAGE 3 ================= */
-const d3=$('#d3'); d3.innerHTML=bodySVG({ball:true, hits:['cer','cbl','med','sc','nv-leg','nv-arm','nv-eye','eye','hand']});
-const s3=$('svg',d3); s3.classList.add('lbl-all');
-const STEPS=['eye','nv-eye','cer','sc','nv-arm','hand'];
-const SLBL={eye:'العينُ (عضوُ حسٍّ)','nv-eye':'عصبٌ من العينِ',cer:'المخُّ',sc:'الحبلُ الشوكيُّ','nv-arm':'عصبُ الذراعِ',hand:'عضلاتُ اليدِ',cbl:'المخيخُ','nv-leg':'عصبُ الرِّجلِ'};
-const SCOL={eye:'#ffffff','nv-eye':COL.nv,cer:COL.cer,sc:COL.sc,'nv-arm':COL.nv,hand:'#ece8fb',cbl:COL.cbl,'nv-leg':COL.nv};
-const HINT=[
-  'ابدأْ من حيثُ تدخلُ المعلوماتُ: أيُّ عضوِ حسٍّ يرى الكرةَ؟',
-  'المعلوماتُ تصلُ إلى الدماغِ أولاً عن طريقِ الأعصابِ. أيُّ عصبٍ يربطُ العينَ بالدماغِ؟',
-  'المخُّ ينظّمُ المعلوماتِ التي تصلُه من الحواسِّ، ومن الدماغِ يصدرُ الأمرُ.',
-  'الأمرُ ينزلُ من الدماغِ إلى الحبلِ الشوكيِّ، فمنه تتفرّعُ الأعصابُ إلى أجزاءِ الجسمِ.',
-  'تتفرّعُ من الحبلِ الشوكيِّ أعصابٌ تصلُ إلى جميعِ أجزاءِ الجسمِ. أيُّ عصبٍ يصلُ إلى اليدِ؟',
-  'إلى أين يصلُ الإيعازُ في النهايةِ؟ إلى العضوِ الذي سيمسكُ الكرةَ.'];
-let step3=0, wrong3=0, done3=false, busy3=false;
-function drawPath3(){
-  const ol=$('#path3'); ol.innerHTML='';
-  STEPS.forEach((k,i)=>{
-    const li=el('li');
-    li.appendChild(el('span',{class:'slot'+(i<step3?' fill':'')+(i===step3?' next':'')}, i<step3?`<span class="sw" style="background:${SCOL[k]}"></span>${SLBL[k]}`:ar(i+1)));
-    if(i<5) li.appendChild(el('span',{class:'arr','aria-hidden':'true'},'←'));
-    ol.appendChild(li);
-  });
-  $$('#bank3 .choice').forEach(b=>b.classList.toggle('used',STEPS.slice(0,step3).includes(b.dataset.k)));
-  $('#send3').disabled = step3<6 || busy3;
-}
-const bank3=$('#bank3');
-Kit.shuffle(Object.keys(SLBL)).forEach(k=>bank3.appendChild(el('button',{class:'choice',type:'button','data-k':k,onclick:()=>pick3(k)},`<span class="sw" style="background:${SCOL[k]}"></span>${SLBL[k]}`)));
-function pick3(k){
-  if(step3>=6||busy3) return;
-  const exp=STEPS[step3];
-  if(k===exp){
-    step3++; wrong3=0; flashPart(s3, k==='nv-eye'||k==='nv-arm'?'nv':k);
-    if(step3<6) say('#fb3','ok',`✔ ${SLBL[k]}. ما الخطوةُ التاليةُ؟`);
-    else say('#fb3','ok','مسارٌ كاملٌ! الآنَ اضغطْ «⚡ أرسلِ الإيعازَ» وراقبِ الإشارةَ.');
-    drawPath3(); return;
-  }
-  if(k==='med' && exp==='sc'){ say('#fb3','info','صحيحٌ أنَّ الإيعازَ يمرُّ بالنخاعِ المستطيلِ؛ فبه يتّصلُ الحبلُ الشوكيُّ بالدماغِ. تابعْ: إلى أين ينزلُ الأمرُ بعدَه؟'); return; }
-  if(STEPS.slice(0,step3).includes(k)){ say('#fb3','info',`«${SLBL[k]}» موجودٌ في المسارِ. ${HINT[step3]}`); return; }
-  wrong3++;
-  let why='';
-  if(k==='cbl') why='المخيخُ وظيفتُه حفظُ توازنِ الجسمِ؛ أمّا تنظيمُ المعلوماتِ التي تصلُ من الحواسِّ فمن عملِ المخِّ. ';
-  else if(k==='nv-leg') why='هذا عصبُ الرِّجلِ، والأمرُ موجَّهٌ إلى اليدِ. ';
-  else if(k==='med') why='النخاعُ المستطيلُ ينظّمُ نبضاتِ القلبِ والتنفّسَ وضغطَ الدمِ. ';
-  else if(k==='skull') why='';
-  say('#fb3','bad',`حاولْ مرةً أخرى — ${why}${HINT[step3]}`+(wrong3>=2?' <button class="btn sm green" type="button" id="show3">أرني الحلَّ</button>':''));
-  const sb=$('#show3'); if(sb) sb.onclick=()=>{ step3=6; drawPath3();
-    say('#fb3','info','المسارُ: العينُ ← عصبٌ ← المخُّ ← الحبلُ الشوكيُّ ← عصبُ الذراعِ ← عضلاتُ اليدِ. المعلوماتُ تصلُ إلى الدماغِ بالأعصابِ، والدماغُ يُصدرُ الأمرَ إشارةً كهربائيةً تنزلُ في الحبلِ الشوكيِّ ثم في العصبِ إلى اليدِ. اضغطْ «⚡ أرسلِ الإيعازَ».'); };
-}
-hitHandler(s3, h=>pick3(h));
-drawPath3(); resetTrails(s3);
-
-const BALL0=[392,178];
-function setBall(svg,x,y){ $('.ballg',svg).setAttribute('transform',`translate(${x},${y})`); }
-function resetScene(svg){
-  resetTrails(svg); setBall(svg,...BALL0); $('.speed',svg).style.opacity=1;
-  $('.armg',svg).style.transform=''; $$('.legg',svg).forEach(g=>g.style.transform='');
-  $$('.part',svg).forEach(p=>p.classList.remove('sel'));
-}
-const armUp = svg => { const a=$('.armg',svg); a.style.transformOrigin='222px 272px'; a.style.transformBox='view-box'; a.style.transform='rotate(-8deg)'; };
-async function ballTo(svg, pts, dur){
-  const g=$('.ballg',svg); const m=/translate\(([-\d.]+),([-\d.]+)\)/.exec(g.getAttribute('transform')); let x0=+m[1], y0=+m[2];
-  for(const [x,y] of pts){ const sx=x0, sy=y0; await anim(dur, t=>setBall(svg, sx+(x-sx)*t, sy+(y-sy)*t)); x0=x; y0=y; }
-}
-const CAP={eye:'١) العينُ (عضوُ حسٍّ) ترى الكرةَ…',ne:'٢) العصبُ ينقلُ المعلوماتِ إلى الدماغِ…',cer:'٣) المخُّ ينظّمُ المعلوماتِ ويُصدرُ الأمرَ: «ارفعِ اليدَ وامسكِ الكرةَ!»',
-  med:'الإيعازُ يمرُّ بالنخاعِ المستطيلِ الذي يصلُ الحبلَ الشوكيَّ بالدماغِ…',sc:'٤) الإيعازُ ينزلُ في الحبلِ الشوكيِّ إشارةً كهربائيةً…',arm:'٥) …ثم في عصبِ الذراعِ…',hand:'٦) وصلَ الإيعازُ إلى اليدِ: أمسكَ الحارسُ الكرةَ! 🧤'};
-async function sendSignal(svg, cap, opts={}){
-  const dot=$('.pulse',svg); resetScene(svg);
-  cap.textContent=CAP.eye; flashPart(svg,'eye'); $$('.eye-g',svg).forEach(g=>g.classList.add('sel')); await sleep(700); $$('.eye-g',svg).forEach(g=>g.classList.remove('sel'));
-  cap.textContent=CAP.ne; flashPart(svg,'nv'); await travelSeg(svg,'eye',dot);
-  cap.textContent=CAP.cer; flashPart(svg,'cer'); await travelSeg(svg,'cer',dot); await sleep(700);
-  cap.textContent=CAP.med; flashPart(svg,'med'); await travelSeg(svg,'med',dot);
-  cap.textContent=CAP.sc; flashPart(svg,'sc'); await travelSeg(svg,'sc',dot);
-  if(opts.multi){
-    cap.textContent='إيعازٌ واحدٌ يتفرّعُ إلى أعصابِ اليدِ والرِّجلِ معاً…';
-    const dot2=dot.cloneNode(); svg.insertBefore(dot2,dot);
-    const legRun=(async()=>{ await travelSeg(svg,'scl',dot2); await travelSeg(svg,'leg',dot2); $$('.legg',svg).forEach(g=>{g.style.transformOrigin='205px 440px';g.style.transformBox='view-box';g.style.transform='rotate(-14deg)';}); })();
-    const armRun=(async()=>{ if(opts.cut){ await travelSeg(svg,'arm',dot,cutLen(svg)); dot.classList.add('stop'); return false;} await travelSeg(svg,'arm',dot); armUp(svg); return true; })();
-    const [,armOk]=await Promise.all([legRun,armRun]);
-    cap.textContent = armOk ? 'تحرّكتِ اليدُ والرِّجلُ معاً بأمرٍ واحدٍ من الدماغِ!' : 'تحرّكتِ الرِّجلُ، أمّا اليدُ فلم يصلْها الأمرُ لأنَّ عصبَها مقطوعٌ.';
-    return armOk;
-  }
-  cap.textContent=CAP.arm; flashPart(svg,'nv');
-  if(opts.cut){
-    await travelSeg(svg,'arm',dot,cutLen(svg)); dot.classList.add('stop');
-    cap.textContent='⛔ توقّفتِ الإشارةُ عندَ القطعِ! لم يصلِ الأمرُ إلى اليدِ.';
-    $('.speed',svg).style.opacity=0; await ballTo(svg,[[300,250],[268,548]],500);
-    return false;
-  }
-  const b=ballTo(svg,[[356,262]],1100);
-  await travelSeg(svg,'arm',dot); armUp(svg); $('.speed',svg).style.opacity=0; await b;
-  cap.textContent=CAP.hand; return true;
-}
-let cutL=null;
-function cutLen(svg){
-  const p=$('.route[data-seg="arm"]',svg), L=p.getTotalLength(); let best=0,bd=1e9;
-  for(let l=0;l<=L;l+=1){ const q=p.getPointAtLength(l), d=Math.hypot(q.x-248,q.y-306); if(d<bd){bd=d;best=l;} }
-  return best;
-}
-$('#send3').addEventListener('click',async()=>{
-  busy3=true; drawPath3(); hush('#fb3');
-  await sendSignal(s3,$('#cap3'));
-  done3=true; busy3=false; drawPath3();
-  say('#fb3','ok','🎉 أمسكَ الحارسُ الكرةَ! وصلتِ المعلوماتُ من العينِ بالعصبِ إلى الدماغِ، فأصدرَ الدماغُ الإيعازَ إشاراتٍ كهربائيةً انتقلتْ في الحبلِ الشوكيِّ والعصبِ إلى اليدِ. يمكنُك الإرسالُ مرةً أخرى.');
-  Kit.celebrate();
-});
-$('#reset3').addEventListener('click',()=>{ if(busy3) return; step3=0; wrong3=0; resetScene(s3); drawPath3(); hush('#fb3'); $('#cap3').textContent='الكرةُ قادمةٌ…'; });
-
-/* ================= STAGE 4 ================= */
-const d4=$('#d4'); d4.innerHTML=bodySVG({ball:true});
-const s4=$('svg',d4); s4.classList.add('lbl-all'); resetTrails(s4);
-let pred4=null, cutSent=false, busy4=false;
-$$('#pred4 .choice').forEach(b=>b.addEventListener('click',()=>{
-  pred4=b.dataset.a; $$('#pred4 .choice').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
-  $('#cut4').disabled=false; $('#send4').disabled=false;
-  say('#fb4','info','سجّلنا توقّعَك. الآنَ اضغطْ «✂️ اقطعِ العصبَ» ثم «⚡ أرسلِ الإيعازَ».');
-}));
-$('#cut4').addEventListener('click',()=>{
-  if(busy4) return;
-  const on=!s4.classList.contains('cut'); s4.classList.toggle('cut',on);
-  $('#cut4').setAttribute('aria-pressed',String(on)); $('#cut4').textContent=on?'🩹 أعدِ العصبَ سليماً':'✂️ اقطعِ العصبَ';
-  $('#cap4').textContent=on?'✂️ عصبُ الذراعِ مقطوعٌ.':'العصبُ سليمٌ.'; resetScene(s4);
-});
-async function run4(multi){
-  if(busy4) return; busy4=true; $('#send4').disabled=true; $('#multi4').disabled=true;
-  const cut=s4.classList.contains('cut');
-  const ok=await sendSignal(s4,$('#cap4'),{cut,multi});
-  busy4=false; $('#send4').disabled=pred4==null; $('#multi4').disabled=false;
-  if(multi){
-    say('#fbc2', ok?'ok':'warn', ok?'أمرٌ واحدٌ من الدماغِ وصلَ إلى عضوينِ في الوقتِ نفسِه — كالمفتاحِ الواحدِ الذي يشغّلُ عدّةَ أجهزةٍ.':'وصلَ الأمرُ إلى الرِّجلِ لأنَّ عصبَها سليمٌ، ولم يصلْ إلى اليدِ لأنَّ عصبَها مقطوعٌ.');
-    return;
-  }
-  if(cut){
-    cutSent=true;
-    const right=pred4==='nomove';
-    say('#fb4', right?'ok':'bad', (right?'توقّعُك صحيحٌ! ':'لاحظْ: النتيجةُ تختلفُ عن توقّعِك. ')+
-      'الدماغُ أصدرَ الأمرَ، لكنَّ الإشارةَ الكهربائيةَ توقّفتْ عندَ القطعِ، فلم تتحرّكِ اليدُ. الأعصابُ مثلُ الأسلاكِ: بدونِها لا يصلُ الأمرُ — كالمصباحِ الذي لا يضيءُ بدونِ أسلاكٍ. جرّبِ الدائرةَ في الأسفلِ.');
-  } else {
-    say('#fb4','info','العصبُ سليمٌ فوصلَ الإيعازُ وأمسكتِ اليدُ الكرةَ. الآنَ اقطعِ العصبَ وأرسلْ مرةً أخرى.');
-  }
-}
-$('#send4').addEventListener('click',()=>run4(false));
-$('#multi4').addEventListener('click',()=>run4(true));
-
-// circuit 1
-$('#circ1').innerHTML=`<svg class="circ1 lit" viewBox="0 0 340 230" role="img" aria-label="دائرةٌ كهربائيةٌ: بطاريةٌ وأسلاكٌ ومصباحٌ">
-  <path class="wire" d="M128,184 H40 V60 H148 M192,60 H300 V184 H212"/>
-  <path class="flow" d="M128,184 H40 V60 H148 M192,60 H300 V184 H212"/>
-  <g class="cx"><rect x="290" y="108" width="20" height="26" fill="#fff"/><path d="M288,110 l24,22 M312,110 l-24,22" stroke="#e8425a" stroke-width="4" stroke-linecap="round"/></g>
-  <rect x="128" y="168" width="84" height="34" rx="8" fill="#200058"/><rect x="212" y="178" width="7" height="14" rx="2" fill="#200058"/>
-  <text x="170" y="191" text-anchor="middle" class="ctext" fill="#fff" style="fill:#fff">البطاريةُ</text>
-  <text x="170" y="222" text-anchor="middle" class="ctext">= الدماغُ</text>
-  <g class="bulbg"><path class="rays" d="M170,18 v-8 M140,30 l-7,-6 M200,30 l7,-6 M130,52 h-8 M210,52 h8"/>
-    <circle class="bulb" cx="170" cy="52" r="22"/><rect x="160" y="70" width="20" height="12" rx="3" fill="#5f5a85"/></g>
-  <text x="170" y="112" text-anchor="middle" class="ctext">المصباحُ = جسمُ الإنسانِ</text>
-  <text x="170" y="140" text-anchor="middle" class="ctext" style="fill:#5f5a85">الأسلاكُ = الأعصابُ</text>
-</svg>`;
-const c1=$('#circ1 svg');
-$('#cutWire').addEventListener('click',()=>{
-  const cut=!c1.classList.contains('cutw'); c1.classList.toggle('cutw',cut); c1.classList.toggle('lit',!cut);
-  $('#cutWire').setAttribute('aria-pressed',String(cut)); $('#cutWire').textContent=cut?'🔗 أعدِ السلكَ':'✂️ اقطعِ السلكَ';
-  say('#fbc1', cut?'warn':'ok', cut?'انطفأَ المصباحُ! البطاريةُ (الدماغُ) ما زالتْ تعملُ، لكنَّ السلكَ (العصبَ) مقطوعٌ فلا يصلُ شيءٌ إلى المصباحِ (الجسمِ).':'عادَ المصباحُ يضيءُ لأنَّ الأسلاكَ أوصلتْه بالبطاريةِ — كما توصلُ الأعصابُ أوامرَ الدماغِ إلى الجسمِ.');
-});
-// circuit 2
-$('#circ2').innerHTML=`<svg class="circ2" viewBox="0 0 340 235" role="img" aria-label="مفتاحٌ واحدٌ يشغّلُ ثلاثةَ مصابيحَ">
-  <path class="wire" d="M40,95 V44 H74 M112,44 H300 V200 H40 V135 M140,44 V96 M140,134 V200 M220,44 V96 M220,134 V200 M300,44 V96 M300,134 V200"/>
-  <path class="flow" d="M40,95 V44 H74 M112,44 H300 V200 H40 V135 M140,44 V96 M140,134 V200 M220,44 V96 M220,134 V200 M300,44 V96 M300,134 V200"/>
-  <rect x="28" y="95" width="24" height="40" rx="5" fill="#200058"/>
-  <g class="lever"><circle cx="74" cy="44" r="5" fill="#200058"/><circle cx="112" cy="44" r="5" fill="#200058"/>
-    <line class="lv" x1="74" y1="44" x2="108" y2="24" stroke="#200058" stroke-width="5" stroke-linecap="round"/></g>
-  <text x="93" y="16" text-anchor="middle" class="ctext">المفتاحُ = الدماغُ</text>
-  ${[140,220,300].map((x,i)=>`<g><path class="rays" d="M${x-26},115 h-7 M${x+26},115 h7"/><circle class="bulb" cx="${x}" cy="115" r="19"/>
-    <text x="${x}" y="225" text-anchor="middle" class="ctext">عضوٌ ${ar(i+1)}</text></g>`).join('')}
-</svg>`;
-const c2=$('#circ2 svg');
-$('#sw2').addEventListener('click',()=>{
-  const on=!c2.classList.contains('lit'); c2.classList.toggle('lit',on);
-  $('.lv',c2).setAttribute('y2', on?44:24);
-  $('#sw2').setAttribute('aria-pressed',String(on)); $('#sw2').textContent=on?'أطفئِ المفتاحَ':'اضغطِ المفتاحَ';
-  say('#fbc2', on?'ok':'info', on?'ضغطةٌ واحدةٌ على المفتاحِ أضاءتِ المصابيحَ الثلاثةَ معاً! كذلك الدماغُ يتحكّمُ في أعضاءٍ كثيرةٍ في الوقتِ نفسِه. جرّبْ «⚡ إيعازٌ إلى اليدِ والرِّجلِ معاً».':'انطفأتْ كلُّها معاً.');
-});
-
-/* ================= STAGE 5 ================= */
-const HEALTH=[
-  {ico:'😴', q:'حانَ وقتُ النومِ ولديك مدرسةٌ غداً.', ok:'أنامُ مبكراً نحوَ ثماني ساعاتٍ', bad:['أسهرُ أمامَ الشاشةِ حتى الفجرِ'], why:'النومُ الكافي بمعدلِ ثماني ساعاتٍ يومياً يحافظُ على صحةِ الجهازِ العصبيِّ.'},
-  {ico:'🏃', q:'عصرُ يومِ العطلةِ.', ok:'أمارسُ الرياضةَ بانتظامٍ', bad:['أجلسُ طوالَ اليومِ دونَ حركةٍ'], why:'الرياضةُ المنتظمةُ تنشّطُ الدورةَ الدمويةَ وتزيدُ الدمَ الواصلَ إلى الدماغِ.'},
-  {ico:'🤸', q:'يتحدّاك صديقُك أن تقفزَ من مكانٍ عالٍ.', ok:'أرفضُ، وأتجنّبُ الرياضةَ العنيفةَ', bad:['أقفزُ وأسقطُ على ظهري بقوةٍ'], why:'الرياضةُ العنيفةُ والسقوطُ القويُّ يؤذيانِ العمودَ الفقريَّ والحبلَ الشوكيَّ والدماغَ.'},
-  {ico:'🏍️', q:'لماذا يلبسُ راكبُ الدراجةِ الناريةِ الخوذةَ؟', ok:'لتحميَ رأسَه ودماغَه من الصدماتِ إذا سقطَ', bad:['لتجعلَ الدراجةَ أسرعَ','لأنها زينةٌ فقط'], why:'الكتابُ يقولُ إنَّ الجمجمةَ تحمي الدماغَ من المؤثراتِ الخارجيةِ والصدماتِ، وإنَّ السقوطَ القويَّ يؤذي الدماغَ؛ والخوذةُ حمايةٌ إضافيةٌ للرأسِ.', extra:true},
-  {ico:'🐟', q:'ماذا أختارُ لوجبةِ الغداءِ؟', ok:'سمكٌ مع خضراواتٍ طازجةٍ', bad:['أتركُ الخضراواتَ وآكلُ الحلوى فقط'], why:'الغذاءُ الصحيُّ كالأسماكِ والخضراواتِ الطازجةِ يحافظُ على صحةِ الجهازِ العصبيِّ.'},
-  {ico:'🚭', q:'في غرفةِ الضيوفِ رجلٌ يدخّنُ.', ok:'أبتعدُ عن المدخّنينَ', bad:['أجلسُ بقربِه في الغرفةِ المغلقةِ'], why:'من طرقِ المحافظةِ على الجهازِ العصبيِّ الابتعادُ عن المدخّنينَ.'}
-];
-let score5=0;
-HEALTH.forEach((h,i)=>{
-  const card=el('div',{class:'hcard'},`<h3><span class="ico" aria-hidden="true">${h.ico}</span>${h.q}</h3>`);
-  const ch=el('div',{class:'choices'}); card.appendChild(ch); const fb=el('div',{class:'fb'}); card.appendChild(fb);
-  let wrong=0, done=false;
-  const opts=Kit.shuffle([[h.ok,true],...h.bad.map(b=>[b,false])]);
-  opts.forEach(([t,ok])=>{
-    const b=el('button',{class:'choice',type:'button'},t); ch.appendChild(b);
-    b.addEventListener('click',()=>{
-      if(done) return;
-      if(ok){ done=true; b.classList.add('ok'); card.classList.add('done'); score5++;
-        $('#score5').textContent='✔️ '+ar(score5)+' / ٦'; $('#score5').classList.toggle('ok',score5===6);
-        say(fb,'ok','أحسنتَ! '+h.why+(h.extra?'<br><small>ℹ️ الكتابُ يطرحُ هذا السؤالَ دونَ إجابةٍ؛ ربطناه بما ذكرَه عن الجمجمةِ والسقوطِ.</small>':''));
-        if(score5===6){ Kit.celebrate(); toast('🛡️ أحسنتَ! حميتَ مركزَ قيادتِك.'); }
-      } else {
-        wrong++; b.classList.add('bad');
-        say(fb,'bad','حاولْ مرةً أخرى — هذا التصرّفُ لا يحمي جهازَك العصبيَّ. فكّرْ: ماذا قالَ الكتابُ عن صحةِ الجهازِ العصبيِّ؟'+(wrong>=2?' <button class="btn sm green" type="button">أرني الحلَّ</button>':''));
-        const sb=$('button',fb); if(sb) sb.onclick=()=>[...ch.children].find(x=>x.textContent===h.ok).click();
-      }
-    });
-  });
-  $('#health').appendChild(card);
-});
-
-/* ================= STAGE 6 ================= */
-const d6=$('#d6'); d6.innerHTML=bodySVG({}); const s6=$('svg',d6); s6.classList.add('lbl-all');
-$('#again').addEventListener('click',()=>location.reload());
-
-/* ================= NAV ================= */
-Kit.setupStages(['أستكشفُ','أصنّفُ','رحلةُ الإيعازِ','العصبُ المقطوعُ','أحمي جهازي','خلاصةٌ'],{
-  canLeave(i){
-    if(i===0){ if(found.size<5) return 'اكتشفِ الأجزاءَ الخمسةَ في الرسمِ أولاً'; if(!q1ok) return 'أجبْ عن سؤالِ «صحّحِ الخطأَ الشائعَ»'; }
-    if(i===1 && placed2<9) return 'صنّفْ كلَّ البطاقاتِ التسعِ أولاً';
-    if(i===2 && !done3) return 'ابنِ المسارَ وأرسلِ الإيعازَ أولاً';
-    if(i===3 && !cutSent) return 'اقطعِ العصبَ وأرسلِ الإيعازَ لترى ماذا يحدثُ';
-    if(i===4 && score5<6) return 'أجبْ عن المواقفِ الستةِ أولاً';
-    return true;
-  },
-  onEnter(i){
-    if(i===2) resetTrails(s3);
-    if(i===3) resetTrails(s4);
-    if(i===5) Kit.celebrate();
-  }
-});
-
+Kit.start();
 </script>
 </body>
 </html>
