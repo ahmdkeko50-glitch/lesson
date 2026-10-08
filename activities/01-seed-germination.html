@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>داخلَ البذرةِ</title>
+<!--
+  BASE TEMPLATE — copy this whole file, then:
+  1. change <title>, the header (.ref chip, h1), and the STAGES list
+  2. write each stage inside <main> as <section class="stage" data-stage="i">
+  3. put activity CSS in the second <style> block and activity JS in the last <script>
+  Everything (CSS + JS) stays inline. No external files, fonts or CDNs.
+-->
+<style>
+/* ================= DESIGN TOKENS (from the book's brand) ================= */
+:root{
+  --navy:#200058; --navy-2:#3a1f7a; --ink:#200058; --muted:#5f5a85;
+  --cyan:#00c3fe; --cyan-d:#0a8fc0; --cyan-l:#e3f8ff; --cyan-b:#b8ebff;
+  --green:#12a06a; --green-d:#0b7a50; --green-l:#e4f6ee; --green-b:#9cd9bd;
+  --red:#e8425a; --red-d:#c22b43; --red-l:#fde8ec; --red-b:#f5b3bf;
+  --yellow:#ffd15c; --orange:#f6a723; --yellow-l:#fff6dc;
+  --purple:#7b5cff; --purple-l:#efeaff;
+  --bg:#f1f0fb; --bg-2:#e3f8ff; --card:#ffffff; --line:#e0ddf0; --soft:#faf9fe;
+  --r-s:12px; --r:18px; --r-l:26px;
+  --sh:0 6px 18px rgba(32,0,88,.08); --sh-l:0 18px 50px rgba(32,0,88,.14);
+  --font: "Segoe UI","Noto Sans Arabic","Noto Naskh Arabic","Geeza Pro","Arial",Tahoma,system-ui,sans-serif;
+  --tap:48px;
+}
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{margin:0;min-height:100vh;font-family:var(--font);color:var(--ink);
+  background:linear-gradient(180deg,var(--bg) 0%,var(--bg-2) 100%) fixed;line-height:1.7;}
+button,input,select,textarea{font-family:inherit;color:inherit;}
+img,svg,canvas{max-width:100%;}
+:focus-visible{outline:3px solid var(--cyan);outline-offset:3px;border-radius:8px;}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+
+/* ================= SHELL ================= */
+.app{max-width:1120px;margin:0 auto;padding:14px 16px 110px;}
+.topbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--card);border:1.5px solid var(--line);
+  border-radius:var(--r);box-shadow:var(--sh);padding:10px 14px;}
+.ref{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13.5px;font-weight:700;color:var(--cyan-d);
+  background:var(--cyan-l);border:1.5px solid var(--cyan-b);border-radius:999px;padding:6px 14px;}
+.ref b{color:var(--navy);}
+.topbar h1{flex:1;min-width:200px;margin:0;font-size:clamp(19px,2.6vw,26px);font-weight:900;line-height:1.3;}
+.topbar h1 small{display:block;font-size:13px;font-weight:600;color:var(--muted);}
+.dots{display:flex;gap:6px;align-items:center;list-style:none;margin:0;padding:0;}
+.dots li{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:14px;
+  background:var(--soft);border:2px solid var(--line);color:var(--muted);transition:all .25s;}
+.dots li.on{background:var(--navy);border-color:var(--navy);color:#fff;transform:scale(1.08);}
+.dots li.done{background:var(--green);border-color:var(--green);color:#fff;}
+
+.stage{display:none;margin-top:16px;background:var(--card);border-radius:var(--r-l);box-shadow:var(--sh-l);overflow:hidden;
+  animation:rise .4s ease both;}
+.stage.on{display:block;}
+.stage-h{background:var(--navy);color:#fff;padding:14px 22px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.stage-h .kind{font-size:13px;font-weight:800;background:rgba(255,255,255,.14);border-radius:999px;padding:4px 12px;}
+.stage-h h2{margin:0;font-size:clamp(18px,2.4vw,23px);font-weight:900;}
+.stage-b{padding:20px 22px 24px;}
+.lead{font-size:17px;margin:0 0 14px;}
+.task{display:flex;gap:10px;align-items:flex-start;background:var(--yellow-l);border:1.5px solid #f3dc97;border-radius:var(--r-s);
+  padding:10px 14px;font-weight:700;margin:0 0 14px;}
+.task::before{content:"👆";font-size:20px;line-height:1.4;}
+.book{font-size:15px;background:var(--purple-l);border-inline-start:5px solid var(--purple);border-radius:var(--r-s);padding:10px 14px;margin:10px 0;}
+.book::before{content:"📘 من الكتاب: ";font-weight:800;color:var(--purple);}
+.extra{font-size:13.5px;color:var(--muted);background:var(--soft);border:1.5px dashed var(--line);border-radius:var(--r-s);padding:8px 12px;margin:10px 0;}
+.extra::before{content:"ℹ️ توضيح للنشاط وليس من الكتاب: ";font-weight:800;}
+.grid2{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:20px;align-items:start;}
+@media (max-width:820px){.grid2{grid-template-columns:minmax(0,1fr);}}
+.panel{background:var(--soft);border:1.5px solid var(--line);border-radius:var(--r);padding:14px;}
+.panel h3{margin:0 0 8px;font-size:17px;font-weight:900;}
+
+/* ================= CONTROLS ================= */
+.btn{min-height:var(--tap);min-width:var(--tap);display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:0 20px;border-radius:999px;border:2px solid transparent;font-size:16px;font-weight:800;cursor:pointer;
+  background:var(--navy);color:#fff;transition:transform .12s,background .2s,box-shadow .2s;touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;user-select:none;}
+.btn:active{transform:scale(.96);}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+.btn.cyan{background:var(--cyan);color:var(--navy);}
+.btn.green{background:var(--green);}
+.btn.red{background:var(--red);}
+.btn.ghost{background:#fff;color:var(--navy);border-color:var(--line);}
+.btn.ghost[aria-pressed="true"]{background:var(--navy);color:#fff;border-color:var(--navy);}
+.btn.sm{min-height:40px;font-size:14.5px;padding:0 14px;}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;}
+.choice{min-height:56px;text-align:start;padding:10px 14px;border-radius:var(--r-s);border:2px solid var(--line);background:#fff;
+  font-size:16px;font-weight:700;cursor:pointer;transition:all .15s;}
+.choice:hover{border-color:var(--cyan);}
+.choice[aria-pressed="true"]{border-color:var(--navy);background:var(--purple-l);}
+.choice.ok{border-color:var(--green);background:var(--green-l);}
+.choice.bad{border-color:var(--red);background:var(--red-l);}
+input[type=range]{width:100%;height:44px;accent-color:var(--cyan-d);cursor:pointer;}
+.slider-lbl{display:flex;justify-content:space-between;font-size:13.5px;font-weight:700;color:var(--muted);}
+
+/* chips + drop zones (Kit.dnd) */
+.chips{display:flex;flex-wrap:wrap;gap:8px;min-height:56px;padding:8px;border-radius:var(--r-s);background:var(--soft);
+  border:1.5px dashed var(--line);}
+.chip{min-height:46px;display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;background:#fff;
+  border:2px solid var(--cyan-b);font-weight:800;font-size:15.5px;cursor:grab;touch-action:none;user-select:none;
+  -webkit-user-select:none;box-shadow:0 2px 0 var(--cyan-b);transition:transform .12s,box-shadow .12s,border-color .2s;}
+.chip.sel{border-color:var(--navy);box-shadow:0 0 0 4px rgba(0,195,254,.35);transform:translateY(-2px);}
+.chip.dragging{opacity:.35;}
+.chip.ghost{position:fixed;z-index:999;pointer-events:none;opacity:.95;transform:rotate(-3deg) scale(1.05);box-shadow:var(--sh-l);}
+.chip.ok{border-color:var(--green);background:var(--green-l);box-shadow:0 2px 0 var(--green-b);cursor:default;}
+.chip.bad{border-color:var(--red);background:var(--red-l);animation:shake .4s;}
+.zone{min-height:64px;border:2.5px dashed var(--cyan-b);border-radius:var(--r-s);padding:8px;background:#fff;
+  transition:background .15s,border-color .15s;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;}
+.zone.hot{background:var(--cyan-l);border-color:var(--cyan);border-style:solid;}
+.zone .zt{width:100%;font-weight:900;font-size:15px;color:var(--navy);}
+
+/* feedback */
+.fb{display:none;margin-top:12px;border-radius:var(--r-s);padding:12px 14px 12px 14px;font-size:16px;font-weight:600;
+  border:2px solid;animation:rise .25s ease both;}
+.fb.show{display:flex;gap:10px;align-items:flex-start;}
+.fb .ic{font-size:22px;line-height:1.3;flex:none;}
+.fb.ok{background:var(--green-l);border-color:var(--green-b);color:#064b31;}
+.fb.bad{background:var(--red-l);border-color:var(--red-b);color:#7a1426;}
+.fb.info{background:var(--cyan-l);border-color:var(--cyan-b);color:#06456a;}
+.fb.warn{background:var(--yellow-l);border-color:#f3dc97;color:#5a4200;}
+
+/* meters & badges */
+.meter{height:16px;border-radius:999px;background:#ece9f8;overflow:hidden;}
+.meter>i{display:block;height:100%;border-radius:999px;background:var(--cyan);transition:width .4s;}
+.badge{display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:14px;border-radius:999px;padding:4px 12px;
+  background:var(--soft);border:1.5px solid var(--line);}
+.badge.ok{background:var(--green-l);border-color:var(--green-b);color:var(--green-d);}
+.badge.bad{background:var(--red-l);border-color:var(--red-b);color:var(--red-d);}
+.missions{list-style:none;margin:0;padding:0;display:grid;gap:8px;}
+.missions li{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-s);background:#fff;
+  border:2px solid var(--line);font-weight:700;}
+.missions li .st{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--soft);
+  border:2px solid var(--line);flex:none;font-size:15px;}
+.missions li.cur{border-color:var(--cyan);}
+.missions li.done{border-color:var(--green-b);background:var(--green-l);}
+.missions li.done .st{background:var(--green);border-color:var(--green);color:#fff;}
+
+/* 3D canvas wrapper (Kit.orbit) */
+.view3d{position:relative;border-radius:var(--r);background:radial-gradient(ellipse at 50% 40%,#2d1670 0%,#160038 75%);
+  overflow:hidden;touch-action:none;cursor:grab;aspect-ratio:4/3;width:100%;}
+.view3d canvas{display:block;width:100%;height:100%;}
+.view3d .hint3d{position:absolute;bottom:10px;inset-inline-start:10px;font-size:13px;font-weight:700;color:#d9d2ff;
+  background:rgba(255,255,255,.1);border-radius:999px;padding:4px 12px;pointer-events:none;}
+
+/* nav footer */
+.navbar{position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);
+  border-top:1.5px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));}
+.navbar .in{max-width:1120px;margin:0 auto;display:flex;gap:10px;align-items:center;justify-content:space-between;}
+.navbar .where{font-weight:800;color:var(--muted);font-size:14.5px;text-align:center;flex:1;}
+
+/* summary card */
+.sum{display:grid;gap:10px;}
+.sum li{background:var(--green-l);border:1.5px solid var(--green-b);border-radius:var(--r-s);padding:10px 14px;font-weight:700;list-style:none;}
+.sum{padding:0;margin:0;}
+
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:998;}
+@keyframes rise{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+@keyframes shake{0%,100%{transform:none;}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+@keyframes pop{0%{transform:scale(.6);opacity:0;}70%{transform:scale(1.08);}100%{transform:scale(1);opacity:1;}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;scroll-behavior:auto !important;}}
+@media (max-width:560px){.stage-b{padding:16px 14px 20px;}.stage-h{padding:12px 14px;}.dots li{width:28px;height:28px;font-size:12.5px;}.btn{padding:0 16px;}}
+</style>
+<style>
+/* ================= ACTIVITY-SPECIFIC CSS ================= */
+.seedbox{position:relative;background:radial-gradient(ellipse at 50% 38%,#fffdf6 0%,#f3eedf 100%);border:1.5px solid var(--line);
+  border-radius:var(--r);overflow:hidden;}
+.seedbox svg{display:block;width:100%;height:auto;user-select:none;-webkit-user-select:none;}
+.seedbox.drag svg{touch-action:none;}
+.seedbox .cap{position:absolute;top:8px;inset-inline-end:10px;font-size:13px;font-weight:800;color:var(--muted);
+  background:rgba(255,255,255,.85);border-radius:999px;padding:2px 10px;pointer-events:none;}
+svg [data-part]{cursor:pointer;}
+svg [data-part]:focus{outline:none;}
+svg [data-part]:focus-visible{outline:3px solid var(--cyan);}
+.hit{fill:transparent;pointer-events:all;}
+.tl{stroke:#200058;stroke-width:2;stroke-dasharray:4 3;}
+.td{fill:#200058;stroke:#fff;stroke-width:1.5;}
+.tr{fill:#fff;stroke:#0a8fc0;stroke-width:2;}
+.tt{font-family:var(--font);font-weight:800;font-size:16px;fill:#200058;}
+.tag{pointer-events:none;animation:pop .35s ease both;transform-box:fill-box;transform-origin:center;}
+.mk circle{fill:#200058;stroke:#fff;stroke-width:2.5;}
+.mk text{font-family:var(--font);font-weight:900;font-size:17px;fill:#fff;}
+.mk line{stroke:#200058;stroke-width:2;}
+.ctl{margin-top:12px;display:grid;gap:10px;}
+.ctl .lbl{font-weight:800;}
+.pcard{background:#fff;border:2px solid var(--cyan-b);border-radius:var(--r-s);padding:12px 14px;min-height:96px;}
+.pcard h3{margin:0 0 4px;font-size:19px;color:var(--navy);}
+.pcard p{margin:0;font-size:16px;}
+.pcard .emb-note{margin-top:8px;font-size:14.5px;color:var(--muted);border-top:1.5px dashed var(--line);padding-top:6px;}
+.pcard .ph{color:var(--muted);font-weight:700;}
+.pcard.pop{animation:pop .3s ease both;}
+.qt{font-weight:800;font-size:17px;margin:14px 0 8px;}
+.choice:disabled{cursor:default;opacity:1;}
+.choice:disabled:not(.ok){opacity:.6;}
+.cmp{width:100%;border-collapse:separate;border-spacing:0;font-size:15.5px;background:#fff;border:1.5px solid var(--line);border-radius:var(--r-s);overflow:hidden;}
+.cmp th,.cmp td{padding:8px 10px;text-align:start;border-bottom:1.5px solid var(--line);vertical-align:top;}
+.cmp tr:last-child td{border-bottom:0;}
+.cmp thead th{background:var(--navy);color:#fff;}
+.cmp tbody th{background:var(--soft);width:28%;}
+.hidden{display:none !important;}
+/* labelling labs */
+.lab{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:14px;align-items:start;}
+@media (max-width:760px){.lab{grid-template-columns:minmax(0,1fr);}}
+.slots{display:grid;gap:8px;}
+.slot{min-height:56px;flex-wrap:nowrap;align-items:center;}
+.slot .num{width:34px;height:34px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:900;flex:none;}
+.chip{white-space:normal;line-height:1.35;}
+.bins{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px;}
+.bins .zone{min-height:96px;}
+.sec{margin-top:22px;padding-top:16px;border-top:2px dashed var(--line);}
+.sec h3{margin:0 0 8px;font-size:18px;}
+/* germination chamber */
+.togs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
+.tog{min-height:92px;border-radius:14px;border:2.5px dashed var(--line);background:#fff;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:2px;font-weight:800;font-size:15px;cursor:pointer;padding:6px;text-align:center;line-height:1.3;}
+.tog .ic{font-size:26px;line-height:1.1;}
+.tog .stt{font-size:13px;font-weight:800;color:var(--red-d);}
+.tog[aria-pressed="true"]{border-style:solid;border-color:var(--green);background:var(--green-l);}
+.tog[aria-pressed="true"] .stt{color:var(--green-d);}
+.tog:disabled{opacity:.55;cursor:not-allowed;}
+.days{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.days .now{font-weight:900;font-size:18px;min-width:84px;}
+.days ol{display:flex;gap:6px;list-style:none;margin:0;padding:0;}
+.days li{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:800;background:#fff;border:2px solid var(--line);color:var(--muted);}
+.days li.on{background:var(--cyan);border-color:var(--cyan-d);color:var(--navy);}
+.days li.past{background:var(--cyan-l);border-color:var(--cyan-b);}
+.food{margin-top:10px;}
+.food .meter>i{background:linear-gradient(90deg,#f2c45c,#e89a1f);}
+.food .lbl{display:flex;justify-content:space-between;font-size:14px;font-weight:800;color:var(--muted);margin-bottom:4px;}
+.log{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:6px;}
+.log li{display:flex;gap:8px;align-items:flex-start;background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:6px 10px;font-size:15px;font-weight:600;animation:rise .3s ease both;}
+.log li b{flex:none;background:var(--navy);color:#fff;border-radius:999px;padding:0 10px;font-size:13.5px;line-height:24px;}
+.log .lh{background:var(--yellow-l);border-color:#f3dc97;font-weight:800;}
+/* order */
+.ord-zones{display:grid;gap:8px;}
+.ord{flex-wrap:nowrap;align-items:center;min-height:62px;}
+.ord .num{width:34px;height:34px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:900;flex:none;}
+.ord .arrow{color:var(--muted);font-size:13px;}
+@media (max-width:560px){.seedbox .cap{display:none;}.tog{min-height:84px;font-size:14px;}.tog .ic{font-size:22px;}.tt{font-size:17px;}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <span class="ref">📘 <b>الفصلُ ١</b> · الدرسُ ١: التكاثرُ بالبذورِ · <span>كتابُ النشاطِ ص ٥–٨</span></span>
+    <h1>داخلَ البذرةِ<small>ماذا تُخبّئُ البذرةُ؟ ومتى تنبتُ؟</small></h1>
+    <ol class="dots" id="dots" aria-label="مراحلُ النشاطِ"></ol>
+  </header>
+
+  <main id="main">
+    <!-- ============ STAGE 0: BEAN ============ -->
+    <section class="stage" data-stage="0" aria-labelledby="s0h">
+      <div class="stage-h"><span class="kind">أستكشفُ</span><h2 id="s0h">أفتحُ بذرةَ الفاصوليا</h2></div>
+      <div class="stage-b">
+        <p class="book">التكاثرُ بالبذورِ طريقةٌ طبيعيةٌ تتكاثرُ بها معظمُ النباتاتِ دونَ تدخّلِ الإنسانِ. والبذرةُ بويضةٌ مخصبةٌ تكوّنتْ في مبيضِ الزهرةِ.</p>
+        <div class="grid2">
+          <div>
+            <p class="task" id="task0">الخطوةُ ١: اسحبْ إصبعَك على البذرةِ لتنزعَ الغلافَ.</p>
+            <div class="seedbox drag" id="box0">
+              <span class="cap">بذرةُ فاصوليا (مُكبَّرةٌ)</span>
+              <svg id="sv0" viewBox="0 0 420 330" role="group" aria-label="بذرةُ فاصوليا تفاعليةٌ"></svg>
+            </div>
+            <div class="ctl">
+              <div class="row"><button class="btn cyan" id="peelBtn" type="button">✋ انزعِ الغلافَ</button></div>
+              <div>
+                <label class="lbl" for="split">الخطوةُ ٢: افصلِ الفلقتينِ ↔</label>
+                <input type="range" id="split" min="0" max="100" value="0" disabled aria-label="افصلِ الفلقتينِ">
+                <div class="slider-lbl"><span>مُغلقةٌ</span><span>مفتوحةٌ</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <h3>🔎 المهمةُ: اكتشفِ الأجزاءَ الأربعةَ</h3>
+            <ul class="missions" id="mis0"></ul>
+            <div class="pcard" id="card0" style="margin-top:12px" aria-live="polite"><p class="ph">اضغطْ على جزءٍ من البذرةِ لتعرفَ اسمَه ووظيفتَه.</p></div>
+            <div class="fb" id="fb0"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ STAGE 1: CORN ============ -->
+    <section class="stage" data-stage="1" aria-labelledby="s1h">
+      <div class="stage-h"><span class="kind">أستكشفُ</span><h2 id="s1h">بذرةُ الذرةِ</h2></div>
+      <div class="stage-b">
+        <div class="grid2">
+          <div>
+            <p class="task" id="task1">اسحبِ السكّينَ إلى الأسفلِ لتقطعَ البذرةَ طولياً.</p>
+            <div class="seedbox drag" id="box1">
+              <span class="cap">حبةُ ذرةٍ (مُكبَّرةٌ)</span>
+              <svg id="sv1" viewBox="0 0 420 330" role="group" aria-label="حبةُ ذرةٍ تفاعليةٌ"></svg>
+            </div>
+            <div class="ctl"><div class="row"><button class="btn cyan" id="cutBtn" type="button">🔪 اقطعِ البذرةَ</button></div></div>
+          </div>
+          <div class="panel">
+            <h3>🔎 المهمةُ: اكتشفِ الأجزاءَ الخمسةَ</h3>
+            <ul class="missions" id="mis1"></ul>
+            <div class="pcard" id="card1" style="margin-top:12px" aria-live="polite"><p class="ph">اقطعِ البذرةَ أولاً، ثم اضغطْ على أجزائِها.</p></div>
+            <div class="fb" id="fb1"></div>
+          </div>
+        </div>
+        <div class="sec hidden" id="cmp1">
+          <h3>⚖️ أقارنُ: الفاصوليا والذرةُ</h3>
+          <table class="cmp">
+            <thead><tr><th></th><th>الفاصوليا</th><th>الذرةُ</th></tr></thead>
+            <tbody>
+              <tr><th>عددُ الفلقِ</th><td>فلقتانِ ✌️ — <b>ذاتُ فلقتينِ</b></td><td>فلقةٌ واحدةٌ ☝️ — <b>ذاتُ فلقةٍ واحدةٍ</b></td></tr>
+              <tr><th>الأجزاءُ في الرسمِ</th><td>غلافُ البذرةِ، الفلقتانِ، الجذيرُ، الرويشةُ</td><td>غلافُ البذرةِ، الفلقةُ، السويداءُ، الجذيرُ، الرويشةُ</td></tr>
+              <tr><th>الجنينُ</th><td>جذيرٌ + رويشةٌ</td><td>جذيرٌ + رويشةٌ</td></tr>
+            </tbody>
+          </table>
+          <div id="q1a"></div>
+          <div id="q1b"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ STAGE 2: LABEL + SORT ============ -->
+    <section class="stage" data-stage="2" aria-labelledby="s2h">
+      <div class="stage-h"><span class="kind">أطبّقُ</span><h2 id="s2h">أسمّي وأصنّفُ</h2></div>
+      <div class="stage-b">
+        <p class="task">اسحبْ كلَّ اسمٍ إلى رقمِه الصحيحِ (أو اضغطِ الاسمَ ثم اضغطِ الرقمَ).</p>
+        <div class="panel">
+          <h3>① بذرةُ الفاصوليا</h3>
+          <div class="lab">
+            <div class="seedbox"><svg id="svL1" viewBox="0 0 420 300" role="img" aria-label="رسمُ بذرةِ فاصوليا مفتوحةٍ عليه أرقامٌ من ١ إلى ٤"></svg></div>
+            <div><div class="slots" id="slots1"></div><div class="chips" id="pool1" style="margin-top:10px" aria-label="الأسماءُ"></div><div class="fb" id="fbL1"></div><div class="row" id="solL1" style="margin-top:8px"></div></div>
+          </div>
+        </div>
+        <div class="panel" style="margin-top:14px">
+          <h3>② بذرةُ الذرةِ (مقطعٌ طوليٌّ)</h3>
+          <div class="lab">
+            <div class="seedbox"><svg id="svL2" viewBox="0 0 420 300" role="img" aria-label="رسمُ مقطعٍ طوليٍّ في حبةِ ذرةٍ عليه أرقامٌ من ١ إلى ٥"></svg></div>
+            <div><div class="slots" id="slots2"></div><div class="chips" id="pool2" style="margin-top:10px" aria-label="الأسماءُ"></div><div class="fb" id="fbL2"></div><div class="row" id="solL2" style="margin-top:8px"></div></div>
+          </div>
+        </div>
+        <div class="sec">
+          <h3>③ صنّفِ البذرتينِ حسبَ عددِ الفلقِ</h3>
+          <div class="chips" id="poolB"></div>
+          <div class="bins">
+            <div class="zone" data-k="1"><span class="zt">☝️ ذاتُ فلقةٍ واحدةٍ</span></div>
+            <div class="zone" data-k="2"><span class="zt">✌️ ذاتُ فلقتينِ</span></div>
+          </div>
+          <div class="fb" id="fbB"></div><div class="row" id="solB" style="margin-top:8px"></div>
+        </div>
+        <div class="sec">
+          <h3>④ من أينَ تأتي البذورُ؟ (اختياريٌّ)</h3>
+          <p class="book">الزهرةُ عضوُ التكاثرِ، وفيها أعضاءُ التذكيرِ والتأنيثِ. يحدثُ الإخصابُ فتتكوّنُ الثمارُ وفي داخلِها البذورُ.</p>
+          <p class="task">صنّفِ الثمارَ حسبَ عددِ البذورِ في داخلِها.</p>
+          <div class="chips" id="poolC"></div>
+          <div class="bins">
+            <div class="zone" data-k="1"><span class="zt">ثمارٌ ببذرةٍ واحدةٍ</span></div>
+            <div class="zone" data-k="n"><span class="zt">ثمارٌ ببذورٍ كثيرةٍ</span></div>
+          </div>
+          <div class="fb" id="fbC"></div><div class="row" id="solC" style="margin-top:8px"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ STAGE 3: GERMINATION CHAMBER ============ -->
+    <section class="stage" data-stage="3" aria-labelledby="s3h">
+      <div class="stage-h"><span class="kind">أجرّبُ</span><h2 id="s3h">غرفةُ الإنباتِ</h2></div>
+      <div class="stage-b">
+        <p class="book">تنمو البذورُ إذا توفّرتِ العواملُ الأساسيةُ للنموِّ: التربةُ الملائمةُ والماءُ الكافي والعناصرُ الغذائيةُ.</p>
+        <div class="grid2">
+          <div>
+            <div class="seedbox" id="box3">
+              <span class="cap">أصيصٌ شفافٌ (مقطعٌ)</span>
+              <svg id="sv3" viewBox="0 0 360 370" role="img" aria-label="أصيصٌ فيه بذرةُ فاصوليا" ></svg>
+            </div>
+            <div class="days"><span class="now" id="dayNow">اليومُ ٠</span><ol id="dayDots"></ol></div>
+            <div class="food"><div class="lbl"><span>🍞 مخزونُ الغذاءِ في البذرةِ</span><span>(توضيحيٌّ)</span></div>
+              <div class="meter" role="meter" aria-label="مخزونُ الغذاءِ في البذرةِ" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" id="foodM"><i style="width:100%"></i></div></div>
+            <p class="extra">الرسمُ وسرعةُ الأيامِ ومقياسُ الغذاءِ توضيحٌ مبسّطٌ لما يذكرُه الكتابُ.</p>
+          </div>
+          <div class="panel">
+            <h3>🧪 المهمةُ</h3>
+            <ul class="missions" id="mis3"></ul>
+            <p class="lead" style="margin:12px 0 6px;font-weight:800">١) اخترِ العواملَ المتوفّرةَ:</p>
+            <div class="togs">
+              <button class="tog" type="button" data-f="soil" aria-pressed="true"><span class="ic">🟫</span>تربةٌ ملائمةٌ<span class="stt"></span></button>
+              <button class="tog" type="button" data-f="water" aria-pressed="true"><span class="ic">💧</span>ماءٌ كافٍ<span class="stt"></span></button>
+              <button class="tog" type="button" data-f="nut" aria-pressed="true"><span class="ic">🧪</span>عناصرُ غذائيةٌ<span class="stt"></span></button>
+            </div>
+            <p class="lead" style="margin:12px 0 6px;font-weight:800">٢) توقّعْ: هل ستنبتُ البذرةُ؟</p>
+            <div class="choices" id="pred3">
+              <button class="choice" type="button" data-v="yes" aria-pressed="false">🌱 نعم، ستنبتُ</button>
+              <button class="choice" type="button" data-v="no" aria-pressed="false">✋ لا، لن تنبتَ</button>
+            </div>
+            <div class="row" style="margin-top:12px">
+              <button class="btn green" id="runBtn" type="button" disabled>▶ شغّلْ ٥ أيامٍ</button>
+              <button class="btn ghost sm" id="resetBtn" type="button">🔄 بذرةٌ جديدةٌ</button>
+            </div>
+            <div class="fb" id="fb3"></div>
+            <div class="row hidden" id="addWaterRow" style="margin-top:10px"><button class="btn cyan" id="addWaterBtn" type="button">💧 أضفِ الماءَ إلى البذرةِ نفسِها</button></div>
+            <ol class="log" id="log3" aria-label="سجلُّ الأيامِ"></ol>
+          </div>
+        </div>
+        <div class="sec hidden" id="dryQ">
+          <h3>🤔 سؤالُ الكتابِ</h3>
+          <div id="q3"></div>
+        </div>
+        <p class="book" style="margin-top:16px">تجربةُ الكتابِ: نضعُ بذرةَ فاصوليا في كأسٍ شفافٍ مبطّنٍ بورقٍ ملوّنٍ ومحشوٍّ بالقطنِ، ولا يغطّي الماءُ البذرةَ، ثم نراقبُها ٥ أيامٍ.</p>
+      </div>
+    </section>
+
+    <!-- ============ STAGE 4: ORDER ============ -->
+    <section class="stage" data-stage="4" aria-labelledby="s4h">
+      <div class="stage-h"><span class="kind">أتحدّى</span><h2 id="s4h">أرتّبُ مراحلَ الإنباتِ</h2></div>
+      <div class="stage-b">
+        <p class="book">الإنباتُ: المراحلُ التي تمرُّ بها البذرةُ في أثناءِ نموِّها.</p>
+        <p class="task">رتّبِ البطاقاتِ من المرحلةِ الأولى إلى الأخيرةِ.</p>
+        <div class="chips" id="poolO"></div>
+        <div class="ord-zones" id="zonesO" style="margin-top:10px"></div>
+        <div class="fb" id="fbO"></div><div class="row" id="solO" style="margin-top:8px"></div>
+        <div class="sec hidden" id="speedSec">
+          <h3>⏱️ سرعةُ النموِّ</h3>
+          <div id="q4"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ STAGE 5: SUMMARY ============ -->
+    <section class="stage" data-stage="5" aria-labelledby="s5h">
+      <div class="stage-h"><span class="kind">خلاصةٌ</span><h2 id="s5h">ماذا تعلّمتُ؟</h2></div>
+      <div class="stage-b">
+        <div class="grid2">
+          <ul class="sum">
+            <li>🌸 البذرةُ بويضةٌ مخصبةٌ تكوّنتْ في مبيضِ الزهرةِ، ومعظمُ النباتاتِ تتكاثرُ بالبذورِ.</li>
+            <li>🛡️ غلافُ البذرةِ يحيطُ بها ويحميها، والفلقُ أكبرُ أجزائِها.</li>
+            <li>🌱 الجنينُ نباتٌ صغيرٌ جداً: الجذيرُ يكوّنُ الجذرَ، والرويشةُ تكوّنُ الساقَ والأوراقَ.</li>
+            <li>🍞 السويداءُ غذاءٌ مخزونٌ داخلَ البذرةِ يتغذّى عليه الجنينُ.</li>
+            <li>✌️ الفاصوليا ذاتُ فلقتينِ، و☝️ الذرةُ ذاتُ فلقةٍ واحدةٍ.</li>
+            <li>💧 تنمو البذرةُ إذا توفّرتِ التربةُ الملائمةُ والماءُ الكافي والعناصرُ الغذائيةُ؛ والبذرةُ الجافةُ لم تنمُ حتى أضفنا الماءَ.</li>
+            <li>🔁 الإنباتُ: تنتفخُ البذرةُ ← يبدأُ الجنينُ بالنموِّ ← يكبرُ الجذيرُ والرويشةُ ← يمتدّانِ في التربةِ وفوقَها.</li>
+            <li>⏱️ الفاصوليا تنمو في وقتٍ قصيرٍ، والحنطةُ والذرةُ تحتاجانِ وقتاً طويلاً.</li>
+          </ul>
+          <div>
+            <div class="seedbox"><svg id="sv5" viewBox="0 0 360 370" role="img" aria-label="بذرةُ فاصوليا نبتتْ: جذيرٌ في التربةِ ورويشةٌ فوقَها"></svg></div>
+            <div class="row" style="margin-top:12px;justify-content:center"><button class="btn ghost" type="button" onclick="location.reload()">🔄 أعدِ النشاطَ</button></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<nav class="navbar" aria-label="التنقلُ بينَ المراحلِ">
+  <div class="in">
+    <button class="btn ghost" id="prevBtn" type="button">→ السابقُ</button>
+    <div class="where" id="where" aria-live="polite"></div>
+    <button class="btn" id="nextBtn" type="button">التالي ←</button>
+  </div>
+</nav>
+
+<script>
+/* ================= KIT (shared helpers) ================= */
+const Kit = (() => {
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const $ = (s, r=document) => r.querySelector(s);
+  const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+  const AR = '٠١٢٣٤٥٦٧٨٩';
+  const ar = n => String(n).replace(/[0-9]/g, d => AR[d]).replace('-', '−');
+  const shuffle = a => { a = a.slice(); for (let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; };
+  const el = (tag, attrs={}, html) => { const e=document.createElement(tag);
+    for (const k in attrs){ if(k==='class') e.className=attrs[k]; else if(k.startsWith('on')) e.addEventListener(k.slice(2),attrs[k]); else e.setAttribute(k,attrs[k]); }
+    if (html!=null) e.innerHTML=html; return e; };
+
+  /* ---- feedback: Kit.say(box, 'ok'|'bad'|'info'|'warn', html) ---- */
+  const ICON = {ok:'✅', bad:'🤔', info:'💡', warn:'⚠️'};
+  function say(box, type, html){
+    if (typeof box==='string') box=$(box);
+    box.className='fb show '+type; box.setAttribute('role','status'); box.setAttribute('aria-live','polite');
+    box.innerHTML='<span class="ic" aria-hidden="true">'+ICON[type]+'</span><div>'+html+'</div>';
+  }
+  function hush(box){ if (typeof box==='string') box=$(box); box.className='fb'; box.innerHTML=''; }
+
+  /* ---- stages + nav. canLeave(i) may return false or a message string to block "next". ---- */
+  let stages=[], cur=0, names=[], hooks={};
+  function setupStages(stageNames, opts={}){
+    names=stageNames; hooks=opts; stages=$$('.stage');
+    const dots=$('#dots'); dots.innerHTML='';
+    names.forEach((n,i)=>{ const li=el('li',{title:n,'aria-label':'المرحلة '+ar(i+1)+': '+n},ar(i+1)); dots.appendChild(li); });
+    $('#prevBtn').onclick=()=>go(cur-1); $('#nextBtn').onclick=()=>go(cur+1);
+    go(0, true);
+  }
+  function go(i, first){
+    if (i<0||i>=stages.length) return;
+    if (!first && i>cur && hooks.canLeave){ const r=hooks.canLeave(cur); if (r!==true && r!==undefined){ toast(r||'أكملِ المهمةَ أولاً'); return; } }
+    stages.forEach((s,k)=>s.classList.toggle('on',k===i));
+    $$('#dots li').forEach((d,k)=>{ d.classList.toggle('on',k===i); d.classList.toggle('done',k<i); });
+    cur=i; $('#where').textContent=ar(i+1)+' / '+ar(stages.length)+' · '+names[i];
+    $('#prevBtn').disabled=i===0; $('#nextBtn').style.visibility=i===stages.length-1?'hidden':'visible';
+    if(!first) window.scrollTo({top:0,behavior:reduced?'auto':'smooth'});
+    hooks.onEnter && hooks.onEnter(i);
+  }
+  let toastT;
+  function toast(msg){
+    let t=$('#kitToast'); if(!t){ t=el('div',{id:'kitToast',role:'alert'}); Object.assign(t.style,{position:'fixed',bottom:'86px',left:'50%',
+      transform:'translateX(-50%)',background:'#200058',color:'#fff',padding:'12px 20px',borderRadius:'999px',fontWeight:'800',
+      zIndex:1000,boxShadow:'0 10px 30px rgba(0,0,0,.25)',maxWidth:'90vw',textAlign:'center'}); document.body.appendChild(t); }
+    t.textContent=msg; t.style.display='block'; clearTimeout(toastT); toastT=setTimeout(()=>t.style.display='none',2600);
+  }
+
+  /* ---- drag & drop with tap-to-place + keyboard.
+     Kit.dnd({ chips:[chipEls], zones:[zoneEls], accept:(chip,zone)=>bool|string, onDrop:(chip,zone,ok)=>{} , lockCorrect:true })
+     chips need data-id. zone gets the chip appended when accepted (or always, if place:'always'). ---- */
+  function dnd(cfg){
+    let sel=null;
+    const zones=cfg.zones;
+    const clear=()=>{ if(sel){sel.classList.remove('sel'); sel.setAttribute('aria-pressed','false');} sel=null; };
+    function drop(chip, zone){
+      const ok = cfg.accept ? cfg.accept(chip, zone) : true;
+      if (ok===true || cfg.place==='always'){ zone.appendChild(chip); }
+      if (ok===true){ chip.classList.remove('bad'); if(cfg.lockCorrect!==false){ chip.classList.add('ok'); chip.dataset.locked='1'; chip.setAttribute('tabindex','-1'); chip.setAttribute('aria-disabled','true'); } }
+      else { chip.classList.remove('bad'); void chip.offsetWidth; chip.classList.add('bad'); }
+      cfg.onDrop && cfg.onDrop(chip, zone, ok===true, ok);
+    }
+    zones.forEach(z=>{
+      z.setAttribute('tabindex', z.getAttribute('tabindex')||'0'); z.setAttribute('role','button');
+      const act=()=>{ if(sel){ const c=sel; clear(); drop(c,z);} };
+      z.addEventListener('click', e=>{ if(e.target.closest('.chip') && !sel) return; act(); });
+      z.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); act(); } });
+    });
+    cfg.chips.forEach(chip=>{
+      chip.setAttribute('tabindex','0'); chip.setAttribute('role','button'); chip.setAttribute('aria-pressed','false');
+      chip.addEventListener('keydown', e=>{ if(chip.dataset.locked) return; if(e.key==='Enter'||e.key===' '){ e.preventDefault(); const was=sel===chip; clear(); if(!was){sel=chip;chip.classList.add('sel');chip.setAttribute('aria-pressed','true');} } });
+      let start=null, ghost=null, moved=false, overZ=null;
+      chip.addEventListener('pointerdown', e=>{
+        if (chip.dataset.locked || e.button>0) return;
+        start={x:e.clientX,y:e.clientY}; moved=false; chip.setPointerCapture(e.pointerId);
+      });
+      chip.addEventListener('pointermove', e=>{
+        if(!start) return;
+        if(!moved && Math.hypot(e.clientX-start.x,e.clientY-start.y)>7){
+          moved=true; clear(); ghost=chip.cloneNode(true); ghost.classList.add('ghost'); ghost.classList.remove('sel','bad');
+          document.body.appendChild(ghost); chip.classList.add('dragging');
+        }
+        if(moved){
+          ghost.style.left=(e.clientX-ghost.offsetWidth/2)+'px'; ghost.style.top=(e.clientY-ghost.offsetHeight/2)+'px';
+          const under=document.elementFromPoint(e.clientX,e.clientY); const z=under&&under.closest('.zone');
+          const zz = z && zones.includes(z) ? z : null;
+          if(zz!==overZ){ overZ&&overZ.classList.remove('hot'); overZ=zz; overZ&&overZ.classList.add('hot'); }
+        }
+      });
+      const end=e=>{
+        if(!start) return; start=null;
+        if(moved){ ghost.remove(); ghost=null; chip.classList.remove('dragging'); if(overZ){ overZ.classList.remove('hot'); drop(chip,overZ); overZ=null; } }
+        else if(e.type==='pointerup'){ const was=sel===chip; clear(); if(!was){ sel=chip; chip.classList.add('sel'); chip.setAttribute('aria-pressed','true'); } }
+      };
+      chip.addEventListener('pointerup', end); chip.addEventListener('pointercancel', end);
+    });
+    return { clear, reset(home){ cfg.chips.forEach(c=>{ c.classList.remove('ok','bad','sel'); delete c.dataset.locked; c.setAttribute('tabindex','0'); c.removeAttribute('aria-disabled'); home.appendChild(c); }); } };
+  }
+
+  /* ---- 3D orbit view: Kit.orbit(container, draw(ctx, cam, w, h, t), {yaw,pitch,zoom,auto}) ----
+     cam.project(x,y,z) -> {x,y,s,z}  (s = perspective scale, z = depth: larger = closer to viewer) */
+  function orbit(box, draw, o={}){
+    const cv=document.createElement('canvas'); box.prepend(cv);
+    const ctx=cv.getContext('2d');
+    const cam={yaw:o.yaw??0.6, pitch:o.pitch??0.35, zoom:o.zoom??1, dist:o.dist??900, auto:o.auto??true, vy:0, vp:0};
+    let W=0,H=0,dpr=1, drag=null, last=performance.now(), userTouched=false;
+    function size(){ const r=box.getBoundingClientRect(); dpr=Math.min(2,devicePixelRatio||1); W=r.width; H=r.height; cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
+    new ResizeObserver(size).observe(box); size();
+    cam.project=(x,y,z)=>{
+      const cy=Math.cos(cam.yaw), sy=Math.sin(cam.yaw), cp=Math.cos(cam.pitch), sp=Math.sin(cam.pitch);
+      let X=x*cy - z*sy, Z=x*sy + z*cy;           // yaw around Y
+      let Y=y*cp - Z*sp; Z=y*sp + Z*cp;            // pitch around X
+      const unit=Math.min(W,H)/520*cam.zoom;
+      const s=cam.dist/(cam.dist - Z);
+      return {x:W/2 + X*s*unit, y:H/2 - Y*s*unit, s:s*unit, z:Z};
+    };
+    box.addEventListener('pointerdown',e=>{ drag={x:e.clientX,y:e.clientY}; userTouched=true; box.setPointerCapture(e.pointerId); box.style.cursor='grabbing'; });
+    box.addEventListener('pointermove',e=>{ if(!drag) return; const dx=e.clientX-drag.x, dy=e.clientY-drag.y; drag={x:e.clientX,y:e.clientY};
+      cam.vy=-dx*0.008; cam.vp=dy*0.006; cam.yaw+=cam.vy; cam.pitch=Math.max(-1.3,Math.min(1.3,cam.pitch+cam.vp)); });
+    const up=()=>{ drag=null; box.style.cursor='grab'; };
+    box.addEventListener('pointerup',up); box.addEventListener('pointercancel',up);
+    box.addEventListener('wheel',e=>{ e.preventDefault(); cam.zoom=Math.max(.6,Math.min(2.2,cam.zoom*(e.deltaY<0?1.08:.92))); },{passive:false});
+    box.tabIndex=0; box.setAttribute('role','img');
+    box.addEventListener('keydown',e=>{ const k=e.key; if(k==='ArrowLeft'){cam.yaw+=.15;} else if(k==='ArrowRight'){cam.yaw-=.15;}
+      else if(k==='ArrowUp'){cam.pitch=Math.max(-1.3,cam.pitch-.12);} else if(k==='ArrowDown'){cam.pitch=Math.min(1.3,cam.pitch+.12);}
+      else if(k==='+'||k==='='){cam.zoom=Math.min(2.2,cam.zoom*1.1);} else if(k==='-'){cam.zoom=Math.max(.6,cam.zoom*.9);} else return; e.preventDefault(); userTouched=true; });
+    function frame(now){
+      const dt=Math.min(50,now-last); last=now;
+      if(!drag){ cam.vy*=0.93; cam.vp*=0.9; cam.yaw+=cam.vy; cam.pitch=Math.max(-1.3,Math.min(1.3,cam.pitch+cam.vp));
+        if(cam.auto && !reduced && Math.abs(cam.vy)<0.002) cam.yaw+=dt*0.00018*(userTouched?0.4:1); }
+      ctx.clearRect(0,0,W,H); draw(ctx,cam,W,H,reduced?0:now,dt);
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+    return cam;
+  }
+  /* shaded sphere */
+  function ball(ctx,x,y,r,color,label,labelColor){
+    if(r<=0.5) return;
+    const g=ctx.createRadialGradient(x-r*.35,y-r*.4,r*.15,x,y,r);
+    g.addColorStop(0,'#ffffff'); g.addColorStop(.25,color); g.addColorStop(1,shade(color,-0.45));
+    ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+    if(label && r>8){ ctx.fillStyle=labelColor||'#fff'; ctx.font='900 '+Math.round(r*1.05)+'px '+getComputedStyle(document.body).fontFamily;
+      ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(label,x,y+r*.05); }
+  }
+  function shade(hex,p){ const n=parseInt(hex.slice(1),16); let r=n>>16,g=n>>8&255,b=n&255;
+    const f=v=>Math.max(0,Math.min(255,Math.round(p<0?v*(1+p):v+(255-v)*p))); return 'rgb('+f(r)+','+f(g)+','+f(b)+')'; }
+
+  /* small celebration */
+  function celebrate(){
+    if(reduced) return;
+    const c=document.createElement('canvas'); c.className='confetti'; document.body.appendChild(c);
+    const x=c.getContext('2d'); c.width=innerWidth; c.height=innerHeight;
+    const cols=['#00c3fe','#12a06a','#ffd15c','#7b5cff','#e8425a'];
+    const P=Array.from({length:90},()=>({x:innerWidth/2+(Math.random()-.5)*200,y:innerHeight*.35,vx:(Math.random()-.5)*9,vy:-Math.random()*9-3,
+      s:5+Math.random()*6,c:cols[Math.random()*5|0],r:Math.random()*6}));
+    let t=0; (function f(){ t++; x.clearRect(0,0,c.width,c.height);
+      P.forEach(p=>{ p.vy+=.28; p.x+=p.vx; p.y+=p.vy; p.r+=.15; x.save(); x.translate(p.x,p.y); x.rotate(p.r); x.fillStyle=p.c; x.fillRect(-p.s/2,-p.s/4,p.s,p.s/2); x.restore(); });
+      if(t<110) requestAnimationFrame(f); else c.remove(); })();
+  }
+
+  return {$, $$, ar, el, shuffle, say, hush, setupStages, go, toast, dnd, orbit, ball, shade, celebrate, reduced, get cur(){return cur;}};
+})();
+</script>
+<script>
+/* ================= ACTIVITY JS ================= */
+const {$, $$, ar, el, say, hush} = Kit;
+
+/* ---------- shapes (local coordinates) ---------- */
+const KID='M 10,-110 C 70,-125 150,-95 150,0 C 150,95 70,125 10,110 C -8,105 -6,80 8,55 C 22,30 22,-30 8,-55 C -6,-80 -8,-105 10,-110 Z';
+const RIM='M 10,-110 C 70,-125 150,-95 150,0 C 150,95 70,125 10,110';
+const CORN='M -88,-95 C -95,-125 -40,-130 0,-128 C 40,-130 95,-125 88,-95 C 82,-30 50,70 14,118 C 6,128 -6,128 -14,118 C -50,70 -82,-30 -88,-95 Z';
+const SCUT='M -46,2 C -26,-14 12,-6 20,24 C 26,54 16,88 -4,112 C -22,102 -40,78 -48,46 C -52,26 -54,10 -46,2 Z';
+const RADB='M 22,8 C 18,20 14,34 13,46 C 20,38 30,28 36,20 Z';
+const LEAF1='M 30,12 C 36,-6 50,-22 64,-26 C 60,-10 48,4 30,12 Z';
+const LEAF2='M 30,12 C 44,-2 60,-6 72,-4 C 62,6 48,12 30,12 Z';
+
+const stp=s=>s.map(([o,c])=>`<stop offset="${o}" stop-color="${c}"/>`).join('');
+const rg=(id,s,cx,cy,r)=>`<radialGradient id="${id}" cx="${cx}" cy="${cy}" r="${r}">${stp(s)}</radialGradient>`;
+const lg=(id,s,x2=0,y2=1)=>`<linearGradient id="${id}" x1="0" y1="0" x2="${x2}" y2="${y2}">${stp(s)}</linearGradient>`;
+function defs(p){ return `<defs>
+ ${rg(p+'cot',[[0,'#fffaf0'],[.55,'#f5e5c0'],[1,'#d6b77c']],'62%','42%','72%')}
+ ${rg(p+'cotO',[[0,'#fdf6de'],[.5,'#ebd59f'],[1,'#c19c58']],'66%','34%','74%')}
+ ${rg(p+'coat',[[0,'#d27a5c'],[.5,'#9c3e2b'],[1,'#5a1d13']],'66%','32%','78%')}
+ ${rg(p+'gold',[[0,'#fff0b8'],[.45,'#ffc94f'],[1,'#d9800f']],'40%','30%','82%')}
+ ${rg(p+'endo',[[0,'#fffcef'],[.6,'#fde8a8'],[1,'#f0c25a']],'45%','35%','78%')}
+ ${rg(p+'scut',[[0,'#fffef6'],[1,'#e9dca0']],'40%','45%','72%')}
+ ${lg(p+'plum',[[0,'#c5e695'],[1,'#64993f']])}
+ ${lg(p+'rad',[[0,'#fbf1d8'],[1,'#d8ba80']])}
+ ${lg(p+'wet',[[0,'#6e4c31'],[1,'#3d281a']])}
+ ${lg(p+'dry',[[0,'#dcbf93'],[1,'#b8936a']])}
+ ${lg(p+'steel',[[0,'#ffffff'],[.5,'#c3ccd4'],[1,'#7f8b96']],0,1)}
+ <clipPath id="${p}clT"><path d="M -60,-170 H 220 V 6 L 170,-6 L 130,8 L 90,-5 L 50,7 L 10,-4 L -60,5 Z"/></clipPath>
+ <clipPath id="${p}clB"><path d="M -60,170 H 220 V 6 L 170,-6 L 130,8 L 90,-5 L 50,7 L 10,-4 L -60,5 Z"/></clipPath>
+</defs>`; }
+
+function coatArt(p){ return `<path d="${KID}" transform="translate(75,0) scale(1.07) translate(-75,0)" fill="url(#${p}coat)" stroke="#4a160e" stroke-width="1.5"/>
+<g fill="#3d0f08" opacity=".28"><ellipse cx="70" cy="-70" rx="10" ry="4" transform="rotate(-25 70 -70)"/><ellipse cx="112" cy="-20" rx="7" ry="3" transform="rotate(60 112 -20)"/><ellipse cx="95" cy="55" rx="12" ry="4" transform="rotate(30 95 55)"/><ellipse cx="50" cy="88" rx="8" ry="3"/><ellipse cx="48" cy="-22" rx="6" ry="3" transform="rotate(80 48 -22)"/><ellipse cx="128" cy="40" rx="5" ry="2.5"/><ellipse cx="80" cy="10" rx="4" ry="2"/></g>
+<ellipse cx="17" cy="0" rx="6" ry="20" fill="#efe3c8" stroke="#7a4a30" stroke-width="1.2"/>
+<ellipse cx="100" cy="-55" rx="20" ry="42" fill="#fff" opacity=".2" transform="rotate(-18 100 -55)"/>`; }
+function cotyOuter(p){ return `<path d="${KID}" fill="url(#${p}cotO)" stroke="#a9874c" stroke-width="2"/>
+<ellipse cx="98" cy="-48" rx="18" ry="38" fill="#fff" opacity=".3" transform="rotate(-18 98 -48)"/>`; }
+const veins=()=>`<g fill="none" stroke="#a8814a" stroke-opacity=".22" stroke-width="2" stroke-linecap="round"><path d="M 44,-20 C 70,-52 100,-72 122,-74"/><path d="M 48,-4 C 82,-10 112,-6 138,4"/><path d="M 44,26 C 72,50 96,70 116,80"/></g>`;
+function embryo(p){ return `<path d="${RADB}" fill="url(#${p}rad)" stroke="#a8864a" stroke-width="1.5"/>
+<path d="${LEAF1}" fill="url(#${p}plum)" stroke="#4d7a2f" stroke-width="1.3"/>
+<path d="${LEAF2}" fill="url(#${p}plum)" stroke="#4d7a2f" stroke-width="1.3"/>
+<path d="M 32,11 L 58,-20 M 32,11 L 66,-4" stroke="#4d7a2f" stroke-width=".8" opacity=".6"/>
+<ellipse cx="28" cy="14" rx="8" ry="7" fill="url(#${p}rad)" stroke="#a8864a" stroke-width="1.3"/>`; }
+const imprint=()=>`<g fill="#a07a3e" opacity=".2"><path d="${RADB}"/><path d="${LEAF1}"/><path d="${LEAF2}"/><ellipse cx="28" cy="14" rx="8" ry="7"/></g>`;
+function cotyInner(p,emb){ return `<path d="${KID}" fill="url(#${p}cot)" stroke="#bf9c60" stroke-width="2"/>${veins()}${emb?embryo(p):imprint()}`; }
+
+const DOTS=[[-40,-100],[-10,-108],[25,-104],[55,-95],[-60,-80],[-28,-82],[8,-86],[40,-78],[70,-72],[-70,-55],[-45,-58],[-15,-62],[20,-60],[52,-52],[-55,-30],[-20,-38],[12,-36],[45,-30],[34,-8],[60,-12],[40,15],[46,40]];
+function cornSection(p){ return `<g data-part="coat"><path d="${CORN}" fill="#c8751d" stroke="#7a4210" stroke-width="2"/></g>
+<g data-part="endo"><path d="${CORN}" transform="scale(.94)" fill="url(#${p}endo)"/>
+<g fill="#e3b24e" opacity=".45">${DOTS.map(([x,y],i)=>`<circle cx="${x}" cy="${y}" r="${2+i%3}"/>`).join('')}</g></g>
+<g data-part="coty1" transform="translate(4,0)"><path d="${SCUT}" fill="url(#${p}scut)" stroke="#c7ac5c" stroke-width="1.6"/></g>
+<g transform="translate(4,0)" pointer-events="none">
+<path d="M -30,44 C -36,28 -34,10 -26,-2 C -18,10 -18,28 -22,44 Z" fill="url(#${p}plum)" stroke="#4d7a2f" stroke-width="1.3"/>
+<path d="M -30,58 C -32,72 -24,88 -14,102 C -12,88 -14,72 -18,58 Z" fill="url(#${p}rad)" stroke="#a8864a" stroke-width="1.3"/>
+<ellipse cx="-25" cy="51" rx="7" ry="9" fill="url(#${p}rad)" stroke="#a8864a" stroke-width="1.2"/></g>`; }
+function cornFront(p){ return `<path d="${CORN}" fill="url(#${p}gold)" stroke="#a65f0c" stroke-width="2"/>
+<path d="M -26,4 C -8,-12 18,-8 26,12 C 30,44 18,82 0,108 C -18,82 -30,44 -26,4 Z" fill="#fff3c4" opacity=".7" stroke="#e6b45a" stroke-width="1.2"/>
+<path d="M -40,-116 C -14,-104 14,-104 40,-116" fill="none" stroke="#9a5a0a" stroke-opacity=".35" stroke-width="3" stroke-linecap="round"/>
+<ellipse cx="-45" cy="-60" rx="16" ry="34" fill="#fff" opacity=".25" transform="rotate(12 -45 -60)"/>`; }
+
+const plain=t=>t.replace(/[ً-ْ]/g,'');
+function tag(text,tx,ty,pts){ const w=plain(text).length*8.6+24;
+  return `<g class="tag">${pts.map(([x,y])=>`<line x1="${tx}" y1="${ty}" x2="${x}" y2="${y}" class="tl"/><circle cx="${x}" cy="${y}" r="4.5" class="td"/>`).join('')}<rect x="${tx-w/2}" y="${ty-16}" width="${w}" height="32" rx="16" class="tr"/><text x="${tx}" y="${ty+6}" text-anchor="middle" class="tt">${text}</text></g>`; }
+function marker(n,mx,my,px,py){ return `<g class="mk"><line x1="${mx}" y1="${my}" x2="${px}" y2="${py}"/><circle cx="${px}" cy="${py}" r="4" /><circle cx="${mx}" cy="${my}" r="16"/><text x="${mx}" y="${my+6}" text-anchor="middle">${ar(n)}</text></g>`; }
+
+/* ---------- parts text (from the book) ---------- */
+const PARTS={
+  coat:{n:'غلافُ البذرةِ',d:'الجزءُ الخارجيُّ المحيطُ بالبذرةِ، ويحميها.'},
+  coty2:{n:'الفلقتانِ',d:'الفلقُ أكبرُ أجزاءِ البذرةِ. بذرةُ الفاصوليا ذاتُ فلقتينِ.'},
+  coty1:{n:'الفلقةُ',d:'الفلقُ من أجزاءِ البذرةِ. بذرةُ الذرةِ ذاتُ فلقةٍ واحدةٍ.'},
+  rad:{n:'الجذيرُ',d:'جزءٌ من الجنينِ، يكوّنُ الجذرَ لاحقاً.'},
+  plum:{n:'الرويشةُ',d:'جزءٌ من الجنينِ، تكوّنُ الساقَ والأوراقَ لاحقاً.'},
+  endo:{n:'السويداءُ',d:'الغذاءُ المخزونُ داخلَ البذرةِ، الذي يتغذّى عليه الجنينُ.'}
+};
+const EMB='🌱 الجنينُ فيه الأعضاءُ الأساسيةُ نفسُها للنباتِ البالغِ بحجمٍ صغيرٍ جداً، ويتكوّنُ من الجذيرِ والرويشةِ.';
+function showCard(box,k){ const P=PARTS[k];
+  box.innerHTML=`<h3>${P.n}</h3><p>${P.d}</p>${(k==='rad'||k==='plum')?`<p class="emb-note">${EMB}</p>`:''}`;
+  box.classList.remove('pop'); void box.offsetWidth; box.classList.add('pop'); }
+function mkMissions(ul,items){ ul.innerHTML=items.map((it,i)=>`<li data-k="${it.k}"><span class="st">${ar(i+1)}</span><span>${it.t}</span></li>`).join(''); }
+function tick(ul,k){ const li=ul.querySelector(`[data-k="${k}"]`); if(li&&!li.classList.contains('done')){ li.classList.add('done'); li.querySelector('.st').textContent='✓'; } }
+function onAct(node,fn){ node.addEventListener('click',fn); node.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); fn(e); } }); }
+function svgPt(svg,e){ const pt=svg.createSVGPoint(); pt.x=e.clientX; pt.y=e.clientY; return pt.matrixTransform(svg.getScreenCTM().inverse()); }
+const ease=k=>k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;
+function tween(ms,fn){ return new Promise(res=>{ if(Kit.reduced||ms<=1){ fn(1); res(); return; }
+  const t0=performance.now(); const f=now=>{ const k=Math.min(1,(now-t0)/ms); fn(ease(k)); if(k<1) requestAnimationFrame(f); else res(); }; requestAnimationFrame(f); }); }
+const wait=ms=>new Promise(r=>setTimeout(r,Kit.reduced?0:ms));
+const mix=(a,b,e)=>{ const o={}; for(const k in b) o[k]=a[k]+(b[k]-a[k])*e; return o; };
+
+/* ---------- generic question with "show me" after 2 wrong ---------- */
+function makeQ(host,{q,opts,onDone}){
+  host.innerHTML=`<p class="qt">${q}</p><div class="choices"></div><div class="fb"></div><div class="row" style="margin-top:8px"></div>`;
+  const box=host.querySelector('.choices'), fb=host.querySelector('.fb'), solRow=host.querySelector('.row'); let wrong=0, done=false;
+  const finish=(b,o,shown)=>{ done=true; b.classList.add('ok'); $$('button',box).forEach(x=>x.disabled=true); solRow.innerHTML='';
+    say(fb,'ok',(shown?'<b>الإجابةُ:</b> ':'<b>أحسنتَ!</b> ')+o.why); onDone&&onDone(); };
+  opts.forEach(o=>{ const b=el('button',{class:'choice',type:'button'},o.t); box.appendChild(b);
+    b.addEventListener('click',()=>{ if(done) return;
+      if(o.ok) return finish(b,o,false);
+      wrong++; b.classList.add('bad'); say(fb,'bad','حاولْ مرةً أخرى — '+o.why);
+      if(wrong>=2&&!solRow.children.length){ const s=el('button',{class:'btn ghost sm',type:'button'},'💡 أرني الحلَّ'); solRow.appendChild(s);
+        s.onclick=()=>{ const i=opts.findIndex(x=>x.ok); finish(box.children[i],opts[i],true); }; } }); });
+}
+/* ---------- generic sort with "show me" ---------- */
+function makeSort({chips,zones,fb,solRow,correct,why,okMsg,onAll}){
+  let wrong=0, finished=false;
+  const lock=c=>{ c.classList.remove('bad','sel'); c.classList.add('ok'); c.dataset.locked='1'; c.setAttribute('tabindex','-1'); c.setAttribute('aria-disabled','true'); };
+  const check=()=>{ if(!finished && chips.every(c=>c.dataset.locked)){ finished=true; solRow.innerHTML=''; onAll&&onAll(); } };
+  Kit.dnd({chips,zones,accept:(c,z)=>correct(c,z)?true:why(c,z),
+    onDrop:(c,z,ok,r)=>{ if(ok){ say(fb,'ok',okMsg(c,z)); check(); }
+      else { wrong++; say(fb,'bad','حاولْ مرةً أخرى — '+r);
+        if(wrong>=2&&!solRow.children.length){ const s=el('button',{class:'btn ghost sm',type:'button'},'💡 أرني الحلَّ'); solRow.appendChild(s);
+          s.onclick=()=>{ chips.forEach(c=>{ if(c.dataset.locked) return; const z=zones.find(z=>correct(c,z)); if(z){ z.appendChild(c); lock(c);} });
+            say(fb,'info','هذا هو الحلُّ الصحيحُ. اقرأْه جيداً: كلُّ اسمٍ في مكانِه الآنَ.'); check(); }; } } }});
+}
+
+/* ================= STAGE 0: BEAN ================= */
+const s0={peeled:false,t:0,opened:false,found:new Set(),tops:{x:0,y:0,r:0,s:1},bots:{x:0,y:0,r:0,s:1}};
+const sv0=$('#sv0'), fb0=$('#fb0'), card0=$('#card0'), mis0=$('#mis0');
+mkMissions(mis0,[{k:'coat',t:'غلافُ البذرةِ'},{k:'coty2',t:'الفلقتانِ'},{k:'rad',t:'الجذيرُ'},{k:'plum',t:'الرويشةُ'}]);
+sv0.innerHTML=defs('a')+`
+<g id="tray0" opacity="0"><rect x="10" y="262" width="104" height="62" rx="14" fill="#fff" fill-opacity=".7" stroke="#c9b38a" stroke-width="2" stroke-dasharray="5 4"/></g>
+<g id="bean0" transform="translate(143,165) scale(.9)">
+  <g id="A0" data-part="coty2">${cotyInner('a',true)}<path id="Ash" d="${KID}" fill="#2a1a05" opacity=".35" pointer-events="none"/></g>
+  <g id="B0" data-part="coty2" tabindex="0" role="button" aria-label="الفلقةُ"><g id="Bout">${cotyOuter('a')}</g><g id="Bin" style="display:none">${cotyInner('a',false)}</g></g>
+  <circle id="hRad" data-part="rad" cx="20" cy="30" r="19" class="hit" tabindex="0" role="button" aria-label="الجذيرُ" style="display:none"/>
+  <circle id="hPlum" data-part="plum" cx="52" cy="-10" r="23" class="hit" tabindex="0" role="button" aria-label="الرويشةُ" style="display:none"/>
+</g>
+<g id="coat0" transform="translate(143,165) scale(.9)" data-part="coat" tabindex="0" role="button" aria-label="غلافُ البذرةِ: اسحبْ لنزعِه أو اضغطْ Enter">
+  <g id="cT" clip-path="url(#aclT)">${coatArt('a')}</g><g id="cB" clip-path="url(#aclB)">${coatArt('a')}</g>
+</g>
+<g id="tags0"></g>`;
+const bean0=$('#bean0'), B0=$('#B0'), A0=$('#A0'), coat0=$('#coat0');
+const pieceTf=o=>`translate(${o.x},${o.y}) rotate(${o.r},75,0) translate(75,0) scale(${o.s}) translate(-75,0)`;
+function setPieces(){ $('#cT').setAttribute('transform',pieceTf(s0.tops)); $('#cB').setAttribute('transform',pieceTf(s0.bots)); }
+function peelP(p){ s0.tops={x:-40*p,y:-55*p,r:-18*p,s:1}; s0.bots={x:40*p,y:55*p,r:16*p,s:1}; setPieces(); }
+const TRAY_T={x:-191.7,y:142,r:-8,s:.3}, TRAY_B={x:-138.3,y:142,r:8,s:.3};
+function renderTags0(){
+  let h=''; const f=s0.found, open=s0.t>.95;
+  if(f.has('coat')&&s0.peeled) h+=tag('غلافُ البذرةِ',62,236,[[62,262]]);
+  if(open&&f.has('coty2')) h+=tag('الفلقتانِ',210,24,[[148,84],[272,84]]);
+  if(open&&f.has('plum')) h+=tag('الرويشةُ',368,58,[[257,156]]);
+  if(open&&f.has('rad')) h+=tag('الجذيرُ',330,304,[[228,192]]);
+  $('#tags0').innerHTML=h;
+}
+function found0(k){
+  const isNew=!s0.found.has(k); s0.found.add(k); showCard(card0,k); tick(mis0,k); renderTags0();
+  if(isNew&&s0.found.size===4){ say(fb0,'ok','<b>رائعٌ!</b> اكتشفتَ الأجزاءَ الأربعةَ: الغلافَ والفلقتينِ والجنينَ (الجذيرَ والرويشةَ). انتقلْ إلى بذرةِ الذرةِ.'); Kit.toast('🎉 أحسنتَ!'); }
+}
+let pd=null;
+coat0.addEventListener('pointerdown',e=>{ if(e.button>0) return; if(s0.peeled){ found0('coat'); return; }
+  pd={p0:svgPt(sv0,e),moved:false,p:0}; try{coat0.setPointerCapture(e.pointerId);}catch(_){} e.preventDefault(); });
+coat0.addEventListener('pointermove',e=>{ if(!pd) return; const q=svgPt(sv0,e); const d=Math.hypot(q.x-pd.p0.x,q.y-pd.p0.y);
+  if(d>6) pd.moved=true; if(!pd.moved) return; pd.p=Math.min(1,d/130); peelP(pd.p); if(pd.p>=1){ pd=null; completePeel(); } });
+const pend=()=>{ if(!pd) return; const p=pd; pd=null;
+  if(!p.moved){ found0('coat'); say(fb0,'info','هذا <b>غلافُ البذرةِ</b>. الآنَ اسحبْ إصبعَك عليه لتنزعَه.'); return; }
+  if(p.p>.45) completePeel(); else tween(250,e=>peelP(p.p*(1-e))); };
+coat0.addEventListener('pointerup',pend); coat0.addEventListener('pointercancel',pend);
+coat0.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); if(!s0.peeled){ found0('coat'); completePeel(); } else found0('coat'); } });
+$('#peelBtn').onclick=()=>{ if(!s0.peeled){ completePeel(); } };
+function completePeel(){
+  if(s0.peeled) return; s0.peeled=true; $('#peelBtn').disabled=true;
+  const a={...s0.tops}, b={...s0.bots};
+  tween(650,e=>{ s0.tops=mix(a,TRAY_T,e); s0.bots=mix(b,TRAY_B,e); setPieces(); $('#tray0').setAttribute('opacity',e); }).then(()=>{
+    $('#box0').classList.remove('drag');
+    coat0.setAttribute('aria-label','غلافُ البذرةِ (منزوعٌ)');
+    $('#split').disabled=false;
+    $('#task0').textContent='الخطوةُ ٢: حرّكِ المنزلقَ لتفصلَ الفلقتينِ، ثم اضغطْ على كلِّ جزءٍ.';
+    say(fb0,'info','نزعتَ <b>الغلافَ</b>، فظهرتِ البذرةُ من الداخلِ. الغلافُ يحيطُ بالبذرةِ ويحميها. حرّكِ المنزلقَ لتفصلَ الفلقتينِ.');
+    if(s0.found.has('coat')) renderTags0();
+  });
+}
+function updBean(){
+  const t=s0.t, X=143+67*t;
+  bean0.setAttribute('transform',`translate(${X},165) scale(.9)`);
+  const s=Math.cos(Math.PI*t), k=.16*Math.sin(Math.PI*t);
+  B0.setAttribute('transform',`matrix(${s.toFixed(4)},${(-k).toFixed(4)},0,1,0,0)`);
+  $('#Bout').style.display=s>=0?'':'none'; $('#Bin').style.display=s>=0?'none':'';
+  $('#Ash').setAttribute('opacity',(.35*(1-t)).toFixed(3));
+  const open=t>.8; $('#hRad').style.display=$('#hPlum').style.display=open?'':'none';
+  if(t>.97&&!s0.opened){ s0.opened=true; say(fb0,'info','انظرْ: عندَ حافةِ الفلقةِ <b>جنينٌ صغيرٌ جداً</b>. اضغطْ على الفلقتينِ وعلى أجزاءِ الجنينِ.'); }
+  renderTags0();
+}
+$('#split').addEventListener('input',e=>{ s0.t=e.target.value/100; updBean(); });
+[A0,B0].forEach(g=>onAct(g,()=>{ if(!s0.peeled){ say(fb0,'warn','انزعِ الغلافَ أولاً.'); return; } found0('coty2');
+  if(s0.t<.5&&!s0.opened) say(fb0,'info','هذه <b>فلقةٌ</b>. حرّكِ المنزلقَ لتفصلَ الفلقتينِ وترى ما بينَهما.'); }));
+onAct($('#hRad'),e=>{ e.stopPropagation(); found0('rad'); });
+onAct($('#hPlum'),e=>{ e.stopPropagation(); found0('plum'); });
+
+/* ================= STAGE 1: CORN ================= */
+const s1={cut:false,tip:30,maxTip:30,found:new Set(),q1:false,q2:false};
+const sv1=$('#sv1'), fb1=$('#fb1'), card1=$('#card1'), mis1=$('#mis1');
+mkMissions(mis1,[{k:'coat',t:'غلافُ البذرةِ'},{k:'endo',t:'السويداءُ'},{k:'coty1',t:'الفلقةُ'},{k:'plum',t:'الرويشةُ'},{k:'rad',t:'الجذيرُ'}]);
+sv1.innerHTML=defs('c')+`
+<g id="sec1" transform="translate(210,165)" style="pointer-events:none">${cornSection('c')}
+  <path d="${CORN}" fill="none" stroke="transparent" stroke-width="20" pointer-events="stroke" data-part="coat" tabindex="0" role="button" aria-label="غلافُ البذرةِ"/>
+  <circle data-part="plum" cx="-20" cy="20" r="16" class="hit" tabindex="0" role="button" aria-label="الرويشةُ"/>
+  <circle data-part="rad" cx="-16" cy="82" r="16" class="hit" tabindex="0" role="button" aria-label="الجذيرُ"/>
+</g>
+<g id="front1" transform="translate(210,165)">${cornFront('c')}</g>
+<line id="guide1" x1="210" y1="40" x2="210" y2="290" stroke="#200058" stroke-opacity=".35" stroke-width="2" stroke-dasharray="3 6"/>
+<line id="cutGlow" x1="210" y1="37" x2="210" y2="37" stroke="#fff" stroke-width="7" stroke-linecap="round"/>
+<line id="cut1" x1="210" y1="37" x2="210" y2="37" stroke="#e8425a" stroke-width="3" stroke-linecap="round"/>
+<g id="knife" transform="translate(210,30)" style="cursor:grab">
+  <rect x="-70" y="-46" width="200" height="66" fill="transparent"/>
+  <path d="M -58,0 C -50,-10 -40,-16 -28,-16 L 30,-16 L 30,0 Z" fill="url(#csteel)" stroke="#5d6770" stroke-width="1.5"/>
+  <rect x="30" y="-19" width="8" height="22" rx="2" fill="#6b7580"/>
+  <rect x="38" y="-17" width="58" height="18" rx="8" fill="#3a2a5c"/>
+  <circle cx="54" cy="-8" r="2.4" fill="#cfd6dd"/><circle cx="78" cy="-8" r="2.4" fill="#cfd6dd"/>
+  <text x="-82" y="2" text-anchor="middle" font-size="22" fill="#200058" opacity=".75">⬇</text>
+</g>
+<g id="tags1"></g>`;
+function renderTags1(){
+  const f=s1.found; let h='';
+  if(f.has('endo')) h+=tag('السويداءُ',360,40,[[232,92]]);
+  if(f.has('coat')) h+=tag('غلافُ البذرةِ',356,116,[[290,112]]);
+  if(f.has('coty1')) h+=tag('الفلقةُ',362,215,[[232,205]]);
+  if(f.has('plum')) h+=tag('الرويشةُ',58,130,[[190,185]]);
+  if(f.has('rad')) h+=tag('الجذيرُ',58,268,[[194,247]]);
+  $('#tags1').innerHTML=h;
+}
+function setKnife(tip){ s1.tip=tip; s1.maxTip=Math.max(s1.maxTip,tip);
+  $('#knife').setAttribute('transform',`translate(210,${tip})`);
+  ['#cut1','#cutGlow'].forEach(s=>$(s).setAttribute('y2',Math.max(37,s1.maxTip)));
+  if(s1.maxTip>=288) completeCut(); }
+let kd=null;
+sv1.addEventListener('pointerdown',e=>{ if(s1.cut||e.button>0) return; kd={off:svgPt(sv1,e).y-s1.tip}; if(Math.abs(kd.off)>70) kd.off=0;
+  try{sv1.setPointerCapture(e.pointerId);}catch(_){} e.preventDefault(); });
+sv1.addEventListener('pointermove',e=>{ if(!kd||s1.cut) return; const y=svgPt(sv1,e).y-kd.off; setKnife(Math.max(30,Math.min(300,y))); });
+const kend=()=>{ if(!kd) return; kd=null; if(!s1.cut&&s1.maxTip>40) say(fb1,'info','استمرَّ في السحبِ حتى أسفلِ البذرةِ.'); };
+sv1.addEventListener('pointerup',kend); sv1.addEventListener('pointercancel',kend);
+$('#cutBtn').onclick=()=>{ if(s1.cut) return; tween(700,e=>{ if(!s1.cut) setKnife(30+(292-30)*e); }); };
+function completeCut(){
+  if(s1.cut) return; s1.cut=true; kd=null; $('#cutBtn').disabled=true;
+  const fr=$('#front1'), kn=$('#knife');
+  tween(750,e=>{ fr.setAttribute('transform',`translate(${210+150*e},165)`); fr.setAttribute('opacity',1-e); kn.setAttribute('opacity',1-e);
+    ['#cut1','#cutGlow','#guide1'].forEach(s=>$(s).setAttribute('opacity',1-e)); }).then(()=>{
+    fr.style.display='none'; kn.style.display='none'; $('#sec1').style.pointerEvents=''; $('#box1').classList.remove('drag');
+    $('#task1').textContent='اضغطْ على كلِّ جزءٍ في المقطعِ لتعرفَ اسمَه.';
+    card1.innerHTML='<p class="ph">اضغطْ على جزءٍ من المقطعِ.</p>';
+    say(fb1,'info','قطعتَ البذرةَ <b>طولياً</b>. انظرْ: الجزءُ الكبيرُ الفاتحُ يملأُ معظمَ البذرةِ. اكتشفْ الأجزاءَ الخمسةَ.');
+  });
+}
+$$('[data-part]',$('#sec1')).forEach(g=>onAct(g,e=>{ if(!s1.cut) return; e.stopPropagation(); found1(g.dataset.part); }));
+function found1(k){
+  const isNew=!s1.found.has(k); s1.found.add(k); showCard(card1,k); tick(mis1,k); renderTags1();
+  if(isNew&&k==='endo') say(fb1,'info','<b>السويداءُ</b> هي الغذاءُ المخزونُ. لاحظْ أنها تملأُ جزءاً كبيراً من بذرةِ الذرةِ.');
+  if(isNew&&s1.found.size===5){ say(fb1,'ok','<b>أحسنتَ!</b> اكتشفتَ الأجزاءَ الخمسةَ. قارنِ الآنَ بينَ البذرتينِ في الأسفلِ.');
+    $('#cmp1').classList.remove('hidden'); }
+}
+makeQ($('#q1a'),{q:'أيُّ البذرتينِ ذاتُ فلقةٍ واحدةٍ؟',opts:[
+  {t:'🌽 الذرةُ',ok:true,why:'بذرةُ الذرةِ فيها <b>فلقةٌ واحدةٌ</b>، أما الفاصوليا ففيها فلقتانِ.'},
+  {t:'🫘 الفاصوليا',ok:false,why:'تذكّرْ: فصلتَ بذرةَ الفاصوليا إلى <b>فلقتينِ</b>، فهي ذاتُ فلقتينِ.'}],onDone:()=>s1.q1=true});
+makeQ($('#q1b'),{q:'على أيِّ جزءٍ يتغذّى جنينُ بذرةِ الذرةِ؟',opts:[
+  {t:'غلافُ البذرةِ',ok:false,why:'الغلافُ هو الجزءُ الخارجيُّ الذي يحيطُ بالبذرةِ <b>ويحميها</b>.'},
+  {t:'السويداءُ',ok:true,why:'السويداءُ هي <b>الغذاءُ المخزونُ</b> داخلَ البذرةِ الذي يتغذّى عليه الجنينُ.'},
+  {t:'الجذيرُ',ok:false,why:'الجذيرُ جزءٌ من الجنينِ نفسِه، وهو يكوّنُ <b>الجذرَ</b> لاحقاً.'}],onDone:()=>s1.q2=true});
+
+/* ================= STAGE 2: LABEL + SORT ================= */
+const s2={l1:false,l2:false,b:false};
+$('#svL1').innerHTML=defs('d')+`<g transform="translate(210,150) scale(.85)">
+  <g transform="scale(-1,1)">${cotyInner('d',false)}<path d="${RIM}" fill="none" stroke="#8a3524" stroke-width="7" stroke-linecap="round"/></g>
+  ${cotyInner('d',true)}<path d="${RIM}" fill="none" stroke="#8a3524" stroke-width="7" stroke-linecap="round"/></g>
+  ${marker(1,300,34,254,141)}${marker(2,40,206,140,176)}${marker(3,394,150,340,150)}${marker(4,262,280,228,180)}`;
+$('#svL2').innerHTML=defs('e')+`<g transform="translate(210,150) scale(.9)" pointer-events="none">${cornSection('e')}</g>
+  ${marker(1,330,32,228,96)}${marker(2,392,112,283,104)}${marker(3,376,214,228,186)}${marker(4,50,258,196,224)}${marker(5,50,118,192,168)}`;
+function buildLab(slotsId,poolId,map,fbId,solId,flag,doneMsg){
+  const slots=$('#'+slotsId), pool=$('#'+poolId);
+  slots.innerHTML=map.map((k,i)=>`<div class="zone slot" data-part="${k}" aria-label="الرقمُ ${ar(i+1)}"><span class="num">${ar(i+1)}</span></div>`).join('');
+  Kit.shuffle(map).forEach(k=>pool.appendChild(el('span',{class:'chip','data-id':k,'data-part':k},PARTS[k].n)));
+  makeSort({chips:$$('.chip',pool),zones:$$('.slot',slots),fb:$('#'+fbId),solRow:$('#'+solId),
+    correct:(c,z)=>c.dataset.part===z.dataset.part,
+    why:(c)=>`هذا الرقمُ يشيرُ إلى جزءٍ آخرَ. تذكّرْ أنَّ <b>${PARTS[c.dataset.part].n}</b>: ${PARTS[c.dataset.part].d}`,
+    okMsg:(c)=>`✔ <b>${PARTS[c.dataset.part].n}</b>: ${PARTS[c.dataset.part].d}`,
+    onAll:()=>{ s2[flag]=true; say($('#'+fbId),'ok',doneMsg); }});
+}
+buildLab('slots1','pool1',['plum','coty2','coat','rad'],'fbL1','solL1','l1','<b>ممتازٌ!</b> سمّيتَ أجزاءَ بذرةِ الفاصوليا: الرويشةَ والفلقتينِ والغلافَ والجذيرَ.');
+buildLab('slots2','pool2',['endo','coat','coty1','rad','plum'],'fbL2','solL2','l2','<b>ممتازٌ!</b> سمّيتَ أجزاءَ بذرةِ الذرةِ. لاحظِ <b>السويداءَ</b>: الغذاءَ المخزونَ.');
+(function(){
+  const pool=$('#poolB'); [['2','🫘 الفاصوليا'],['1','🌽 الذرةُ']].forEach(([k,t])=>pool.appendChild(el('span',{class:'chip','data-id':k,'data-k':k},t)));
+  const zones=$$('.zone',pool.parentElement);
+  makeSort({chips:$$('.chip',pool),zones,fb:$('#fbB'),solRow:$('#solB'),correct:(c,z)=>c.dataset.k===z.dataset.k,
+    why:c=>c.dataset.k==='2'?'الفاصوليا ذاتُ <b>فلقتينِ</b>: تذكّرِ الفلقتينِ اللتينِ فصلتَهما كصفحتَي كتابٍ.':'الذرةُ ذاتُ <b>فلقةٍ واحدةٍ</b>: رأيتَها في المقطعِ الطوليِّ.',
+    okMsg:c=>c.dataset.k==='2'?'صحيحٌ: الفاصوليا ذاتُ فلقتينِ.':'صحيحٌ: الذرةُ ذاتُ فلقةٍ واحدةٍ.',
+    onAll:()=>{ s2.b=true; say($('#fbB'),'ok','<b>أحسنتَ!</b> الفاصوليا ذاتُ فلقتينِ، والذرةُ ذاتُ فلقةٍ واحدةٍ.'); }});
+})();
+(function(){
+  const pool=$('#poolC'); Kit.shuffle([['1','التمرُ'],['1','الخوخُ'],['1','المشمشُ'],['n','البطيخُ'],['n','الطماطمُ']]).forEach(([k,t],i)=>pool.appendChild(el('span',{class:'chip','data-id':'f'+i,'data-k':k},t)));
+  const zones=$$('.zone',pool.parentElement);
+  makeSort({chips:$$('.chip',pool),zones,fb:$('#fbC'),solRow:$('#solC'),correct:(c,z)=>c.dataset.k===z.dataset.k,
+    why:c=>`يذكرُ الكتابُ أنَّ التمرَ والخوخَ والمشمشَ ثمارٌ <b>ببذرةٍ واحدةٍ</b>، وأنَّ البطيخَ والطماطمَ ثمارٌ <b>ببذورٍ كثيرةٍ</b>.`,
+    okMsg:c=>`صحيحٌ: ${c.textContent} ${c.dataset.k==='1'?'ثمرةٌ ببذرةٍ واحدةٍ':'ثمرةٌ ببذورٍ كثيرةٍ'}.`,
+    onAll:()=>say($('#fbC'),'ok','<b>رائعٌ!</b> البذورُ تتكوّنُ داخلَ الثمارِ بعدَ الإخصابِ.')});
+})();
+
+/* ================= STAGE 3: GERMINATION CHAMBER ================= */
+const env={soil:true,water:true,nut:true}; let pred=null, running=false;
+const done3={full:false,dry:false,added:false}; let lastScen=null;
+const pot={sw:0,Lr:0,Lp:0,leaf:0,food:100};
+const SC={
+  full:{sw:[0,0,1,1,1,1],Lr:[0,0,0,26,62,112],Lp:[0,0,0,16,48,108],leaf:[0,0,0,0,0,1],food:[100,100,92,72,48,28]},
+  dry:{sw:[0,0,0,0,0,0],Lr:[0,0,0,0,0,0],Lp:[0,0,0,0,0,0],leaf:[0,0,0,0,0,0],food:[100,100,100,100,100,100]},
+  part:{sw:[0,0,1,1,1,1],Lr:[0,0,0,22,40,40],Lp:[0,0,0,14,30,30],leaf:[0,0,0,0,0,0],food:[100,100,85,50,12,0]}
+};
+const LOG={
+  full:['البذرةُ في مكانِها، والتربةُ رطبةٌ.','انتفختِ البذرةُ بعدَ حصولِها على الماءِ.','بدأَ الجنينُ بالنموِّ: يكبرُ الجذيرُ والرويشةُ.','يستمرُّ الجذيرُ والرويشةُ في الكِبَرِ شيئاً فشيئاً.','امتدَّ الجذيرُ في التربةِ، والرويشةُ فوقَها.'],
+  dry:['البذرةُ في مكانِها، ولا يوجدُ ماءٌ.','البذرةُ جافةٌ ولم تتغيّرْ.','البذرةُ جافةٌ ولم تتغيّرْ.','البذرةُ جافةٌ ولم تتغيّرْ.','البذرةُ ما زالتْ جافةً ولم تتغيّرْ.'],
+  part:['البذرةُ في مكانِها، ويوجدُ ماءٌ.','انتفختِ البذرةُ بعدَ حصولِها على الماءِ.','بدأَ الجنينُ بالنموِّ معتمداً على غذائِه المخزونِ.','يكبرُ الجذيرُ والرويشةُ قليلاً، والغذاءُ المخزونُ يقلُّ.','توقّفَ النموُّ ولم يكتملْ: ينقصُ عاملٌ أساسيٌّ. (توضيحٌ)']
+};
+const mis3=$('#mis3'), fb3=$('#fb3'), log3=$('#log3');
+mkMissions(mis3,[{k:'full',t:'شغّلِ التجربةَ والعواملُ الثلاثةُ متوفّرةٌ'},{k:'dry',t:'جرّبْ بذرةً من دونِ ماءٍ'},{k:'added',t:'أضفِ الماءَ إلى البذرةِ الجافةِ'}]);
+$('#dayDots').innerHTML=[1,2,3,4,5].map(d=>`<li aria-label="اليوم ${ar(d)}">${ar(d)}</li>`).join('');
+const POT_BG=`<rect x="70" y="58" width="220" height="292" rx="20" fill="#eef8ff" fill-opacity=".75" stroke="#8fbfd6" stroke-width="3"/>`;
+const POT_FG=`<rect x="82" y="72" width="9" height="258" rx="4.5" fill="#fff" opacity=".55"/><path d="M 70,70 Q 70,58 82,58 H 278 Q 290,58 290,70" fill="none" stroke="#6aa9c6" stroke-width="4"/>`;
+function potArt(st,e,p){
+  const soil=e.soil, water=e.water, nut=e.nut; let h='';
+  if(soil){ h+=`<path d="M 73,150 C 120,142 160,156 200,148 C 240,142 268,154 287,150 L 287,334 Q 287,347 274,347 L 86,347 Q 73,347 73,334 Z" fill="url(#${p}${water?'wet':'dry'})"/>`;
+    h+=`<g fill="${water?'#2c1c11':'#a07c55'}" opacity=".5"><ellipse cx="96" cy="180" rx="6" ry="4"/><ellipse cx="262" cy="214" rx="7" ry="4"/><ellipse cx="120" cy="300" rx="8" ry="5"/><ellipse cx="236" cy="326" rx="6" ry="4"/><ellipse cx="150" cy="240" rx="4" ry="3"/><ellipse cx="270" cy="270" rx="5" ry="3"/></g>`;
+    if(!water) h+=`<g stroke="#8d6a45" stroke-width="2" fill="none" opacity=".75" stroke-linecap="round"><path d="M 100,168 l 14,10 l -4,14 l 12,8"/><path d="M 244,176 l -10,12 l 8,10"/><path d="M 136,290 l 16,6 l 4,14"/><path d="M 252,282 l -12,8 l 4,12"/></g>`;
+    else h+=`<g fill="#7fd3ff" opacity=".22"><ellipse cx="120" cy="252" rx="30" ry="8"/><ellipse cx="240" cy="304" rx="26" ry="7"/><ellipse cx="238" cy="190" rx="20" ry="6"/></g>`;
+  } else if(water){ h+=`<path d="M 73,326 H 287 V 334 Q 287,347 274,347 H 86 Q 73,347 73,334 Z" fill="#5cc8f5" opacity=".45"/>`; }
+  if(water){ h+=[[118,96],[246,88],[226,124]].map(([x,y])=>`<path d="M ${x},${y-10} C ${x+6},${y-2} ${x+7},${y+6} ${x},${y+7} C ${x-7},${y+6} ${x-6},${y-2} ${x},${y-10} Z" fill="#3cb8f0" stroke="#0a8fc0" stroke-width="1"/>`).join(''); }
+  if(nut){ const pts=soil?[[100,196],[132,262],[158,322],[232,244],[262,300],[108,322],[254,182],[204,292]]:[[100,336],[140,338],[222,336],[262,338]];
+    h+=pts.map(([x,y],i)=>`<circle cx="${x}" cy="${y}" r="5" fill="${['#00c3fe','#ffd15c','#7b5cff'][i%3]}" stroke="#fff" stroke-width="1.5"/>`).join(''); }
+  const sx=180, sy=soil?215:306, k=soil?1:.55;
+  if(st.Lr>.5){ const L=st.Lr*k, x0=sx-9, y0=sy+8; const d=`M ${x0},${y0} C ${x0-10},${y0+L*.35} ${x0+12},${y0+L*.7} ${x0+3},${y0+L}`;
+    h+=`<path d="${d}" stroke="#a8864a" stroke-width="${(6+st.Lr/40).toFixed(1)}" fill="none" stroke-linecap="round"/><path d="${d}" stroke="#f6e9c8" stroke-width="${(3.5+st.Lr/40).toFixed(1)}" fill="none" stroke-linecap="round"/>`;
+    if(st.Lr>18) h+=tag('الجذيرُ',x0+70,y0+L*.75,[[x0+6,y0+L*.75]]); }
+  if(st.Lp>.5){ const L=st.Lp*k, x0=sx+6, y0=sy-8, hook=1-st.leaf, ex=x0+4, ey=y0-L;
+    const d=`M ${x0},${y0} C ${x0-8},${y0-L*.45} ${x0+10},${y0-L*.8} ${ex},${ey}`+(hook>.05?` q ${(9*hook).toFixed(1)},${(-5*hook).toFixed(1)} ${(12*hook).toFixed(1)},${(9*hook).toFixed(1)}`:'');
+    h+=`<path d="${d}" stroke="#4d7a2f" stroke-width="7" fill="none" stroke-linecap="round"/><path d="${d}" stroke="#93c95f" stroke-width="4" fill="none" stroke-linecap="round"/>`;
+    if(st.leaf>.02){ const s=st.leaf; h+=`<g transform="translate(${ex},${ey})"><ellipse cx="-13" cy="-5" rx="${14*s}" ry="${6.5*s}" transform="rotate(25)" fill="url(#${p}plum)" stroke="#4d7a2f"/><ellipse cx="13" cy="-5" rx="${14*s}" ry="${6.5*s}" transform="rotate(-25)" fill="url(#${p}plum)" stroke="#4d7a2f"/></g>`; }
+    if(st.Lp>18) h+=tag('الرويشةُ',ex-70,ey+12,[[ex-4,ey+8]]); }
+  const sc=.17*(1+.2*st.sw);
+  h+=`<g transform="translate(${sx},${sy}) rotate(-62) scale(${sc.toFixed(4)}) translate(-75,0)"><path d="${KID}" fill="url(#${p}coat)" stroke="#4a160e" stroke-width="6"/>
+    <path d="${KID}" fill="#fff" opacity="${(.12*st.sw).toFixed(3)}"/>
+    ${st.sw<.5?`<path d="M 40,-62 C 62,-40 62,-10 50,12 M 92,-34 C 104,-2 100,30 86,60 M 60,40 C 80,52 100,52 118,40" stroke="#2a0a05" stroke-width="7" fill="none" opacity="${(.4*(1-st.sw*2)).toFixed(2)}"/>`:''}
+    <ellipse cx="100" cy="-55" rx="20" ry="42" fill="#fff" opacity=".2" transform="rotate(-18 100 -55)"/></g>`;
+  return h;
+}
+const sv3=$('#sv3');
+sv3.innerHTML=defs('g')+POT_BG+'<g id="dyn3"></g>'+POT_FG;
+function drawPot(){ $('#dyn3').innerHTML=potArt(pot,env,'g'); const m=$('#foodM'); m.firstElementChild.style.width=pot.food+'%'; m.setAttribute('aria-valuenow',Math.round(pot.food)); }
+function setDay(d){ $('#dayNow').textContent='اليومُ '+ar(d); $$('#dayDots li').forEach((li,i)=>{ li.classList.toggle('on',i+1===d); li.classList.toggle('past',i+1<d); }); }
+function scen(){ return !env.water?'dry':(env.soil&&env.nut?'full':'part'); }
+function updToggles(){ $$('.tog').forEach(b=>{ const on=env[b.dataset.f]; b.setAttribute('aria-pressed',on); b.querySelector('.stt').textContent=on?'✔ متوفّرٌ':'✖ غيرُ متوفّرٍ'; }); }
+function resetSeed(keepFb){ Object.assign(pot,{sw:0,Lr:0,Lp:0,leaf:0,food:100}); setDay(0); drawPot(); log3.innerHTML='';
+  pred=null; $$('#pred3 .choice').forEach(b=>{ b.setAttribute('aria-pressed','false'); b.classList.remove('ok','bad'); }); $('#runBtn').disabled=true;
+  $('#addWaterRow').classList.add('hidden'); if(!keepFb) hush(fb3); }
+function setLock(on){ running=on; $$('.tog, #pred3 .choice, #resetBtn, #addWaterBtn').forEach(b=>b.disabled=on); $('#runBtn').disabled=on||!pred; }
+$$('.tog').forEach(b=>b.addEventListener('click',()=>{ if(running) return; env[b.dataset.f]=!env[b.dataset.f]; updToggles(); resetSeed();
+  say(fb3,'info','غيّرتَ العواملَ. توقّعْ من جديدٍ، ثم شغّلِ التجربةَ.'); }));
+$$('#pred3 .choice').forEach(b=>b.addEventListener('click',()=>{ if(running) return; pred=b.dataset.v;
+  $$('#pred3 .choice').forEach(x=>x.setAttribute('aria-pressed',x===b)); $('#runBtn').disabled=false; }));
+$('#resetBtn').onclick=()=>{ if(!running){ resetSeed(); } };
+$('#runBtn').onclick=()=>{ if(!running&&pred) run(false); };
+$('#addWaterBtn').onclick=()=>{ if(running) return; env.water=true; updToggles(); $('#addWaterRow').classList.add('hidden'); run(true); };
+async function run(afterWater){
+  if(innerWidth<820){ try{ $('#box3').scrollIntoView({behavior:Kit.reduced?'auto':'smooth',block:'start'}); }catch(_){} }
+  const sc=scen(); lastScen=sc; setLock(true); hush(fb3); $('#addWaterRow').classList.add('hidden');
+  Object.assign(pot,{sw:0,Lr:0,Lp:0,leaf:0,food:100}); drawPot(); log3.innerHTML='';
+  if(afterWater) log3.appendChild(el('li',{class:'lh'},'💧 أضفنا الماءَ إلى البذرةِ الجافةِ نفسِها:'));
+  const S=SC[sc];
+  for(let d=1; d<=5; d++){
+    setDay(d); const from={...pot}, to={sw:S.sw[d],Lr:S.Lr[d],Lp:S.Lp[d],leaf:S.leaf[d],food:S.food[d]};
+    await tween(900,e=>{ Object.assign(pot,mix(from,to,e)); drawPot(); });
+    log3.appendChild(el('li',{},`<b>اليومُ ${ar(d)}</b><span>${LOG[sc][d-1]}</span>`));
+    await wait(380);
+  }
+  setLock(false);
+  const pTxt=afterWater?'':(sc==='full'?(pred==='yes'?'توقّعُك صحيحٌ. ':'توقّعتَ ألّا تنبتَ، لكنّها نبتتْ. '):sc==='dry'?(pred==='no'?'توقّعُك صحيحٌ. ':'توقّعتَ أن تنبتَ، لكنّها لم تتغيّرْ. '):'');
+  if(sc==='full'){
+    done3.full=true; tick(mis3,'full');
+    if(afterWater){ done3.added=true; tick(mis3,'added');
+      say(fb3,'ok','<b>البذرةُ الجافةُ نفسُها</b> انتفختْ بعدَ حصولِها على الماءِ، ثم بدأَ الجنينُ ينمو: الجذيرُ في التربةِ والرويشةُ فوقَها.');
+      $('#dryQ').classList.remove('hidden'); }
+    else say(fb3,'ok','<b>نبتتِ البذرةُ!</b> '+pTxt+'انتفختْ، ثم كبرَ الجذيرُ في التربةِ والرويشةُ فوقَها، لأنَّ العواملَ الثلاثةَ متوفّرةٌ. لاحظْ أنَّ <b>مخزونَ الغذاءِ</b> يقلُّ لأنَّ الجنينَ يتغذّى عليه.');
+  } else if(sc==='dry'){
+    done3.dry=true; tick(mis3,'dry');
+    say(fb3,'info',pTxt+'البذرةُ الجافةُ <b>لم تتغيّرْ</b> طوالَ ٥ أيامٍ، لأنَّ <b>الماءَ</b> — أحدَ عواملِ النموِّ — غيرُ متوفّرٍ. أضفِ الماءَ إلى البذرةِ نفسِها وراقبْ ماذا يحدثُ.');
+    $('#addWaterRow').classList.remove('hidden');
+  } else {
+    if(afterWater){ done3.added=true; tick(mis3,'added'); $('#dryQ').classList.remove('hidden'); }
+    const miss=[!env.soil&&'التربةُ الملائمةُ',!env.nut&&'العناصرُ الغذائيةُ'].filter(Boolean).join(' و');
+    say(fb3,'warn',(afterWater?'بعدَ إضافةِ الماءِ <b>انتفختِ البذرةُ</b> وبدأَ الجنينُ ينمو، ':'انتفختِ البذرةُ وبدأَ الجنينُ ينمو معتمداً على غذائِه المخزونِ، ')+'لكنَّ النموَّ <b>لا يكتملُ</b>: ينقصُ <b>'+miss+'</b>. الكتابُ يذكرُ أنَّ البذورَ تنمو إذا توفّرتِ العواملُ الثلاثةُ: التربةُ الملائمةُ والماءُ الكافي والعناصرُ الغذائيةُ. <br><small>(توقّفُ النموِّ في الرسمِ توضيحٌ للنشاطِ.)</small>');
+  }
+  if(done3.full&&done3.dry&&done3.added) Kit.toast('🎉 أكملتَ التجاربَ!');
+}
+makeQ($('#q3'),{q:'هل البذورُ الجافةُ ميتةٌ ولا تنمو؟ لماذا؟',opts:[
+  {t:'نعم، البذرةُ الجافةُ ميتةٌ ولن تنموَ أبداً.',ok:false,why:'راجعْ تجربتَك: البذرةُ الجافةُ انتظرتْ دونَ تغيّرٍ، و<b>عندما أضفنا الماءَ انتفختْ وبدأَ الجنينُ ينمو</b>.'},
+  {t:'البذرةُ الجافةُ لم تنمُ لأنَّ الماءَ — أحدَ عواملِ النموِّ — غيرُ متوفّرٍ؛ وعندما أضفنا الماءَ انتفختْ وبدأَ الجنينُ ينمو.',ok:true,why:'البذرةُ الجافةُ لم تنمُ لأنَّ <b>الماءَ</b> — أحدَ عواملِ النموِّ — غيرُ متوفّرٍ؛ وعندما أضفنا الماءَ انتفختْ وبدأَ الجنينُ ينمو.'},
+  {t:'البذرةُ الجافةُ لا تحتاجُ إلى الماءِ لتنموَ.',ok:false,why:'في تجربتِك لم تتغيّرِ البذرةُ دونَ ماءٍ؛ فالماءُ من <b>العواملِ الأساسيةِ للنموِّ</b>.'}]});
+updToggles(); resetSeed(true);
+
+/* ================= STAGE 4: ORDER ================= */
+const STEPS=['تنتفخُ البذرةُ','يبدأُ الجنينُ بالنموِّ','يكبرُ الجذيرُ والرويشةُ','يمتدّانِ في التربةِ وفوقَها'];
+const HINT=['الانتفاخُ يحدثُ أولاً عندما تحصلُ البذرةُ على الماءِ.','بعدَ الانتفاخِ يبدأُ الجنينُ بالنموِّ.','بعدَ أن يبدأَ الجنينُ بالنموِّ يكبرُ الجذيرُ والرويشةُ شيئاً فشيئاً.','الامتدادُ في التربةِ وفوقَها هو آخرُ المراحلِ.'];
+let orderDone=false, speedDone=false;
+(function(){
+  const zones=$('#zonesO'), pool=$('#poolO');
+  zones.innerHTML=STEPS.map((_,i)=>`<div class="zone ord" data-i="${i}" aria-label="المرحلةُ ${ar(i+1)}"><span class="num">${ar(i+1)}</span></div>`).join('');
+  let order=[0,1,2,3]; while(order.join()==='0,1,2,3') order=Kit.shuffle(order);
+  order.forEach(i=>pool.appendChild(el('span',{class:'chip','data-id':'o'+i,'data-i':i},STEPS[i])));
+  makeSort({chips:$$('.chip',pool),zones:$$('.zone',zones),fb:$('#fbO'),solRow:$('#solO'),
+    correct:(c,z)=>c.dataset.i===z.dataset.i&&!z.querySelector('.chip'),
+    why:(c,z)=>(+c.dataset.i<+z.dataset.i?'هذه المرحلةُ تأتي <b>قبلَ</b> ذلك. ':'هذه المرحلةُ تأتي <b>بعدَ</b> ذلك. ')+HINT[c.dataset.i],
+    okMsg:c=>'✔ '+HINT[c.dataset.i],
+    onAll:()=>{ orderDone=true; say($('#fbO'),'ok','<b>ممتازٌ!</b> تنتفخُ البذرةُ ← يبدأُ الجنينُ بالنموِّ ← يكبرُ الجذيرُ والرويشةُ ← يمتدّانِ في التربةِ وفوقَها.');
+      $('#speedSec').classList.remove('hidden'); }});
+})();
+makeQ($('#q4'),{q:'أيُّهما ينمو في وقتٍ أقصرَ؟',opts:[
+  {t:'🫘 الفاصوليا',ok:true,why:'الفاصوليا تنمو في <b>وقتٍ قصيرٍ</b>، أما الحنطةُ والذرةُ فتحتاجانِ وقتاً طويلاً قد يمتدُّ أشهراً.'},
+  {t:'🌾 الحنطةُ والذرةُ',ok:false,why:'يذكرُ الكتابُ أنَّ الحنطةَ والذرةَ تحتاجانِ <b>وقتاً طويلاً</b> قد يمتدُّ أشهراً.'}],onDone:()=>{ speedDone=true; Kit.celebrate(); }});
+
+/* ================= STAGE 5: SUMMARY ART ================= */
+$('#sv5').innerHTML=defs('h')+POT_BG+potArt({sw:1,Lr:112,Lp:108,leaf:1},{soil:true,water:true,nut:true},'h')+POT_FG;
+
+/* ================= NAV ================= */
+Kit.setupStages(['أفتحُ البذرةَ','بذرةُ الذرةِ','أسمّي وأصنّفُ','غرفةُ الإنباتِ','أرتّبُ المراحلَ','خلاصةٌ'],{
+  canLeave(i){
+    if(i===0&&s0.found.size<4) return 'اكتشفِ الأجزاءَ الأربعةَ أولاً 🔎';
+    if(i===1&&s1.found.size<5) return 'اقطعِ البذرةَ واكتشفْ أجزاءَها الخمسةَ أولاً 🔎';
+    if(i===2&&!(s2.l1&&s2.l2&&s2.b)) return 'أكملْ تسميةَ الرسمينِ وتصنيفَ البذرتينِ';
+    if(i===3&&!(done3.full&&done3.dry&&done3.added)) return 'أكملِ التجاربَ الثلاثَ في قائمةِ المهمةِ 🧪';
+    if(i===4&&!orderDone) return 'رتّبِ المراحلَ أولاً';
+    return true;
+  },
+  onEnter(i){ if(i===5) Kit.celebrate(); }
+});
+</script>
+</body>
+</html>
