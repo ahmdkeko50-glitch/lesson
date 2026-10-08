@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>عنوان النشاط</title>
+<!--
+  BASE TEMPLATE — copy this whole file, then:
+  1. change <title>, the header (.ref chip, h1), and the STAGES list
+  2. write each stage inside <main> as <section class="stage" data-stage="i">
+  3. put activity CSS in the second <style> block and activity JS in the last <script>
+  Everything (CSS + JS) stays inline. No external files, fonts or CDNs.
+-->
+<style>
+/* ================= DESIGN TOKENS (from the book's brand) ================= */
+:root{
+  --navy:#200058; --navy-2:#3a1f7a; --ink:#200058; --muted:#5f5a85;
+  --cyan:#00c3fe; --cyan-d:#0a8fc0; --cyan-l:#e3f8ff; --cyan-b:#b8ebff;
+  --green:#12a06a; --green-d:#0b7a50; --green-l:#e4f6ee; --green-b:#9cd9bd;
+  --red:#e8425a; --red-d:#c22b43; --red-l:#fde8ec; --red-b:#f5b3bf;
+  --yellow:#ffd15c; --orange:#f6a723; --yellow-l:#fff6dc;
+  --purple:#7b5cff; --purple-l:#efeaff;
+  --bg:#f1f0fb; --bg-2:#e3f8ff; --card:#ffffff; --line:#e0ddf0; --soft:#faf9fe;
+  --r-s:12px; --r:18px; --r-l:26px;
+  --sh:0 6px 18px rgba(32,0,88,.08); --sh-l:0 18px 50px rgba(32,0,88,.14);
+  --font: "Segoe UI","Noto Sans Arabic","Noto Naskh Arabic","Geeza Pro","Arial",Tahoma,system-ui,sans-serif;
+  --tap:48px;
+}
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{margin:0;min-height:100vh;font-family:var(--font);color:var(--ink);
+  background:linear-gradient(180deg,var(--bg) 0%,var(--bg-2) 100%) fixed;line-height:1.7;}
+button,input,select,textarea{font-family:inherit;color:inherit;}
+img,svg,canvas{max-width:100%;}
+:focus-visible{outline:3px solid var(--cyan);outline-offset:3px;border-radius:8px;}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+
+/* ================= SHELL ================= */
+.app{max-width:1120px;margin:0 auto;padding:14px 16px 110px;}
+.topbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--card);border:1.5px solid var(--line);
+  border-radius:var(--r);box-shadow:var(--sh);padding:10px 14px;}
+.ref{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13.5px;font-weight:700;color:var(--cyan-d);
+  background:var(--cyan-l);border:1.5px solid var(--cyan-b);border-radius:999px;padding:6px 14px;}
+.ref b{color:var(--navy);}
+.topbar h1{flex:1;min-width:200px;margin:0;font-size:clamp(19px,2.6vw,26px);font-weight:900;line-height:1.3;}
+.topbar h1 small{display:block;font-size:13px;font-weight:600;color:var(--muted);}
+.dots{display:flex;gap:6px;align-items:center;list-style:none;margin:0;padding:0;}
+.dots li{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:14px;
+  background:var(--soft);border:2px solid var(--line);color:var(--muted);transition:all .25s;}
+.dots li.on{background:var(--navy);border-color:var(--navy);color:#fff;transform:scale(1.08);}
+.dots li.done{background:var(--green);border-color:var(--green);color:#fff;}
+
+.stage{display:none;margin-top:16px;background:var(--card);border-radius:var(--r-l);box-shadow:var(--sh-l);overflow:hidden;
+  animation:rise .4s ease both;}
+.stage.on{display:block;}
+.stage-h{background:var(--navy);color:#fff;padding:14px 22px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.stage-h .kind{font-size:13px;font-weight:800;background:rgba(255,255,255,.14);border-radius:999px;padding:4px 12px;}
+.stage-h h2{margin:0;font-size:clamp(18px,2.4vw,23px);font-weight:900;}
+.stage-b{padding:20px 22px 24px;}
+.lead{font-size:17px;margin:0 0 14px;}
+.task{display:flex;gap:10px;align-items:flex-start;background:var(--yellow-l);border:1.5px solid #f3dc97;border-radius:var(--r-s);
+  padding:10px 14px;font-weight:700;margin:0 0 14px;}
+.task::before{content:"👆";font-size:20px;line-height:1.4;}
+.book{font-size:15px;background:var(--purple-l);border-inline-start:5px solid var(--purple);border-radius:var(--r-s);padding:10px 14px;margin:10px 0;}
+.book::before{content:"📘 من الكتاب: ";font-weight:800;color:var(--purple);}
+.extra{font-size:13.5px;color:var(--muted);background:var(--soft);border:1.5px dashed var(--line);border-radius:var(--r-s);padding:8px 12px;margin:10px 0;}
+.extra::before{content:"ℹ️ توضيح للنشاط وليس من الكتاب: ";font-weight:800;}
+.grid2{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:20px;align-items:start;}
+@media (max-width:820px){.grid2{grid-template-columns:minmax(0,1fr);}}
+.panel{background:var(--soft);border:1.5px solid var(--line);border-radius:var(--r);padding:14px;}
+.panel h3{margin:0 0 8px;font-size:17px;font-weight:900;}
+
+/* ================= CONTROLS ================= */
+.btn{min-height:var(--tap);min-width:var(--tap);display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:0 20px;border-radius:999px;border:2px solid transparent;font-size:16px;font-weight:800;cursor:pointer;
+  background:var(--navy);color:#fff;transition:transform .12s,background .2s,box-shadow .2s;touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;user-select:none;}
+.btn:active{transform:scale(.96);}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+.btn.cyan{background:var(--cyan);color:var(--navy);}
+.btn.green{background:var(--green);}
+.btn.red{background:var(--red);}
+.btn.ghost{background:#fff;color:var(--navy);border-color:var(--line);}
+.btn.ghost[aria-pressed="true"]{background:var(--navy);color:#fff;border-color:var(--navy);}
+.btn.sm{min-height:40px;font-size:14.5px;padding:0 14px;}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;}
+.choice{min-height:56px;text-align:start;padding:10px 14px;border-radius:var(--r-s);border:2px solid var(--line);background:#fff;
+  font-size:16px;font-weight:700;cursor:pointer;transition:all .15s;}
+.choice:hover{border-color:var(--cyan);}
+.choice[aria-pressed="true"]{border-color:var(--navy);background:var(--purple-l);}
+.choice.ok{border-color:var(--green);background:var(--green-l);}
+.choice.bad{border-color:var(--red);background:var(--red-l);}
+input[type=range]{width:100%;height:44px;accent-color:var(--cyan-d);cursor:pointer;}
+.slider-lbl{display:flex;justify-content:space-between;font-size:13.5px;font-weight:700;color:var(--muted);}
+
+/* chips + drop zones (Kit.dnd) */
+.chips{display:flex;flex-wrap:wrap;gap:8px;min-height:56px;padding:8px;border-radius:var(--r-s);background:var(--soft);
+  border:1.5px dashed var(--line);}
+.chip{min-height:46px;display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;background:#fff;
+  border:2px solid var(--cyan-b);font-weight:800;font-size:15.5px;cursor:grab;touch-action:none;user-select:none;
+  -webkit-user-select:none;box-shadow:0 2px 0 var(--cyan-b);transition:transform .12s,box-shadow .12s,border-color .2s;}
+.chip.sel{border-color:var(--navy);box-shadow:0 0 0 4px rgba(0,195,254,.35);transform:translateY(-2px);}
+.chip.dragging{opacity:.35;}
+.chip.ghost{position:fixed;z-index:999;pointer-events:none;opacity:.95;transform:rotate(-3deg) scale(1.05);box-shadow:var(--sh-l);}
+.chip.ok{border-color:var(--green);background:var(--green-l);box-shadow:0 2px 0 var(--green-b);cursor:default;}
+.chip.bad{border-color:var(--red);background:var(--red-l);animation:shake .4s;}
+.zone{min-height:64px;border:2.5px dashed var(--cyan-b);border-radius:var(--r-s);padding:8px;background:#fff;
+  transition:background .15s,border-color .15s;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;}
+.zone.hot{background:var(--cyan-l);border-color:var(--cyan);border-style:solid;}
+.zone .zt{width:100%;font-weight:900;font-size:15px;color:var(--navy);}
+
+/* feedback */
+.fb{display:none;margin-top:12px;border-radius:var(--r-s);padding:12px 14px 12px 14px;font-size:16px;font-weight:600;
+  border:2px solid;animation:rise .25s ease both;}
+.fb.show{display:flex;gap:10px;align-items:flex-start;}
+.fb .ic{font-size:22px;line-height:1.3;flex:none;}
+.fb.ok{background:var(--green-l);border-color:var(--green-b);color:#064b31;}
+.fb.bad{background:var(--red-l);border-color:var(--red-b);color:#7a1426;}
+.fb.info{background:var(--cyan-l);border-color:var(--cyan-b);color:#06456a;}
+.fb.warn{background:var(--yellow-l);border-color:#f3dc97;color:#5a4200;}
+
+/* meters & badges */
+.meter{height:16px;border-radius:999px;background:#ece9f8;overflow:hidden;}
+.meter>i{display:block;height:100%;border-radius:999px;background:var(--cyan);transition:width .4s;}
+.badge{display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:14px;border-radius:999px;padding:4px 12px;
+  background:var(--soft);border:1.5px solid var(--line);}
+.badge.ok{background:var(--green-l);border-color:var(--green-b);color:var(--green-d);}
+.badge.bad{background:var(--red-l);border-color:var(--red-b);color:var(--red-d);}
+.missions{list-style:none;margin:0;padding:0;display:grid;gap:8px;}
+.missions li{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-s);background:#fff;
+  border:2px solid var(--line);font-weight:700;}
+.missions li .st{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--soft);
+  border:2px solid var(--line);flex:none;font-size:15px;}
+.missions li.cur{border-color:var(--cyan);}
+.missions li.done{border-color:var(--green-b);background:var(--green-l);}
+.missions li.done .st{background:var(--green);border-color:var(--green);color:#fff;}
+
+/* 3D canvas wrapper (Kit.orbit) */
+.view3d{position:relative;border-radius:var(--r);background:radial-gradient(ellipse at 50% 40%,#2d1670 0%,#160038 75%);
+  overflow:hidden;touch-action:none;cursor:grab;aspect-ratio:4/3;width:100%;}
+.view3d canvas{display:block;width:100%;height:100%;}
+.view3d .hint3d{position:absolute;bottom:10px;inset-inline-start:10px;font-size:13px;font-weight:700;color:#d9d2ff;
+  background:rgba(255,255,255,.1);border-radius:999px;padding:4px 12px;pointer-events:none;}
+
+/* nav footer */
+.navbar{position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);
+  border-top:1.5px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));}
+.navbar .in{max-width:1120px;margin:0 auto;display:flex;gap:10px;align-items:center;justify-content:space-between;}
+.navbar .where{font-weight:800;color:var(--muted);font-size:14.5px;text-align:center;flex:1;}
+
+/* summary card */
+.sum{display:grid;gap:10px;}
+.sum li{background:var(--green-l);border:1.5px solid var(--green-b);border-radius:var(--r-s);padding:10px 14px;font-weight:700;list-style:none;}
+.sum{padding:0;margin:0;}
+
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:998;}
+@keyframes rise{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+@keyframes shake{0%,100%{transform:none;}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+@keyframes pop{0%{transform:scale(.6);opacity:0;}70%{transform:scale(1.08);}100%{transform:scale(1);opacity:1;}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;scroll-behavior:auto !important;}}
+@media (max-width:560px){.stage-b{padding:16px 14px 20px;}.stage-h{padding:12px 14px;}.dots li{width:28px;height:28px;font-size:12.5px;}.btn{padding:0 16px;}}
+</style>
+<style>
+/* ================= ACTIVITY-SPECIFIC CSS ================= */
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <span class="ref">📘 <b>الفصلُ ؟</b> · الدرسُ ؟ · <span>كتابُ النشاطِ ص ؟</span></span>
+    <h1>عنوانُ النشاطِ<small>سطرٌ قصيرٌ يصفُ الهدفَ</small></h1>
+    <ol class="dots" id="dots" aria-label="مراحلُ النشاطِ"></ol>
+  </header>
+
+  <main id="main">
+    <section class="stage" data-stage="0" aria-labelledby="s0h">
+      <div class="stage-h"><span class="kind">أستكشفُ</span><h2 id="s0h">…</h2></div>
+      <div class="stage-b">…</div>
+    </section>
+  </main>
+</div>
+
+<nav class="navbar" aria-label="التنقلُ بينَ المراحلِ">
+  <div class="in">
+    <button class="btn ghost" id="prevBtn" type="button">→ السابقُ</button>
+    <div class="where" id="where" aria-live="polite"></div>
+    <button class="btn" id="nextBtn" type="button">التالي ←</button>
+  </div>
+</nav>
+
+<script>
+/* ================= KIT (shared helpers) ================= */
+const Kit = (() => {
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const $ = (s, r=document) => r.querySelector(s);
+  const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+  const AR = '٠١٢٣٤٥٦٧٨٩';
+  const ar = n => String(n).replace(/[0-9]/g, d => AR[d]).replace('-', '−');
+  const shuffle = a => { a = a.slice(); for (let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; };
+  const el = (tag, attrs={}, html) => { const e=document.createElement(tag);
+    for (const k in attrs){ if(k==='class') e.className=attrs[k]; else if(k.startsWith('on')) e.addEventListener(k.slice(2),attrs[k]); else e.setAttribute(k,attrs[k]); }
+    if (html!=null) e.innerHTML=html; return e; };
+
+  /* ---- feedback: Kit.say(box, 'ok'|'bad'|'info'|'warn', html) ---- */
+  const ICON = {ok:'✅', bad:'🤔', info:'💡', warn:'⚠️'};
+  function say(box, type, html){
+    if (typeof box==='string') box=$(box);
+    box.className='fb show '+type; box.setAttribute('role','status'); box.setAttribute('aria-live','polite');
+    box.innerHTML='<span class="ic" aria-hidden="true">'+ICON[type]+'</span><div>'+html+'</div>';
+  }
+  function hush(box){ if (typeof box==='string') box=$(box); box.className='fb'; box.innerHTML=''; }
+
+  /* ---- stages + nav. canLeave(i) may return false or a message string to block "next". ---- */
+  let stages=[], cur=0, names=[], hooks={};
+  function setupStages(stageNames, opts={}){
+    names=stageNames; hooks=opts; stages=$$('.stage');
+    const dots=$('#dots'); dots.innerHTML='';
+    names.forEach((n,i)=>{ const li=el('li',{title:n,'aria-label':'المرحلة '+ar(i+1)+': '+n},ar(i+1)); dots.appendChild(li); });
+    $('#prevBtn').onclick=()=>go(cur-1); $('#nextBtn').onclick=()=>go(cur+1);
+    go(0, true);
+  }
+  function go(i, first){
+    if (i<0||i>=stages.length) return;
+    if (!first && i>cur && hooks.canLeave){ const r=hooks.canLeave(cur); if (r!==true && r!==undefined){ toast(r||'أكملِ المهمةَ أولاً'); return; } }
+    stages.forEach((s,k)=>s.classList.toggle('on',k===i));
+    $$('#dots li').forEach((d,k)=>{ d.classList.toggle('on',k===i); d.classList.toggle('done',k<i); });
+    cur=i; $('#where').textContent=ar(i+1)+' / '+ar(stages.length)+' · '+names[i];
+    $('#prevBtn').disabled=i===0; $('#nextBtn').style.visibility=i===stages.length-1?'hidden':'visible';
+    if(!first) window.scrollTo({top:0,behavior:reduced?'auto':'smooth'});
+    hooks.onEnter && hooks.onEnter(i);
+  }
+  let toastT;
+  function toast(msg){
+    let t=$('#kitToast'); if(!t){ t=el('div',{id:'kitToast',role:'alert'}); Object.assign(t.style,{position:'fixed',bottom:'86px',left:'50%',
+      transform:'translateX(-50%)',background:'#200058',color:'#fff',padding:'12px 20px',borderRadius:'999px',fontWeight:'800',
+      zIndex:1000,boxShadow:'0 10px 30px rgba(0,0,0,.25)',maxWidth:'90vw',textAlign:'center'}); document.body.appendChild(t); }
+    t.textContent=msg; t.style.display='block'; clearTimeout(toastT); toastT=setTimeout(()=>t.style.display='none',2600);
+  }
+
+  /* ---- drag & drop with tap-to-place + keyboard.
+     Kit.dnd({ chips:[chipEls], zones:[zoneEls], accept:(chip,zone)=>bool|string, onDrop:(chip,zone,ok)=>{} , lockCorrect:true })
+     chips need data-id. zone gets the chip appended when accepted (or always, if place:'always'). ---- */
+  function dnd(cfg){
+    let sel=null;
+    const zones=cfg.zones;
+    const clear=()=>{ if(sel){sel.classList.remove('sel'); sel.setAttribute('aria-pressed','false');} sel=null; };
+    function drop(chip, zone){
+      const ok = cfg.accept ? cfg.accept(chip, zone) : true;
+      if (ok===true || cfg.place==='always'){ zone.appendChild(chip); }
+      if (ok===true){ chip.classList.remove('bad'); if(cfg.lockCorrect!==false){ chip.classList.add('ok'); chip.dataset.locked='1'; chip.setAttribute('tabindex','-1'); chip.setAttribute('aria-disabled','true'); } }
+      else { chip.classList.remove('bad'); void chip.offsetWidth; chip.classList.add('bad'); }
+      cfg.onDrop && cfg.onDrop(chip, zone, ok===true, ok);
+    }
+    zones.forEach(z=>{
+      z.setAttribute('tabindex', z.getAttribute('tabindex')||'0'); z.setAttribute('role','button');
+      const act=()=>{ if(sel){ const c=sel; clear(); drop(c,z);} };
+      z.addEventListener('click', e=>{ if(e.target.closest('.chip') && !sel) return; act(); });
+      z.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); act(); } });
+    });
+    cfg.chips.forEach(chip=>{
+      chip.setAttribute('tabindex','0'); chip.setAttribute('role','button'); chip.setAttribute('aria-pressed','false');
+      chip.addEventListener('keydown', e=>{ if(chip.dataset.locked) return; if(e.key==='Enter'||e.key===' '){ e.preventDefault(); const was=sel===chip; clear(); if(!was){sel=chip;chip.classList.add('sel');chip.setAttribute('aria-pressed','true');} } });
+      let start=null, ghost=null, moved=false, overZ=null;
+      chip.addEventListener('pointerdown', e=>{
+        if (chip.dataset.locked || e.button>0) return;
+        start={x:e.clientX,y:e.clientY}; moved=false; chip.setPointerCapture(e.pointerId);
+      });
+      chip.addEventListener('pointermove', e=>{
+        if(!start) return;
+        if(!moved && Math.hypot(e.clientX-start.x,e.clientY-start.y)>7){
+          moved=true; clear(); ghost=chip.cloneNode(true); ghost.classList.add('ghost'); ghost.classList.remove('sel','bad');
+          document.body.appendChild(ghost); chip.classList.add('dragging');
+        }
+        if(moved){
+          ghost.style.left=(e.clientX-ghost.offsetWidth/2)+'px'; ghost.style.top=(e.clientY-ghost.offsetHeight/2)+'px';
+          const under=document.elementFromPoint(e.clientX,e.clientY); const z=under&&under.closest('.zone');
+          const zz = z && zones.includes(z) ? z : null;
+          if(zz!==overZ){ overZ&&overZ.classList.remove('hot'); overZ=zz; overZ&&overZ.classList.add('hot'); }
+        }
+      });
+      const end=e=>{
+        if(!start) return; start=null;
+        if(moved){ ghost.remove(); ghost=null; chip.classList.remove('dragging'); if(overZ){ overZ.classList.remove('hot'); drop(chip,overZ); overZ=null; } }
+        else if(e.type==='pointerup'){ const was=sel===chip; clear(); if(!was){ sel=chip; chip.classList.add('sel'); chip.setAttribute('aria-pressed','true'); } }
+      };
+      chip.addEventListener('pointerup', end); chip.addEventListener('pointercancel', end);
+    });
+    return { clear, reset(home){ cfg.chips.forEach(c=>{ c.classList.remove('ok','bad','sel'); delete c.dataset.locked; c.setAttribute('tabindex','0'); c.removeAttribute('aria-disabled'); home.appendChild(c); }); } };
+  }
+
+  /* ---- 3D orbit view: Kit.orbit(container, draw(ctx, cam, w, h, t), {yaw,pitch,zoom,auto}) ----
+     cam.project(x,y,z) -> {x,y,s,z}  (s = perspective scale, z = depth: larger = closer to viewer) */
+  function orbit(box, draw, o={}){
+    const cv=document.createElement('canvas'); box.prepend(cv);
+    const ctx=cv.getContext('2d');
+    const cam={yaw:o.yaw??0.6, pitch:o.pitch??0.35, zoom:o.zoom??1, dist:o.dist??900, auto:o.auto??true, vy:0, vp:0};
+    let W=0,H=0,dpr=1, drag=null, last=performance.now(), userTouched=false;
+    function size(){ const r=box.getBoundingClientRect(); dpr=Math.min(2,devicePixelRatio||1); W=r.width; H=r.height; cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
+    new ResizeObserver(size).observe(box); size();
+    cam.project=(x,y,z)=>{
+      const cy=Math.cos(cam.yaw), sy=Math.sin(cam.yaw), cp=Math.cos(cam.pitch), sp=Math.sin(cam.pitch);
+      let X=x*cy - z*sy, Z=x*sy + z*cy;           // yaw around Y
+      let Y=y*cp - Z*sp; Z=y*sp + Z*cp;            // pitch around X
+      const unit=Math.min(W,H)/520*cam.zoom;
+      const s=cam.dist/(cam.dist - Z);
+      return {x:W/2 + X*s*unit, y:H/2 - Y*s*unit, s:s*unit, z:Z};
+    };
+    box.addEventListener('pointerdown',e=>{ drag={x:e.clientX,y:e.clientY}; userTouched=true; box.setPointerCapture(e.pointerId); box.style.cursor='grabbing'; });
+    box.addEventListener('pointermove',e=>{ if(!drag) return; const dx=e.clientX-drag.x, dy=e.clientY-drag.y; drag={x:e.clientX,y:e.clientY};
+      cam.vy=-dx*0.008; cam.vp=dy*0.006; cam.yaw+=cam.vy; cam.pitch=Math.max(-1.3,Math.min(1.3,cam.pitch+cam.vp)); });
+    const up=()=>{ drag=null; box.style.cursor='grab'; };
+    box.addEventListener('pointerup',up); box.addEventListener('pointercancel',up);
+    box.addEventListener('wheel',e=>{ e.preventDefault(); cam.zoom=Math.max(.6,Math.min(2.2,cam.zoom*(e.deltaY<0?1.08:.92))); },{passive:false});
+    box.tabIndex=0; box.setAttribute('role','img');
+    box.addEventListener('keydown',e=>{ const k=e.key; if(k==='ArrowLeft'){cam.yaw+=.15;} else if(k==='ArrowRight'){cam.yaw-=.15;}
+      else if(k==='ArrowUp'){cam.pitch=Math.max(-1.3,cam.pitch-.12);} else if(k==='ArrowDown'){cam.pitch=Math.min(1.3,cam.pitch+.12);}
+      else if(k==='+'||k==='='){cam.zoom=Math.min(2.2,cam.zoom*1.1);} else if(k==='-'){cam.zoom=Math.max(.6,cam.zoom*.9);} else return; e.preventDefault(); userTouched=true; });
+    function frame(now){
+      const dt=Math.min(50,now-last); last=now;
+      if(!drag){ cam.vy*=0.93; cam.vp*=0.9; cam.yaw+=cam.vy; cam.pitch=Math.max(-1.3,Math.min(1.3,cam.pitch+cam.vp));
+        if(cam.auto && !reduced && Math.abs(cam.vy)<0.002) cam.yaw+=dt*0.00018*(userTouched?0.4:1); }
+      ctx.clearRect(0,0,W,H); draw(ctx,cam,W,H,reduced?0:now,dt);
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+    return cam;
+  }
+  /* shaded sphere */
+  function ball(ctx,x,y,r,color,label,labelColor){
+    if(r<=0.5) return;
+    const g=ctx.createRadialGradient(x-r*.35,y-r*.4,r*.15,x,y,r);
+    g.addColorStop(0,'#ffffff'); g.addColorStop(.25,color); g.addColorStop(1,shade(color,-0.45));
+    ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+    if(label && r>8){ ctx.fillStyle=labelColor||'#fff'; ctx.font='900 '+Math.round(r*1.05)+'px '+getComputedStyle(document.body).fontFamily;
+      ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(label,x,y+r*.05); }
+  }
+  function shade(hex,p){ const n=parseInt(hex.slice(1),16); let r=n>>16,g=n>>8&255,b=n&255;
+    const f=v=>Math.max(0,Math.min(255,Math.round(p<0?v*(1+p):v+(255-v)*p))); return 'rgb('+f(r)+','+f(g)+','+f(b)+')'; }
+
+  /* small celebration */
+  function celebrate(){
+    if(reduced) return;
+    const c=document.createElement('canvas'); c.className='confetti'; document.body.appendChild(c);
+    const x=c.getContext('2d'); c.width=innerWidth; c.height=innerHeight;
+    const cols=['#00c3fe','#12a06a','#ffd15c','#7b5cff','#e8425a'];
+    const P=Array.from({length:90},()=>({x:innerWidth/2+(Math.random()-.5)*200,y:innerHeight*.35,vx:(Math.random()-.5)*9,vy:-Math.random()*9-3,
+      s:5+Math.random()*6,c:cols[Math.random()*5|0],r:Math.random()*6}));
+    let t=0; (function f(){ t++; x.clearRect(0,0,c.width,c.height);
+      P.forEach(p=>{ p.vy+=.28; p.x+=p.vx; p.y+=p.vy; p.r+=.15; x.save(); x.translate(p.x,p.y); x.rotate(p.r); x.fillStyle=p.c; x.fillRect(-p.s/2,-p.s/4,p.s,p.s/2); x.restore(); });
+      if(t<110) requestAnimationFrame(f); else c.remove(); })();
+  }
+
+  return {$, $$, ar, el, shuffle, say, hush, setupStages, go, toast, dnd, orbit, ball, shade, celebrate, reduced, get cur(){return cur;}};
+})();
+</script>
+<script>
+/* ================= ACTIVITY JS ================= */
+Kit.setupStages(['أستكشفُ']);
+</script>
+</body>
+</html>
